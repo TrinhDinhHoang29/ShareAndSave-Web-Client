@@ -5,71 +5,71 @@
 
 :root {
 	--radius: 0.5rem;
-	--background: oklch(1 0 0);
-	--foreground: oklch(0.141 0.005 285.823);
-	--card: oklch(1 0 0);
-	--card-foreground: oklch(0.141 0.005 285.823);
-	--popover: oklch(1 0 0);
-	--popover-foreground: oklch(0.141 0.005 285.823);
-	--primary: oklch(0.606 0.25 292.717);
-	--primary-foreground: oklch(0.969 0.016 293.756);
-	--secondary: oklch(0.967 0.001 286.375);
-	--secondary-foreground: oklch(0.21 0.006 285.885);
-	--muted: oklch(0.967 0.001 286.375);
-	--muted-foreground: oklch(0.552 0.016 285.938);
-	--accent: oklch(0.967 0.001 286.375);
-	--accent-foreground: oklch(0.21 0.006 285.885);
-	--destructive: oklch(0.577 0.245 27.325);
-	--border: oklch(0.92 0.004 286.32);
-	--input: oklch(0.92 0.004 286.32);
-	--ring: oklch(0.606 0.25 292.717);
-	--chart-1: oklch(0.646 0.222 41.116);
-	--chart-2: oklch(0.6 0.118 184.704);
-	--chart-3: oklch(0.398 0.07 227.392);
-	--chart-4: oklch(0.828 0.189 84.429);
-	--chart-5: oklch(0.769 0.188 70.08);
-	--sidebar: oklch(0.985 0 0);
-	--sidebar-foreground: oklch(0.141 0.005 285.823);
-	--sidebar-primary: oklch(0.606 0.25 292.717);
-	--sidebar-primary-foreground: oklch(0.969 0.016 293.756);
-	--sidebar-accent: oklch(0.967 0.001 286.375);
-	--sidebar-accent-foreground: oklch(0.21 0.006 285.885);
-	--sidebar-border: oklch(0.92 0.004 286.32);
-	--sidebar-ring: oklch(0.606 0.25 292.717);
+	--background: #F1F5F9; /* lightExtension.background */
+	--foreground: #1A2238; /* lightExtension.primaryTextColor */
+	--card: #FFFFFF; /* lightExtension.card */
+	--card-foreground: #1A2238; /* lightExtension.primaryTextColor */
+	--popover: #FFFFFF; /* lightExtension.card (giả định tương tự card) */
+	--popover-foreground: #1A2238; /* lightExtension.primaryTextColor */
+	--primary: #3366FF; /* lightExtension.primary */
+	--primary-foreground: #FFFFFF; /* lightExtension.onPrimary */
+	--secondary: #5A6B8C; /* lightExtension.secondary */
+	--secondary-foreground: #FFFFFF; /* lightExtension.onSecondary */
+	--muted: #E0E7FF; /* lightExtension.accentLight */
+	--muted-foreground: #6B7280; /* lightExtension.secondaryTextColor */
+	--accent: #E0E7FF; /* lightExtension.accentLight */
+	--accent-foreground: #1A2238; /* lightExtension.primaryTextColor */
+	--destructive: #EF4444; /* lightExtension.danger */
+	--border: #E0E7FF; /* lightExtension.accentLight (giả định cho border) */
+	--input: #E0E7FF; /* lightExtension.accentLight (giả định cho input) */
+	--ring: #3366FF; /* lightExtension.primary */
+	--chart-1: #22C55E; /* lightExtension.success */
+	--chart-2: #F59E42; /* lightExtension.warning */
+	--chart-3: #EF4444; /* lightExtension.danger */
+	--chart-4: #3366FF; /* lightExtension.primary */
+	--chart-5: #5A6B8C; /* lightExtension.secondary */
+	--sidebar: #F8FAFC; /* lightExtension.surfaceContainer */
+	--sidebar-foreground: #1A2238; /* lightExtension.primaryTextColor */
+	--sidebar-primary: #3366FF; /* lightExtension.primary */
+	--sidebar-primary-foreground: #FFFFFF; /* lightExtension.onPrimary */
+	--sidebar-accent: #E0E7FF; /* lightExtension.accentLight */
+	--sidebar-accent-foreground: #1A2238; /* lightExtension.primaryTextColor */
+	--sidebar-border: #E0E7FF; /* lightExtension.accentLight */
+	--sidebar-ring: #3366FF; /* lightExtension.primary */
 }
 
 .dark {
-	--background: oklch(0.141 0.005 285.823);
-	--foreground: oklch(0.985 0 0);
-	--card: oklch(0.21 0.006 285.885);
-	--card-foreground: oklch(0.985 0 0);
-	--popover: oklch(0.21 0.006 285.885);
-	--popover-foreground: oklch(0.985 0 0);
-	--primary: oklch(0.541 0.281 293.009);
-	--primary-foreground: oklch(0.969 0.016 293.756);
-	--secondary: oklch(0.274 0.006 286.033);
-	--secondary-foreground: oklch(0.985 0 0);
-	--muted: oklch(0.274 0.006 286.033);
-	--muted-foreground: oklch(0.705 0.015 286.067);
-	--accent: oklch(0.274 0.006 286.033);
-	--accent-foreground: oklch(0.985 0 0);
-	--destructive: oklch(0.704 0.191 22.216);
-	--border: oklch(1 0 0 / 10%);
-	--input: oklch(1 0 0 / 15%);
-	--ring: oklch(0.541 0.281 293.009);
-	--chart-1: oklch(0.488 0.243 264.376);
-	--chart-2: oklch(0.696 0.17 162.48);
-	--chart-3: oklch(0.769 0.188 70.08);
-	--chart-4: oklch(0.627 0.265 303.9);
-	--chart-5: oklch(0.645 0.246 16.439);
-	--sidebar: oklch(0.21 0.006 285.885);
-	--sidebar-foreground: oklch(0.985 0 0);
-	--sidebar-primary: oklch(0.541 0.281 293.009);
-	--sidebar-primary-foreground: oklch(0.969 0.016 293.756);
-	--sidebar-accent: oklch(0.274 0.006 286.033);
-	--sidebar-accent-foreground: oklch(0.985 0 0);
-	--sidebar-border: oklch(1 0 0 / 10%);
-	--sidebar-ring: oklch(0.541 0.281 293.009);
+	--background: #181C20; /* darkExtension.background */
+	--foreground: #F1F5F9; /* darkExtension.primaryTextColor */
+	--card: #23272F; /* darkExtension.card */
+	--card-foreground: #F1F5F9; /* darkExtension.primaryTextColor */
+	--popover: #23272F; /* darkExtension.card (giả định tương tự card) */
+	--popover-foreground: #F1F5F9; /* darkExtension.primaryTextColor */
+	--primary: #3366FF; /* darkExtension.primary */
+	--primary-foreground: #FFFFFF; /* darkExtension.onPrimary */
+	--secondary: #B0B8C4; /* darkExtension.secondary */
+	--secondary-foreground: #000000; /* darkExtension.onSecondary */
+	--muted: #25304B; /* darkExtension.accentLight */
+	--muted-foreground: #B0B8C4; /* darkExtension.secondaryTextColor */
+	--accent: #25304B; /* darkExtension.accentLight */
+	--accent-foreground: #F1F5F9; /* darkExtension.primaryTextColor */
+	--destructive: #EF4444; /* darkExtension.danger */
+	--border: #25304B; /* darkExtension.accentLight (giả định cho border) */
+	--input: #25304B; /* darkExtension.accentLight (giả định cho input) */
+	--ring: #3366FF; /* darkExtension.primary */
+	--chart-1: #22C55E; /* darkExtension.success */
+	--chart-2: #F59E42; /* darkExtension.warning */
+	--chart-3: #EF4444; /* darkExtension.danger */
+	--chart-4: #3366FF; /* darkExtension.primary */
+	--chart-5: #B0B8C4; /* darkExtension.secondary */
+	--sidebar: #23272F; /* darkExtension.surfaceContainer */
+	--sidebar-foreground: #F1F5F9; /* darkExtension.primaryTextColor */
+	--sidebar-primary: #3366FF; /* darkExtension.primary */
+	--sidebar-primary-foreground: #FFFFFF; /* darkExtension.onPrimary */
+	--sidebar-accent: #25304B; /* darkExtension.accentLight */
+	--sidebar-accent-foreground: #F1F5F9; /* darkExtension.primaryTextColor */
+	--sidebar-border: #25304B; /* darkExtension.accentLight */
+	--sidebar-ring: #3366FF; /* darkExtension.primary */
 }
 
 @theme inline {

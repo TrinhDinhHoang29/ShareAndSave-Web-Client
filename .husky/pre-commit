@@ -1,3 +1,8 @@
-npm run lint-staged
+#!/usr/bin/env sh
 
-
+if command -v npx >/dev/null 2>&1; then
+  npx lint-staged
+else
+  echo "npx not found, please install it or update your husky configuration"
+  exit 1
+fi

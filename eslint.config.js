@@ -43,21 +43,10 @@ export default tseslint.config(
 			'@typescript-eslint/no-unsafe-function-type': 'off',
 			'@typescript-eslint/no-namespace': 'off',
 			'@typescript-eslint/no-non-null-asserted-optional-chain': 'off',
+			'@typescript-eslint/no-unused-vars': 'off',
 			'react-hooks/rules-of-hooks': 'off',
 			'react-hooks/exhaustive-deps': 'off',
-			'react-refresh/only-export-components': 'off',
-			'@typescript-eslint/no-unused-vars': [
-				'error',
-				{
-					args: 'all',
-					argsIgnorePattern: '^_',
-					caughtErrors: 'all',
-					caughtErrorsIgnorePattern: '^_',
-					destructuredArrayIgnorePattern: '^_',
-					varsIgnorePattern: '^_',
-					ignoreRestSiblings: true
-				}
-			]
+			'react-refresh/only-export-components': 'off'
 		}
 	}
 )

@@ -2,15 +2,13 @@ import { lazy, Suspense } from 'react'
 import { RouteObject } from 'react-router-dom'
 
 import LayoutDefault from '@/components/layout'
-import LoadingSpinner from '@/components/ui/loading-spinner'
-import { ProtectedRoute } from '@/pages/_authenticated/_protected.route'
-
 // Lazy load các components
 const Home = lazy(() => import('@/pages/_authenticated/home'))
+const SendItem = lazy(() => import('@/pages/_authenticated/send-item'))
 
 // Error Boundary Component
 const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
-	return <Suspense fallback={<LoadingSpinner />}>{children}</Suspense>
+	return <Suspense fallback={<div>Loading</div>}>{children}</Suspense>
 }
 
 export const routes: RouteObject[] = [
@@ -21,12 +19,14 @@ export const routes: RouteObject[] = [
 			{
 				index: true,
 				element: (
-					<ProtectedRoute>
-						<ErrorBoundary>
-							<Home />
-						</ErrorBoundary>
-					</ProtectedRoute>
+					<ErrorBoundary>
+						<Home />
+					</ErrorBoundary>
 				)
+			},
+			{
+				path: 'gui-do-cu',
+				element: <SendItem />
 			}
 		]
 	}

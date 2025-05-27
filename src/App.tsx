@@ -1,13 +1,12 @@
 import { Route, Routes } from 'react-router-dom'
 
-import LoadingSpinner from '@/components/ui/loading-spinner'
 import { useAuth } from '@/context/auth-context'
 import { routes } from '@/routes/index.route'
 
 function App() {
 	const { isAuthLoading } = useAuth()
 	if (isAuthLoading) {
-		return <LoadingSpinner />
+		return <div>100%</div>
 	}
 	return (
 		<Routes>
