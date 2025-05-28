@@ -35,17 +35,17 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
 
 			<div className='space-y-4'>
 				<DatePicker
-					name='date'
+					name='appointmentTime'
 					label='Ngày và giờ hẹn *'
 					register={register}
-					error={errors.date}
+					error={errors.appointmentTime}
 				/>
 				<InputText
-					name='location'
+					name='appointmentLocation'
 					label='Địa điểm hẹn *'
 					placeholder='Nhập địa điểm hẹn'
 					register={register}
-					error={errors.location}
+					error={errors.appointmentLocation}
 				/>
 
 				<div className='bg-muted/50 border-border rounded-lg border p-4'>
@@ -67,7 +67,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
 						<label className='relative inline-flex cursor-pointer items-center'>
 							<input
 								type='checkbox'
-								{...register('anonymous')}
+								{...register('isAnonymous')}
 								className='peer sr-only'
 							/>
 							<div className="bg-muted peer-focus:ring-primary peer peer-checked:bg-primary h-6 w-11 rounded-full peer-focus:ring-2 peer-focus:outline-none after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white"></div>

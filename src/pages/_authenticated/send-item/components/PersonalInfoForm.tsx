@@ -49,12 +49,12 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
 					error={errors.email}
 				/>
 				<InputText
-					name='phone'
+					name='phoneNumber'
 					label='Số điện thoại *'
 					type='tel'
 					placeholder='0123 456 789'
 					register={register}
-					error={errors.phone}
+					error={errors.phoneNumber}
 				/>
 			</div>
 		</div>

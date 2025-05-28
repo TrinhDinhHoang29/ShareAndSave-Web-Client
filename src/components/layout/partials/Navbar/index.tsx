@@ -2,13 +2,17 @@ import { Bell, Download, Menu, Moon, Sun, UserCircle } from 'lucide-react'
 import React from 'react'
 import { Link } from 'react-router-dom'
 
+import Dropdown from '@/components/common/Dropdown'
 import { useTheme } from '@/context/theme-context'
+
+import DropdownProfileMenu from './DropdownProfileMenu'
+import ProfileMenu from './ProfileMenu'
 
 const Navbar: React.FC = () => {
 	const { theme, setTheme } = useTheme()
 
 	return (
-		<nav className='bg-background text-foreground sticky top-0 z-50 flex h-20 items-center justify-between px-16 shadow transition-colors'>
+		<nav className='bg-background text-foreground sticky top-0 z-50 flex h-20 items-center justify-between px-16 shadow-md transition-colors'>
 			{/* Left: Logo + App name */}
 			<div className='flex min-w-[220px] items-center gap-4'>
 				<Link
@@ -29,7 +33,7 @@ const Navbar: React.FC = () => {
 				<input
 					type='text'
 					placeholder='Tìm kiếm bài đăng, người dùng...'
-					className='border-input bg-card text-foreground focus:ring-primary w-160 rounded-full border px-4 py-2 text-base transition-colors focus:ring-2 focus:outline-none'
+					className='border-input bg-card text-foreground focus:ring-primary w-160 rounded-full border px-4 py-2 text-base shadow-md transition-colors focus:ring-2 focus:outline-none'
 				/>
 				{/* Quick action: Gửi đồ cũ */}
 			</div>
@@ -38,49 +42,25 @@ const Navbar: React.FC = () => {
 			<div className='flex min-w-[180px] items-center justify-end gap-4'>
 				{/* Toggle Dark/Light */}
 				<button
-					className='cursor-pointer border-none bg-transparent'
+					className='border-muted-foreground text-secondary rounded-md border-2 border-solid p-2 shadow-md transition-colors hover:opacity-90'
 					title={theme === 'dark' ? 'Chuyển sang sáng' : 'Chuyển sang tối'}
 					onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
 				>
-					{theme === 'dark' ? (
-						<Sun
-							size={22}
-							className='text-primary transition-colors hover:opacity-75'
-						/>
-					) : (
-						<Moon
-							size={22}
-							className='text-primary transition-colors hover:opacity-75'
-						/>
-					)}
+					{theme === 'dark' ? <Sun size={22} /> : <Moon size={22} />}
 				</button>
 				<button
-					className='cursor-pointer border-none bg-transparent'
+					className='border-muted-foreground text-secondary rounded-md border-2 border-solid p-2 shadow-md transition-colors hover:opacity-90'
 					title='Tải xuống'
 				>
-					<Download
-						size={22}
-						className='text-primary hover:text-secondary transition-colors'
-					/>
+					<Download size={22} />
 				</button>
 				<button
-					className='cursor-pointer border-none bg-transparent'
+					className='border-muted-foreground text-secondary rounded-md border-2 border-solid p-2 shadow-md transition-colors hover:opacity-90'
 					title='Thông báo'
 				>
-					<Bell
-						size={22}
-						className='text-primary hover:text-secondary transition-colors'
-					/>
+					<Bell size={22} />
 				</button>
-				<button
-					className='cursor-pointer border-none bg-transparent'
-					title='Hồ sơ'
-				>
-					<UserCircle
-						size={24}
-						className='text-primary hover:text-secondary transition-colors'
-					/>
-				</button>
+				<DropdownProfileMenu />
 			</div>
 		</nav>
 	)

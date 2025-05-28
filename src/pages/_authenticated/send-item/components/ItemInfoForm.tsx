@@ -7,7 +7,7 @@ import { ItemInfo } from '@/models/types'
 
 interface ItemInfoFormProps {
 	isTransitioning: boolean
-	handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void
+	handleImageUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void
 }
 
 const ItemInfoForm: React.FC<ItemInfoFormProps> = ({
@@ -38,7 +38,7 @@ const ItemInfoForm: React.FC<ItemInfoFormProps> = ({
 			</div>
 
 			<div className='space-y-4'>
-				<ImageUpload
+				{/* <ImageUpload
 					name='image'
 					label='Hình ảnh món đồ *'
 					watch={watch}
@@ -46,7 +46,7 @@ const ItemInfoForm: React.FC<ItemInfoFormProps> = ({
 					handleImageUpload={handleImageUpload}
 					error={Array.isArray(errors.image) ? errors.image[0] : errors.image}
 					maxImages={5}
-				/>
+				/> */}
 				<InputText
 					name='description'
 					label='Mô tả món đồ *'

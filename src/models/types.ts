@@ -3,18 +3,18 @@ import * as z from 'zod'
 export const personalInfoSchema = z.object({
 	fullName: z.string().min(2, 'Họ và tên phải chứa ít nhất 2 ký tự'),
 	email: z.string().email('Email không hợp lệ'),
-	phone: z.string().min(10, 'Số điện thoại không hợp lệ')
+	phoneNumber: z.string().min(10, 'Số điện thoại không hợp lệ')
 })
 
 export const itemInfoSchema = z.object({
-	image: z.array(z.string()).min(1, 'Vui lòng chọn ít nhất một hình ảnh'),
+	// image: z.array(z.string()).min(1, 'Vui lòng chọn ít nhất một hình ảnh'),
 	description: z.string()
 })
 
 export const appointmentSchema = z.object({
-	date: z.string().min(1, 'Vui lòng chọn một ngày'),
-	location: z.string().min(5, 'Vui lòng nhập địa điểm hẹn'),
-	anonymous: z.boolean()
+	appointmentTime: z.string().min(1, 'Vui lòng chọn một ngày'),
+	appointmentLocation: z.string().min(5, 'Vui lòng nhập địa điểm hẹn'),
+	isAnonymous: z.boolean()
 })
 
 export type PersonalInfo = z.infer<typeof personalInfoSchema>

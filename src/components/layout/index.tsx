@@ -12,7 +12,7 @@ function LayoutDefault() {
 				{/* Sidebar cố định bên trái, nằm dưới navbar */}
 				<Sidebar />
 				{/* Nội dung chính: margin-left để tránh bị Sidebar che, padding-top tránh bị Navbar che */}
-				<main className='ml-64 flex-1 p-12'>
+				<main className='relative ml-64 min-h-[calc(100vh-5rem)] flex-1 p-12'>
 					<Outlet />
 				</main>
 			</div>

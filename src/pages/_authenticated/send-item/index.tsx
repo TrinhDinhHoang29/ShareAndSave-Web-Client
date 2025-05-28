@@ -1,21 +1,19 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import {
-	ArrowRightIcon,
-	BoxIcon,
-	Calendar,
-	CalendarIcon,
-	ChevronLeft,
-	ChevronRight,
-	InfoIcon,
-	Package,
-	Send,
-	User,
-	UserIcon
-} from 'lucide-react'
+import { Calendar, ChevronRight, Package, Send, User } from 'lucide-react'
 import React, { useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 
-import { SendItemFormData, Step } from '@/models/interfaces'
+import requestApi from '@/apis/modules/request.api'
+import PrimaryButton from '@/components/common/PrimaryButton'
+import SecondaryButton from '@/components/common/SecondaryButton'
+import { useAlertModalContext } from '@/context/alert-modal-context'
+import { formatDateToISO } from '@/lib/utils'
+import {
+	IApiErrorResponse,
+	IRequestSendItemRequest,
+	ISendItemFormData,
+	IStep
+} from '@/models/interfaces'
 import {
 	Appointment,
 	appointmentSchema,
@@ -26,16 +24,22 @@ import {
 } from '@/models/types'
 
 import AppointmentForm from './components/AppointmentForm'
+import Instruction from './components/Instruction'
 import ItemInfoForm from './components/ItemInfoForm'
+import MyThank from './components/MyThank'
 import PersonalInfoForm from './components/PersonalInfoForm'
 import ProgressBar from './components/ProgressBar'
 
 const SendItem: React.FC = () => {
 	const [currentStep, setCurrentStep] = useState<number>(0)
 	const [isTransitioning, setIsTransitioning] = useState<boolean>(false)
-	const [SendItemFormData, setSendItemFormData] = useState<SendItemFormData>({})
+	const [ISendItemFormData, setISendItemFormData] =
+		useState<ISendItemFormData>(Object)
+	const [isCompleted, setIsCompleted] = useState<boolean>(false)
+	const [completedEmail, setCompletedEmail] = useState<string>('')
+	const { showLoading, showSuccess, showError, close } = useAlertModalContext()
 
-	const steps: Step[] = [
+	const steps: IStep[] = [
 		{ title: 'Thông tin cá nhân', icon: User },
 		{ title: 'Thông tin món đồ', icon: Package },
 		{ title: 'Lịch hẹn', icon: Calendar }
@@ -43,17 +47,17 @@ const SendItem: React.FC = () => {
 
 	const personalForm = useForm<PersonalInfo>({
 		resolver: zodResolver(personalInfoSchema),
-		defaultValues: SendItemFormData.personalInfo
+		defaultValues: ISendItemFormData.personalInfo
 	})
 
 	const itemForm = useForm<ItemInfo>({
 		resolver: zodResolver(itemInfoSchema),
-		defaultValues: SendItemFormData.itemInfo || { image: [], description: '' }
+		defaultValues: ISendItemFormData.itemInfo || { description: '' }
 	})
 
 	const appointmentForm = useForm<Appointment>({
 		resolver: zodResolver(appointmentSchema),
-		defaultValues: SendItemFormData.appointment || { anonymous: false }
+		defaultValues: ISendItemFormData.appointment || { isAnonymous: false }
 	})
 
 	const handleNext = async () => {
@@ -62,7 +66,7 @@ const SendItem: React.FC = () => {
 		if (currentStep === 0) {
 			isValid = await personalForm.trigger()
 			if (isValid) {
-				setSendItemFormData(prev => ({
+				setISendItemFormData(prev => ({
 					...prev,
 					personalInfo: personalForm.getValues()
 				}))
@@ -70,7 +74,7 @@ const SendItem: React.FC = () => {
 		} else if (currentStep === 1) {
 			isValid = await itemForm.trigger()
 			if (isValid) {
-				setSendItemFormData(prev => ({
+				setISendItemFormData(prev => ({
 					...prev,
 					itemInfo: itemForm.getValues()
 				}))
@@ -96,35 +100,104 @@ const SendItem: React.FC = () => {
 		}
 	}
 
+	const resetForm = () => {
+		// Reset tất cả form
+		personalForm.reset()
+		itemForm.reset({ description: '' })
+		appointmentForm.reset({ isAnonymous: false })
+
+		// Reset state
+		setISendItemFormData(Object)
+		setCurrentStep(0)
+		setIsCompleted(false)
+		setCompletedEmail('')
+		setIsTransitioning(false)
+	}
+
 	const handleSubmit = async () => {
 		const isValid = await appointmentForm.trigger()
 		if (isValid) {
-			const finalData: SendItemFormData = {
-				...SendItemFormData,
+			const finalData: ISendItemFormData = {
+				...ISendItemFormData,
 				appointment: appointmentForm.getValues()
 			}
-			console.log('Dữ liệu cuối cùng:', finalData)
-			alert('Yêu cầu đã được gửi thành công! ✨')
+
+			const requestData = {
+				...finalData.personalInfo,
+				...finalData.itemInfo,
+				...finalData.appointment
+			}
+
+			console.log('Dữ liệu gửi đi:', requestData)
+
+			const convertedData: IRequestSendItemRequest = {
+				fullName: requestData.fullName,
+				email: requestData.email,
+				phoneNumber: requestData.phoneNumber,
+				description: requestData.description,
+				appointmentTime: formatDateToISO(requestData.appointmentTime),
+				appointmentLocation: requestData.appointmentLocation,
+				isAnonymous: requestData.isAnonymous || false
+			}
+
+			try {
+				showLoading({
+					loadingMessage: 'Đang gửi yêu cầu...',
+					showCancel: true,
+					onCancel: () => {
+						close()
+					}
+				})
+
+				const res = await requestApi.sendOldItem(convertedData)
+
+				if (res.code === 200) {
+					// Lưu email và chuyển sang trạng thái hoàn thành
+					setCompletedEmail(convertedData.email)
+					setIsCompleted(true)
+
+					// Có thể vẫn giữ success modal nếu muốn
+					showSuccess({
+						successTitle: 'Gửi yêu cầu thành công!',
+						successMessage: `Vui lòng để ý email ${convertedData.email} để nhận thông tin sớm nhất.`,
+						successButtonText: 'Hoàn tất'
+					})
+				} else {
+					showError({
+						errorTitle: 'Lỗi gửi yêu cầu',
+						errorMessage:
+							res.message ||
+							'Đã xảy ra lỗi khi gửi yêu cầu. Vui lòng thử lại sau.',
+						errorButtonText: 'Thử lại'
+					})
+					return
+				}
+			} catch (error: any) {
+				const errorResponse = error as IApiErrorResponse
+
+				console.log(errorResponse)
+				showError({
+					errorTitle: 'Lỗi gửi yêu cầu',
+					errorMessage:
+						errorResponse.message ||
+						'Đã xảy ra lỗi khi gửi yêu cầu. Vui lòng thử lại sau.',
+					errorButtonText: 'Thử lại'
+				})
+				return
+			}
 		}
 	}
 
-	const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const files = Array.from(e.target.files || [])
-		const newImages = files.map(file => {
-			const reader = new FileReader()
-			return new Promise<string>(resolve => {
-				reader.onloadend = () => resolve(reader.result as string)
-				reader.readAsDataURL(file)
-			})
-		})
-
-		Promise.all(newImages).then(imageUrls => {
-			const currentImages = itemForm.watch('image') || []
-			itemForm.setValue('image', [...currentImages, ...imageUrls])
-		})
-	}
-
 	const renderCurrentForm = () => {
+		if (isCompleted) {
+			return (
+				<MyThank
+					onReset={resetForm}
+					email={completedEmail}
+				/>
+			)
+		}
+
 		switch (currentStep) {
 			case 0:
 				return (
@@ -135,10 +208,7 @@ const SendItem: React.FC = () => {
 			case 1:
 				return (
 					<FormProvider {...itemForm}>
-						<ItemInfoForm
-							isTransitioning={isTransitioning}
-							handleImageUpload={handleImageUpload}
-						/>
+						<ItemInfoForm isTransitioning={isTransitioning} />
 					</FormProvider>
 				)
 			case 2:
@@ -153,132 +223,57 @@ const SendItem: React.FC = () => {
 	}
 
 	return (
-		<div className='bg-background min-h-screen'>
-			<div className='grid w-full grid-cols-1 gap-6 md:grid-cols-3'>
-				<div className='col-span-1 md:col-span-2'>
-					<div className='bg-card border-border rounded-xl border p-8 shadow-lg'>
-						<ProgressBar currentStep={currentStep} />
+		<>
+			<div className='bg-background min-h-screen'>
+				<div className='grid w-full grid-cols-1 gap-6 md:grid-cols-3'>
+					<div className='col-span-1 md:col-span-2'>
+						<div className='bg-card border-border rounded-xl border p-8 shadow-lg'>
+							<ProgressBar currentStep={isCompleted ? 3 : currentStep} />
 
-						<div className='mb-8 min-h-[400px]'>{renderCurrentForm()}</div>
+							<div className='mb-8 min-h-[400px]'>{renderCurrentForm()}</div>
 
-						<div className='border-border flex items-center justify-between border-t pt-6'>
-							{currentStep > 0 ? (
-								<button
-									onClick={handleBack}
-									className='text-muted-foreground bg-muted hover:bg-muted/80 flex items-center rounded-lg px-4 py-2 transition-colors duration-200'
-								>
-									<ChevronLeft
-										size={18}
-										className='mr-1'
-									/>{' '}
-									Quay lại
-								</button>
-							) : (
-								<div />
+							{!isCompleted && (
+								<div className='border-border flex items-center justify-between border-t pt-6'>
+									{currentStep > 0 ? (
+										<SecondaryButton onClick={handleBack}>
+											Quay lại
+										</SecondaryButton>
+									) : (
+										<div />
+									)}
+
+									<div>
+										{currentStep < steps.length - 1 ? (
+											<PrimaryButton
+												icon={<ChevronRight size={18} />}
+												positionIcon='right'
+												onClick={handleNext}
+											>
+												Tiếp theo
+											</PrimaryButton>
+										) : (
+											<button
+												onClick={handleSubmit}
+												className='bg-chart-1 hover:bg-chart-1/90 flex items-center rounded-lg px-6 py-2 font-medium text-white transition-colors duration-200'
+											>
+												<Send
+													size={18}
+													className='mr-2'
+												/>{' '}
+												Gửi yêu cầu
+											</button>
+										)}
+									</div>
+								</div>
 							)}
-
-							<div>
-								{currentStep < steps.length - 1 ? (
-									<button
-										onClick={handleNext}
-										className='bg-primary text-primary-foreground hover:bg-primary/90 flex items-center rounded-lg px-6 py-2 font-medium transition-colors duration-200'
-									>
-										Tiếp theo
-										<ChevronRight
-											size={18}
-											className='ml-1'
-										/>
-									</button>
-								) : (
-									<button
-										onClick={handleSubmit}
-										className='bg-chart-1 hover:bg-chart-1/90 flex items-center rounded-lg px-6 py-2 font-medium text-white transition-colors duration-200'
-									>
-										<Send
-											size={18}
-											className='mr-2'
-										/>{' '}
-										Gửi yêu cầu
-									</button>
-								)}
-							</div>
 						</div>
 					</div>
-				</div>
-				<div className='sticky top-0 col-span-1 md:top-16'>
-					<div className='bg-card border-border rounded-xl border p-8 shadow-lg'>
-						<div className='p-4'>
-							<div className='mb-4 flex items-center gap-2'>
-								<InfoIcon className='h-5 w-5 text-gray-600' />
-								<h2 className='text-lg font-medium'>Hướng dẫn gửi đồ</h2>
-							</div>
-							<div className='space-y-6'>
-								<div className='flex gap-3'>
-									<div className='flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-gray-300'>
-										<UserIcon className='h-4 w-4 text-gray-600' />
-									</div>
-									<div>
-										<h3 className='mb-1 font-medium text-gray-800'>
-											Bước 1: Thông tin cá nhân
-										</h3>
-										<p className='text-sm text-gray-600'>
-											Điền đầy đủ thông tin cá nhân để chúng tôi có thể liên hệ
-											khi cần thiết.
-										</p>
-									</div>
-								</div>
-								<div className='flex gap-3'>
-									<div className='flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-gray-300'>
-										<BoxIcon className='h-4 w-4 text-gray-600' />
-									</div>
-									<div>
-										<h3 className='mb-1 font-medium text-gray-800'>
-											Bước 2: Thông tin đồ vật
-										</h3>
-										<p className='text-sm text-gray-600'>
-											Cung cấp hình ảnh và mô tả chi tiết về đồ vật để dễ dàng
-											xác nhận.
-										</p>
-									</div>
-								</div>
-								<div className='flex gap-3'>
-									<div className='flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-gray-300'>
-										<CalendarIcon className='h-4 w-4 text-gray-600' />
-									</div>
-									<div>
-										<h3 className='mb-1 font-medium text-gray-800'>
-											Bước 3: Đặt lịch hẹn
-										</h3>
-										<p className='text-sm text-gray-600'>
-											Chọn thời gian và địa điểm thuận tiện để gửi đồ.
-										</p>
-									</div>
-								</div>
-								<div className='mt-6 border-t border-gray-200 pt-4'>
-									<h3 className='mb-2 font-medium text-gray-800'>
-										Lưu ý quan trọng:
-									</h3>
-									<ul className='space-y-2 text-sm text-gray-600'>
-										<li className='flex items-start gap-2'>
-											<ArrowRightIcon className='mt-0.5 h-4 w-4 flex-shrink-0' />
-											Mang theo CMND/CCCD khi đến gửi đồ
-										</li>
-										<li className='flex items-start gap-2'>
-											<ArrowRightIcon className='mt-0.5 h-4 w-4 flex-shrink-0' />
-											Đảm bảo đồ vật sạch sẽ và đóng gói cẩn thận
-										</li>
-										<li className='flex items-start gap-2'>
-											<ArrowRightIcon className='mt-0.5 h-4 w-4 flex-shrink-0' />
-											Kiểm tra kỹ đồ vật trước khi gửi
-										</li>
-									</ul>
-								</div>
-							</div>
-						</div>
+					<div className='sticky top-0 col-span-1 md:top-16'>
+						<Instruction />
 					</div>
 				</div>
 			</div>
-		</div>
+		</>
 	)
 }
 
