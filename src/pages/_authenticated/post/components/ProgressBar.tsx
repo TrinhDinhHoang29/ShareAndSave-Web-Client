@@ -57,14 +57,14 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep }) => {
 						currentStep >= 1 ? 'text-primary' : 'text-muted-foreground'
 					}
 				>
-					Thông tin đồ vật
+					Loại bài đăng
 				</span>
 				<span
 					className={
 						currentStep >= 2 ? 'text-primary' : 'text-muted-foreground'
 					}
 				>
-					Lịch hẹn
+					Thông tin bài đăng
 				</span>
 			</div>
 		</div>

@@ -19,7 +19,7 @@ const Home = () => {
 			await new Promise((resolve, reject) =>
 				setTimeout(
 					() => reject(new Error('Không thể kết nối đến máy chủ')),
-					10000
+					2000
 				)
 			)
 
@@ -49,19 +49,3 @@ const Home = () => {
 }
 
 export default Home
-
-// const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-// 	const files = Array.from(e.target.files || [])
-// 	const newImages = files.map(file => {
-// 		const reader = new FileReader()
-// 		return new Promise<string>(resolve => {
-// 			reader.onloadend = () => resolve(reader.result as string)
-// 			reader.readAsDataURL(file)
-// 		})
-// 	})
-
-// 	Promise.all(newImages).then(imageUrls => {
-// 		const currentImages = itemForm.watch('image') || []
-// 		itemForm.setValue('image', [...currentImages, ...imageUrls])
-// 	})
-// }

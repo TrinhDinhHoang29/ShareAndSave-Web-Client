@@ -5,11 +5,10 @@ import Loading from '@/components/common/Loading'
 import LayoutDefault from '@/components/layout'
 // Lazy load các components
 const Home = lazy(() => import('@/pages/_authenticated/home'))
-const SendItem = lazy(() => import('@/pages/_authenticated/send-item'))
+const Post = lazy(() => import('@/pages/_authenticated/post'))
 const SendRequest = lazy(
-	() => import('@/pages/_authenticated/profile/send-request')
+	() => import('@/pages/_authenticated/profile/send-request/send')
 )
-
 // Error Boundary Component
 const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
 	return (
@@ -40,10 +39,10 @@ function AppRouter() {
 					)
 				},
 				{
-					path: 'gui-do-cu',
+					path: 'dang-bai',
 					element: (
 						<ErrorBoundary>
-							<SendItem />
+							<Post />
 						</ErrorBoundary>
 					)
 				},

@@ -17,7 +17,7 @@ const InputText: React.FC<InputTextProps> = ({
 	placeholder,
 	register,
 	error,
-	rows = 4
+	rows = 8
 }) => {
 	const commonClasses =
 		'w-full px-4 py-3 border border-border rounded-lg bg-card text-card-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200'

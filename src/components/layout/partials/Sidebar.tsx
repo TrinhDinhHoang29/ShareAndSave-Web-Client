@@ -14,8 +14,8 @@ const sidebarLinks = [
 		icon: <FileText size={20} />
 	},
 	{
-		to: '/gui-do-cu',
-		label: 'Gửi đồ cũ',
+		to: '/dang-bai',
+		label: 'Đăng bài',
 		icon: <Send size={20} />
 	},
 	{
@@ -27,7 +27,7 @@ const sidebarLinks = [
 
 const Sidebar: React.FC = () => {
 	return (
-		<aside className='bg-sidebar text-sidebar-foreground border-sidebar-border fixed top-0 left-0 z-40 flex h-screen w-64 flex-col border-r px-4 py-8'>
+		<aside className='bg-sidebar text-sidebar-foreground border-sidebar-border fixed top-0 left-0 z-30 flex h-screen w-64 flex-col border-r px-4 py-8'>
 			<nav className='mt-20 flex flex-col gap-2'>
 				{sidebarLinks.map(({ to, label, icon }) => (
 					<NavLink

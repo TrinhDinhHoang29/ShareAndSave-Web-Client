@@ -12,7 +12,7 @@ const Navbar: React.FC = () => {
 	const { theme, setTheme } = useTheme()
 
 	return (
-		<nav className='bg-background text-foreground sticky top-0 z-50 flex h-20 items-center justify-between px-16 shadow-md transition-colors'>
+		<nav className='bg-background text-foreground sticky top-0 z-40 flex h-20 items-center justify-between px-16 shadow-md transition-colors'>
 			{/* Left: Logo + App name */}
 			<div className='flex min-w-[220px] items-center gap-4'>
 				<Link

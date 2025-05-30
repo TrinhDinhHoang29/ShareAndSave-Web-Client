@@ -1,63 +1,70 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Calendar, ChevronRight, Package, Send, User } from 'lucide-react'
-import React, { useState } from 'react'
+import { ChevronRight, Package, Send, Star, User } from 'lucide-react'
+import React, { lazy, Suspense, useState } from 'react' // Thêm Suspense và lazy
 import { FormProvider, useForm } from 'react-hook-form'
 
-import requestApi from '@/apis/modules/request.api'
+import Loading from '@/components/common/Loading'
 import PrimaryButton from '@/components/common/PrimaryButton'
 import SecondaryButton from '@/components/common/SecondaryButton'
-import { useAlertModalContext } from '@/context/alert-modal-context'
+import { useSendItemMutation } from '@/hooks/mutations/useSendItemMutation'
 import { formatDateToISO } from '@/lib/utils'
+import { EPostType } from '@/models/enums'
+import { IPostInfoFormData, IPostRequest, IStep } from '@/models/interfaces'
 import {
-	IApiErrorResponse,
-	IRequestSendItemRequest,
-	ISendItemFormData,
-	IStep
-} from '@/models/interfaces'
-import {
-	Appointment,
-	appointmentSchema,
-	ItemInfo,
-	itemInfoSchema,
-	PersonalInfo,
-	personalInfoSchema
-} from '@/models/types'
+	personalInfoSchema,
+	postInfoSchema,
+	postTypeSchema
+} from '@/models/schema'
+import { PersonalInfo, PostInfo, PostType } from '@/models/types'
 
-import AppointmentForm from './components/AppointmentForm'
 import Instruction from './components/Instruction'
-import ItemInfoForm from './components/ItemInfoForm'
-import MyThank from './components/MyThank'
-import PersonalInfoForm from './components/PersonalInfoForm'
+import MyThank from './components/MyThank' // Không lazy
+import PersonalInfoForm from './components/PersonalInfoForm' // Không lazy
+import PostTypeForm from './components/PostTypeForm'
 import ProgressBar from './components/ProgressBar'
 
-const SendItem: React.FC = () => {
+// Lazy load chỉ các Post components
+const PostSendOldItemform = lazy(
+	() => import('./components/PostSendOldItemForm')
+)
+const PostSendLostItemForm = lazy(
+	() => import('./components/PostSendLostItemForm')
+)
+const PostFindItemForm = lazy(() => import('./components/PostFindItemForm'))
+const PostForm = lazy(() => import('./components/PostForm'))
+
+const Post: React.FC = () => {
 	const [currentStep, setCurrentStep] = useState<number>(0)
 	const [isTransitioning, setIsTransitioning] = useState<boolean>(false)
-	const [ISendItemFormData, setISendItemFormData] =
-		useState<ISendItemFormData>(Object)
+	const [formData, setFormData] = useState<IPostInfoFormData>(Object)
 	const [isCompleted, setIsCompleted] = useState<boolean>(false)
 	const [completedEmail, setCompletedEmail] = useState<string>('')
-	const { showLoading, showSuccess, showError, close } = useAlertModalContext()
+	const mutation = useSendItemMutation({
+		onSuccess: () => {
+			setCompletedEmail(formData.personalInfo?.email || '')
+			setIsCompleted(true)
+		}
+	})
 
 	const steps: IStep[] = [
 		{ title: 'Thông tin cá nhân', icon: User },
-		{ title: 'Thông tin món đồ', icon: Package },
-		{ title: 'Lịch hẹn', icon: Calendar }
+		{ title: 'Loại bài đăng', icon: Star },
+		{ title: 'Thông tin bài đăng', icon: Package }
 	]
 
 	const personalForm = useForm<PersonalInfo>({
 		resolver: zodResolver(personalInfoSchema),
-		defaultValues: ISendItemFormData.personalInfo
+		defaultValues: formData.personalInfo
 	})
 
-	const itemForm = useForm<ItemInfo>({
-		resolver: zodResolver(itemInfoSchema),
-		defaultValues: ISendItemFormData.itemInfo || { description: '' }
+	const postTypeForm = useForm<PostType>({
+		resolver: zodResolver(postTypeSchema),
+		defaultValues: formData.postType || { type: '0' }
 	})
 
-	const appointmentForm = useForm<Appointment>({
-		resolver: zodResolver(appointmentSchema),
-		defaultValues: ISendItemFormData.appointment || { isAnonymous: false }
+	const postInfoForm = useForm<PostInfo>({
+		resolver: zodResolver(postInfoSchema),
+		defaultValues: formData.postInfo || { description: '', image: [] }
 	})
 
 	const handleNext = async () => {
@@ -66,17 +73,17 @@ const SendItem: React.FC = () => {
 		if (currentStep === 0) {
 			isValid = await personalForm.trigger()
 			if (isValid) {
-				setISendItemFormData(prev => ({
+				setFormData((prev: any) => ({
 					...prev,
 					personalInfo: personalForm.getValues()
 				}))
 			}
 		} else if (currentStep === 1) {
-			isValid = await itemForm.trigger()
+			isValid = await postTypeForm.trigger()
 			if (isValid) {
-				setISendItemFormData(prev => ({
+				setFormData((prev: any) => ({
 					...prev,
-					itemInfo: itemForm.getValues()
+					postType: postTypeForm.getValues()
 				}))
 			}
 		}
@@ -101,13 +108,10 @@ const SendItem: React.FC = () => {
 	}
 
 	const resetForm = () => {
-		// Reset tất cả form
 		personalForm.reset()
-		itemForm.reset({ description: '' })
-		appointmentForm.reset({ isAnonymous: false })
-
-		// Reset state
-		setISendItemFormData(Object)
+		postTypeForm.reset({ type: '0' })
+		postInfoForm.reset({ description: '' })
+		setFormData(Object)
 		setCurrentStep(0)
 		setIsCompleted(false)
 		setCompletedEmail('')
@@ -115,76 +119,47 @@ const SendItem: React.FC = () => {
 	}
 
 	const handleSubmit = async () => {
-		const isValid = await appointmentForm.trigger()
+		const isValid = await postInfoForm.trigger()
 		if (isValid) {
-			const finalData: ISendItemFormData = {
-				...ISendItemFormData,
-				appointment: appointmentForm.getValues()
+			const finalData: IPostInfoFormData = {
+				...formData,
+				postInfo: postInfoForm.getValues()
 			}
 
 			const requestData = {
 				...finalData.personalInfo,
-				...finalData.itemInfo,
-				...finalData.appointment
+				...finalData.postType,
+				...finalData.postInfo
 			}
 
 			console.log('Dữ liệu gửi đi:', requestData)
 
-			const convertedData: IRequestSendItemRequest = {
+			const convertedData: IPostRequest = {
 				fullName: requestData.fullName,
 				email: requestData.email,
 				phoneNumber: requestData.phoneNumber,
 				description: requestData.description,
-				appointmentTime: formatDateToISO(requestData.appointmentTime),
-				appointmentLocation: requestData.appointmentLocation,
-				isAnonymous: requestData.isAnonymous || false
+				type: requestData.type,
+				images: requestData.images || [],
+				title: requestData.title
 			}
 
-			try {
-				showLoading({
-					loadingMessage: 'Đang gửi yêu cầu...',
-					showCancel: true,
-					onCancel: () => {
-						close()
-					}
-				})
-
-				const res = await requestApi.sendOldItem(convertedData)
-
-				if (res.code === 200) {
-					// Lưu email và chuyển sang trạng thái hoàn thành
-					setCompletedEmail(convertedData.email)
-					setIsCompleted(true)
-
-					// Có thể vẫn giữ success modal nếu muốn
-					showSuccess({
-						successTitle: 'Gửi yêu cầu thành công!',
-						successMessage: `Vui lòng để ý email ${convertedData.email} để nhận thông tin sớm nhất.`,
-						successButtonText: 'Hoàn tất'
-					})
-				} else {
-					showError({
-						errorTitle: 'Lỗi gửi yêu cầu',
-						errorMessage:
-							res.message ||
-							'Đã xảy ra lỗi khi gửi yêu cầu. Vui lòng thử lại sau.',
-						errorButtonText: 'Thử lại'
-					})
-					return
-				}
-			} catch (error: any) {
-				const errorResponse = error as IApiErrorResponse
-
-				console.log(errorResponse)
-				showError({
-					errorTitle: 'Lỗi gửi yêu cầu',
-					errorMessage:
-						errorResponse.message ||
-						'Đã xảy ra lỗi khi gửi yêu cầu. Vui lòng thử lại sau.',
-					errorButtonText: 'Thử lại'
-				})
-				return
+			if (requestData.type === EPostType.SEND_OLD) {
+				convertedData.condition = requestData.condition
+				convertedData.category = requestData.category
+			} else if (requestData.type === EPostType.SEND_LOST) {
+				convertedData.foundDate = formatDateToISO(requestData.foundDate || '')
+				convertedData.foundLocation = requestData.lostLocation
+				convertedData.category = requestData.category
+			} else if (requestData.type === '2') {
+				convertedData.lostLocation = requestData.lostLocation
+				convertedData.lostDate = formatDateToISO(requestData.lostDate || '')
+				convertedData.category = requestData.category
+				convertedData.reward = requestData.reward
 			}
+
+			console.log('Dữ liệu đã chuyển đổi:', convertedData)
+			// mutation.mutate(convertedData);
 		}
 	}
 
@@ -207,16 +182,39 @@ const SendItem: React.FC = () => {
 				)
 			case 1:
 				return (
-					<FormProvider {...itemForm}>
-						<ItemInfoForm isTransitioning={isTransitioning} />
+					<FormProvider {...postTypeForm}>
+						<PostTypeForm isTransitioning={isTransitioning} />
 					</FormProvider>
 				)
-			case 2:
+			case 2: {
+				const selectedType = postTypeForm.watch('type')
+				let FormComponent
+
+				switch (selectedType) {
+					case '0':
+						FormComponent = PostSendOldItemform
+						break
+					case '1':
+						FormComponent = PostSendLostItemForm
+						break
+					case '2':
+						FormComponent = PostFindItemForm
+						break
+					case '3':
+						FormComponent = PostForm
+						break
+					default:
+						FormComponent = PostForm
+				}
+
 				return (
-					<FormProvider {...appointmentForm}>
-						<AppointmentForm isTransitioning={isTransitioning} />
+					<FormProvider {...postInfoForm}>
+						<Suspense fallback={<Loading />}>
+							<FormComponent isTransitioning={isTransitioning} />
+						</Suspense>
 					</FormProvider>
 				)
+			}
 			default:
 				return null
 		}
@@ -260,7 +258,7 @@ const SendItem: React.FC = () => {
 													size={18}
 													className='mr-2'
 												/>{' '}
-												Gửi yêu cầu
+												Đăng bài
 											</button>
 										)}
 									</div>
@@ -268,7 +266,7 @@ const SendItem: React.FC = () => {
 							)}
 						</div>
 					</div>
-					<div className='sticky top-0 col-span-1 md:top-16'>
+					<div className='top-0 col-span-1 md:top-16'>
 						<Instruction />
 					</div>
 				</div>
@@ -277,4 +275,4 @@ const SendItem: React.FC = () => {
 	)
 }
 
-export default SendItem
+export default Post
