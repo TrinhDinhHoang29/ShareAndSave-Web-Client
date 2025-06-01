@@ -1,12 +1,16 @@
 import { useMutation } from '@tanstack/react-query'
 import { useRef } from 'react'
 
-import requestApi from '@/apis/modules/request.api'
+import postApi from '@/apis/modules/post.api'
 import { useAlertModalContext } from '@/context/alert-modal-context'
-import { IApiErrorResponse, IRequestSendItemRequest } from '@/models/interfaces'
+import {
+	IApiErrorResponse,
+	IPostRequest,
+	IPostResponse
+} from '@/models/interfaces'
 
 interface UseSendItemMutationOptions {
-	onSuccess?: () => void
+	onSuccess?: (data: IPostResponse) => void
 	onError?: () => void
 	onSettled?: () => void
 }
@@ -16,16 +20,15 @@ export const useSendItemMutation = ({
 	onError,
 	onSettled
 }: UseSendItemMutationOptions = {}) => {
-	const { showLoading, showSuccess, showError, close } = useAlertModalContext()
+	const { showLoading, showError, close } = useAlertModalContext()
 	const abortControllerRef = useRef<AbortController | null>(null)
 
 	return useMutation({
-		mutationFn: (data: IRequestSendItemRequest) => {
+		mutationFn: (data: IPostRequest) => {
 			abortControllerRef.current = new AbortController()
-			return requestApi.sendOldItem(data, abortControllerRef.current.signal)
+			return postApi.create(data, abortControllerRef.current.signal)
 		},
 		onMutate: () => {
-			console.log('loading...')
 			showLoading({
 				loadingMessage: 'Đang gửi yêu cầu...',
 				showCancel: true,
@@ -35,14 +38,10 @@ export const useSendItemMutation = ({
 				}
 			})
 		},
-		onSuccess: (res, variables) => {
+		onSuccess: res => {
 			if (res.code === 200) {
-				showSuccess({
-					successTitle: 'Gửi yêu cầu thành công!',
-					successMessage: `Vui lòng để ý email ${variables.email} để nhận thông tin sớm nhất.`,
-					successButtonText: 'Hoàn tất'
-				})
-				onSuccess?.()
+				close()
+				onSuccess?.(res.data)
 			} else {
 				showError({
 					errorTitle: 'Lỗi gửi yêu cầu',

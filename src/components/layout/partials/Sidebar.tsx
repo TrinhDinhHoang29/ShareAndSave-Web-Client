@@ -1,4 +1,4 @@
-import { BarChart, FileText, Home, Send } from 'lucide-react'
+import { BarChart, FileText, Heart, Home, Send, Warehouse } from 'lucide-react'
 import React from 'react'
 import { NavLink } from 'react-router-dom'
 
@@ -14,9 +14,19 @@ const sidebarLinks = [
 		icon: <FileText size={20} />
 	},
 	{
+		to: '/kho-do-cu',
+		label: 'Kho đồ cũ',
+		icon: <Warehouse size={20} />
+	},
+	{
 		to: '/dang-bai',
 		label: 'Đăng bài',
 		icon: <Send size={20} />
+	},
+	{
+		to: '/quan-tam',
+		label: 'Quan tâm',
+		icon: <Heart size={20} />
 	},
 	{
 		to: '/bang-xep-hang',

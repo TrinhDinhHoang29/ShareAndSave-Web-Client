@@ -6,10 +6,14 @@ import { FormProvider, useForm } from 'react-hook-form'
 import Loading from '@/components/common/Loading'
 import PrimaryButton from '@/components/common/PrimaryButton'
 import SecondaryButton from '@/components/common/SecondaryButton'
+import { useAuth } from '@/context/auth-context'
 import { useSendItemMutation } from '@/hooks/mutations/useSendItemMutation'
-import { formatDateToISO } from '@/lib/utils'
-import { EPostType } from '@/models/enums'
-import { IPostInfoFormData, IPostRequest, IStep } from '@/models/interfaces'
+import {
+	IPostInfoFormData,
+	IPostRequest,
+	IPostResponse,
+	IStep
+} from '@/models/interfaces'
 import {
 	personalInfoSchema,
 	postInfoSchema,
@@ -17,6 +21,7 @@ import {
 } from '@/models/schema'
 import { PersonalInfo, PostInfo, PostType } from '@/models/types'
 
+import AutoLoginRedirect from './components/AutoLoginRedirect'
 import Instruction from './components/Instruction'
 import MyThank from './components/MyThank' // Không lazy
 import PersonalInfoForm from './components/PersonalInfoForm' // Không lazy
@@ -34,15 +39,22 @@ const PostFindItemForm = lazy(() => import('./components/PostFindItemForm'))
 const PostForm = lazy(() => import('./components/PostForm'))
 
 const Post: React.FC = () => {
-	const [currentStep, setCurrentStep] = useState<number>(0)
 	const [isTransitioning, setIsTransitioning] = useState<boolean>(false)
 	const [formData, setFormData] = useState<IPostInfoFormData>(Object)
 	const [isCompleted, setIsCompleted] = useState<boolean>(false)
 	const [completedEmail, setCompletedEmail] = useState<string>('')
+	const [postResponse, setPostResponse] = useState<IPostResponse>(Object)
+	const { isAuthenticated, user } = useAuth()
+	const [currentStep, setCurrentStep] = useState<number>(() =>
+		isAuthenticated ? 1 : 0
+	)
+
 	const mutation = useSendItemMutation({
-		onSuccess: () => {
+		onSuccess: (data: IPostResponse) => {
+			console.log(data)
 			setCompletedEmail(formData.personalInfo?.email || '')
 			setIsCompleted(true)
+			setPostResponse(data)
 		}
 	})
 
@@ -132,44 +144,59 @@ const Post: React.FC = () => {
 				...finalData.postInfo
 			}
 
-			console.log('Dữ liệu gửi đi:', requestData)
+			// Lọc các thuộc tính không null hoặc không rỗng từ requestData
+			const contentData: Record<string, any> = {}
+			Object.entries(requestData).forEach(([key, value]) => {
+				// Loại bỏ các thuộc tính đã sử dụng trong convertedData
+				if (
+					![
+						'fullName',
+						'email',
+						'phoneNumber',
+						'type',
+						'images',
+						'title',
+						'newItems',
+						'oldItems'
+					].includes(key) &&
+					value != null && // Không null hoặc undefined
+					value !== '' && // Không rỗng (string)
+					(!Array.isArray(value) || value.length > 0) // Không phải mảng rỗng
+				) {
+					contentData[key] = value
+				}
+			})
+
+			// Chuyển contentData thành JSON string
+			const infoJson = JSON.stringify(contentData)
 
 			const convertedData: IPostRequest = {
-				fullName: requestData.fullName,
-				email: requestData.email,
-				phoneNumber: requestData.phoneNumber,
-				description: requestData.description,
-				type: requestData.type,
+				fullName: requestData?.fullName,
+				email: requestData?.email,
+				phoneNumber: requestData?.phoneNumber,
+				author_id: user?.id,
+				type: Number(requestData.type),
 				images: requestData.images || [],
-				title: requestData.title
+				title: requestData.title,
+				info: infoJson, // Gán content dưới dạng JSON string
+				newItems: requestData.newItems?.map(({ id: any, ...rest }) => rest),
+				oldItems: requestData.oldItems?.map(({ id: any, ...rest }) => rest)
 			}
 
-			if (requestData.type === EPostType.SEND_OLD) {
-				convertedData.condition = requestData.condition
-				convertedData.category = requestData.category
-			} else if (requestData.type === EPostType.SEND_LOST) {
-				convertedData.foundDate = formatDateToISO(requestData.foundDate || '')
-				convertedData.foundLocation = requestData.lostLocation
-				convertedData.category = requestData.category
-			} else if (requestData.type === '2') {
-				convertedData.lostLocation = requestData.lostLocation
-				convertedData.lostDate = formatDateToISO(requestData.lostDate || '')
-				convertedData.category = requestData.category
-				convertedData.reward = requestData.reward
-			}
-
-			console.log('Dữ liệu đã chuyển đổi:', convertedData)
+			console.log(convertedData)
 			// mutation.mutate(convertedData);
 		}
 	}
 
 	const renderCurrentForm = () => {
 		if (isCompleted) {
-			return (
+			return isAuthenticated ? (
 				<MyThank
 					onReset={resetForm}
 					email={completedEmail}
 				/>
+			) : (
+				<AutoLoginRedirect info={postResponse} />
 			)
 		}
 
@@ -232,12 +259,13 @@ const Post: React.FC = () => {
 
 							{!isCompleted && (
 								<div className='border-border flex items-center justify-between border-t pt-6'>
-									{currentStep > 0 ? (
+									{(currentStep > 0 && !isAuthenticated) ||
+									(currentStep > 1 && isAuthenticated) ? (
 										<SecondaryButton onClick={handleBack}>
 											Quay lại
 										</SecondaryButton>
 									) : (
-										<div />
+										<div></div>
 									)}
 
 									<div>

@@ -1,9 +1,11 @@
-export const getAccessToken = () => localStorage.getItem('access_token')
-export const setAccessToken = (token: string) =>
-	localStorage.setItem('access_token', token)
-export const clearAccessToken = () => localStorage.removeItem('access_token')
+import Cookies from 'js-cookie'
 
-export const getRefreshToken = () => localStorage.getItem('refresh_token')
+export const getAccessToken = () => Cookies.get('access_token')
+export const setAccessToken = (token: string) =>
+	Cookies.set('access_token', token)
+export const clearAccessToken = () => Cookies.remove('access_token')
+
+export const getRefreshToken = () => Cookies.get('refresh_token')
 export const setRefreshToken = (token: string) =>
-	localStorage.setItem('refresh_token', token)
-export const clearRefreshToken = () => localStorage.removeItem('refresh_token')
+	Cookies.set('refresh_token', token)
+export const clearRefreshToken = () => Cookies.remove('refresh_token')

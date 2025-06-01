@@ -40,7 +40,7 @@ const MyThank: React.FC<MyThankProps> = ({ onReset, email }) => {
 				transition={{ delay: 0.4, duration: 0.5 }}
 				className='text-foreground mb-4 text-2xl font-bold'
 			>
-				Cảm ơn bạn đã gửi đồ!
+				Cảm ơn bạn đã đăng bài!
 			</motion.h2>
 
 			<motion.div
@@ -49,12 +49,10 @@ const MyThank: React.FC<MyThankProps> = ({ onReset, email }) => {
 				transition={{ delay: 0.6, duration: 0.5 }}
 				className='text-muted-foreground mb-6 max-w-md'
 			>
-				<p className='mb-2'>
-					Yêu cầu gửi đồ của bạn đã được tiếp nhận thành công.
-				</p>
+				<p className='mb-2'>Bài đăng của bạn đã được gửi thành công.</p>
 				{email && (
 					<p className='text-sm'>
-						Chúng tôi sẽ gửi thông tin chi tiết về lịch hẹn đến email{' '}
+						Chúng tôi sẽ gửi thông báo cập nhật về bài đăng đến email{' '}
 						<span className='text-primary font-medium'>{email}</span>
 					</p>
 				)}
@@ -67,8 +65,10 @@ const MyThank: React.FC<MyThankProps> = ({ onReset, email }) => {
 				className='space-y-4'
 			>
 				<div className='bg-muted/50 text-muted-foreground rounded-lg p-4 text-sm'>
-					<p>• Vui lòng kiểm tra email trong vòng 24 giờ tới</p>
-					<p>• Mang đồ đến đúng thời gian và địa điểm đã hẹn</p>
+					<p>
+						• Vui lòng kiểm tra email để nhận thông báo trong vòng 24 giờ tới
+					</p>
+					<p>• Kiểm tra trạng thái bài đăng trong mục "Bài đăng của tôi"</p>
 					<p>• Liên hệ hotline nếu cần hỗ trợ thêm</p>
 				</div>
 
@@ -79,7 +79,7 @@ const MyThank: React.FC<MyThankProps> = ({ onReset, email }) => {
 						positionIcon='left'
 						className='w-full sm:w-auto'
 					>
-						Gửi đồ khác
+						Đăng bài khác
 					</PrimaryButton>
 				</div>
 			</motion.div>

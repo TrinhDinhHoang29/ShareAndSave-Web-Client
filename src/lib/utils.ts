@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import { v4 as uuidv4 } from 'uuid'
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs))
@@ -57,4 +58,20 @@ export function formatDateToISOWithTimeZone(
 		/(\d{2})\/(\d{2})\/(\d{4}), (\d{2}):(\d{2})/,
 		'$3-$1-$2T$4:$5:00Z'
 	)
+}
+
+export function getDeviceType() {
+	const ua = navigator.userAgent
+	if (/mobile/i.test(ua)) return 'mobile'
+	if (/tablet/i.test(ua)) return 'tablet'
+	return 'desktop'
+}
+
+export function getDeviceId() {
+	let deviceId = localStorage.getItem('deviceId')
+	if (!deviceId) {
+		deviceId = uuidv4() // Tạo UUID mới
+		localStorage.setItem('deviceId', deviceId)
+	}
+	return deviceId // Ví dụ: 'abc-123-xyz'
 }

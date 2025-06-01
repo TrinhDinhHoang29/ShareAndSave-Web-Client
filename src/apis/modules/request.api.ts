@@ -1,12 +1,5 @@
 import { ERequestStatus, ERequestType } from '@/models/enums'
-import {
-	IApiResponse,
-	IRequest,
-	IRequestResponse,
-	IRequestSendItemRequest
-} from '@/models/interfaces'
-
-import axiosPublic from '../client/public.client'
+import { IApiResponse, IRequest, IRequestResponse } from '@/models/interfaces'
 
 const requestEndpoints = {
 	sendOldItemL: 'requests' + '/' + 'send-old-item'
@@ -136,19 +129,6 @@ const requestApi = {
 			code: 200,
 			message: 'Success',
 			data: { status: ERequestStatus.PENDING }
-		}
-	},
-	async sendOldItem(
-		data: IRequestSendItemRequest,
-		signal?: AbortSignal
-	): Promise<IApiResponse<IRequestSendItemRequest>> {
-		// eslint-disable-next-line no-useless-catch
-		try {
-			return await axiosPublic.post(requestEndpoints.sendOldItemL, data, {
-				signal
-			})
-		} catch (error) {
-			throw error
 		}
 	}
 	//   async list(params: {

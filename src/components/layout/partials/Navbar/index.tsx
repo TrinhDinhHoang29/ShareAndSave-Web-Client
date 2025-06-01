@@ -1,12 +1,10 @@
-import { Bell, Download, Menu, Moon, Sun, UserCircle } from 'lucide-react'
+import { Bell, Download, Menu, Moon, Sun } from 'lucide-react'
 import React from 'react'
 import { Link } from 'react-router-dom'
 
-import Dropdown from '@/components/common/Dropdown'
 import { useTheme } from '@/context/theme-context'
 
 import DropdownProfileMenu from './DropdownProfileMenu'
-import ProfileMenu from './ProfileMenu'
 
 const Navbar: React.FC = () => {
 	const { theme, setTheme } = useTheme()

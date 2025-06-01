@@ -4,11 +4,10 @@ import { useRoutes } from 'react-router-dom'
 import Loading from '@/components/common/Loading'
 import LayoutDefault from '@/components/layout'
 // Lazy load các components
-const Home = lazy(() => import('@/pages/_authenticated/home'))
-const Post = lazy(() => import('@/pages/_authenticated/post'))
-const SendRequest = lazy(
-	() => import('@/pages/_authenticated/profile/send-request/send')
-)
+const Home = lazy(() => import('@/pages/home'))
+const Post = lazy(() => import('@/pages/post'))
+const SendRequest = lazy(() => import('@/pages/profile/send-request/send'))
+const Interest = lazy(() => import('@/pages/interest'))
 // Error Boundary Component
 const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
 	return (
@@ -43,6 +42,14 @@ function AppRouter() {
 					element: (
 						<ErrorBoundary>
 							<Post />
+						</ErrorBoundary>
+					)
+				},
+				{
+					path: 'quan-tam',
+					element: (
+						<ErrorBoundary>
+							<Interest />
 						</ErrorBoundary>
 					)
 				},

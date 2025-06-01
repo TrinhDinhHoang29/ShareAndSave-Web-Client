@@ -1,12 +1,15 @@
 import axios from 'axios'
 
+import { getDeviceId, getDeviceType } from '@/lib/utils'
+
 const axiosPublic = axios.create({
 	baseURL: import.meta.env.VITE_API_URL, // Địa chỉ API public
 	headers: {
-		'ngrok-skip-browser-warning': 'true',
 		Accept: 'application/json',
 		'Content-Type': 'application/json',
-		charset: 'UTF-8'
+		charset: 'UTF-8',
+		'Device-Type': getDeviceType(), // Lấy động Device-Type
+		'Device-ID': getDeviceId() // Lấy động Device-ID
 	}
 })
 

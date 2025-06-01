@@ -9,11 +9,19 @@ import {
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import { IUser } from '@/models/interfaces'
+
 interface ProfileMenuProps {
 	onClickOutSide?: () => void
+	user: IUser | null
+	logout: () => void
 }
 
-const ProfileMenu: React.FC<ProfileMenuProps> = ({ onClickOutSide }) => {
+const ProfileMenu: React.FC<ProfileMenuProps> = ({
+	onClickOutSide,
+	user,
+	logout
+}) => {
 	const navigate = useNavigate()
 
 	interface MenuItem {
@@ -42,7 +50,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({ onClickOutSide }) => {
 		{
 			label: 'Đăng xuất',
 			icon: <LogOut className='h-4 w-4' />,
-			onClick: () => navigate('login'),
+			onClick: () => logout(),
 			divider: true
 		}
 	]
@@ -55,25 +63,37 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({ onClickOutSide }) => {
 	}
 
 	return (
-		<div className='bg-card w-64 overflow-hidden rounded-lg border border-gray-100 shadow-lg'>
+		<div className='w-64 overflow-hidden'>
 			{/* Profile Header */}
-			<div className='bg-background border-b border-gray-100 px-4 py-4'>
+			<div className='bg-background rounded-t-md border-b border-gray-100 px-4 py-4'>
 				<div className='flex items-center gap-3'>
 					<div className='relative'>
 						<div className='flex h-12 w-12 items-center justify-center rounded-full bg-gray-200'>
-							<User className='text-secondary h-5 w-5' />
+							{user?.avatar ? (
+								<img
+									src={user.avatar}
+									alt={`${user?.fullName} avatar`}
+									className='h-full w-full rounded-full object-cover'
+								/>
+							) : (
+								<User className='text-secondary h-5 w-5' /> // Placeholder nếu không có avatar
+							)}
 						</div>
 						<div className='absolute -right-0.5 -bottom-0.5 h-4 w-4 rounded-full border-2 border-white bg-green-500'></div>
 					</div>
 					<div className='flex-1'>
-						<h3 className='text-foreground/80 font-medium'>John Doe</h3>
-						<p className='text-foreground/80/50 text-sm'>john@example.com</p>
+						<h3 className='text-foreground/80 max-w-[170px] truncate overflow-hidden font-medium whitespace-nowrap'>
+							{user?.fullName}
+						</h3>
+						<p className='text-foreground/50 max-w-[170px] truncate overflow-hidden text-xs whitespace-nowrap'>
+							{user?.email}
+						</p>
 					</div>
 				</div>
 			</div>
 
 			{/* Menu Items */}
-			<div className='py-1'>
+			<div className='pb-2'>
 				{profileMenuItems.map((item: MenuItem, index: number) => (
 					<div key={index}>
 						{item.divider && (

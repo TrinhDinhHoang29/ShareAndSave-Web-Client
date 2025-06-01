@@ -1,7 +1,7 @@
 import {
 	ArrowRightIcon,
-	BoxIcon,
-	CalendarIcon,
+	ClipboardListIcon,
+	FileTextIcon,
 	InfoIcon,
 	UserIcon
 } from 'lucide-react'
@@ -22,57 +22,60 @@ const Instruction: React.FC = () => {
 						</div>
 						<div>
 							<h3 className='text-foreground mb-1 font-medium'>
-								Bước 1: Thông tin cá nhân
+								Giai đoạn 1: Thông tin cá nhân
 							</h3>
 							<p className='text-foreground/90 text-sm'>
-								Điền đầy đủ thông tin cá nhân để chúng tôi có thể liên hệ khi
-								cần thiết.
+								Điền đầy đủ thông tin cá nhân (tên, email, số điện thoại) để
+								chúng tôi có thể liên hệ khi cần thiết.
 							</p>
 						</div>
 					</div>
 					<div className='flex gap-3'>
 						<div className='border-muted-foreground flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border'>
-							<BoxIcon className='text-primary h-4 w-4' />
+							<FileTextIcon className='text-primary h-4 w-4' />
 						</div>
 						<div>
 							<h3 className='text-foreground mb-1 font-medium'>
-								Bước 2: Thông tin đồ vật
+								Giai đoạn 2: Loại bài đăng
 							</h3>
 							<p className='text-foreground/90 text-sm'>
-								Cung cấp hình ảnh và mô tả chi tiết về đồ vật để dễ dàng xác
-								nhận.
+								Chọn loại bài đăng phù hợp (Gửi đồ cũ, Nhặt đồ thất lạc, Tìm đồ
+								thất lạc, hoặc Khác) để tiếp tục.
 							</p>
 						</div>
 					</div>
 					<div className='flex gap-3'>
 						<div className='border-muted-foreground flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border'>
-							<CalendarIcon className='text-primary h-4 w-4' />
+							<ClipboardListIcon className='text-primary h-4 w-4' />
 						</div>
 						<div>
 							<h3 className='text-foreground mb-1 font-medium'>
-								Bước 3: Đặt lịch hẹn
+								Giai đoạn 3: Thông tin bài đăng
 							</h3>
 							<p className='text-foreground/90 text-sm'>
-								Chọn thời gian và địa điểm thuận tiện để gửi đồ.
+								Cung cấp chi tiết về bài đăng (mô tả, hình ảnh, ngày tháng, địa
+								điểm) để hoàn tất quá trình.
 							</p>
 						</div>
 					</div>
 					<div className='mt-6 border-t border-gray-200 pt-4'>
 						<h3 className='text-foreground mb-2 font-medium'>
-							Lưu ý quan trọng:
+							Lưu ý quan trọng khi đăng bài:
 						</h3>
 						<ul className='text-foreground/90 space-y-2 text-sm'>
 							<li className='flex items-start gap-2'>
 								<ArrowRightIcon className='mt-0.5 h-4 w-4 flex-shrink-0' />
-								Mang theo CMND/CCCD khi đến gửi đồ
+								Đảm bảo thông tin cá nhân chính xác để nhận thông báo liên quan
+								đến bài đăng
 							</li>
 							<li className='flex items-start gap-2'>
 								<ArrowRightIcon className='mt-0.5 h-4 w-4 flex-shrink-0' />
-								Đảm bảo đồ vật sạch sẽ và đóng gói cẩn thận
+								Mô tả chi tiết và cung cấp hình ảnh rõ ràng để tăng khả năng xác
+								nhận hoặc tìm kiếm
 							</li>
 							<li className='flex items-start gap-2'>
 								<ArrowRightIcon className='mt-0.5 h-4 w-4 flex-shrink-0' />
-								Kiểm tra kỹ đồ vật trước khi gửi
+								Kiểm tra kỹ thông tin bài đăng trước khi gửi để tránh sai sót
 							</li>
 						</ul>
 					</div>

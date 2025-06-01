@@ -75,8 +75,8 @@ const Dropdown: React.FC<DropdownProps> = ({
 			{isOpen && (
 				<div
 					className={clsx(
-						'bg-card/80 border-border/50 absolute z-20 mt-2 rounded-md border shadow-lg backdrop-blur-md',
-						'animate-fadeIn min-w-[180px] py-1',
+						'border-border/50 absolute z-20 mt-2 rounded-md border shadow-lg backdrop-blur-md',
+						'animate-fadeIn min-w-[180px]',
 						positionStyles[position]
 					)}
 					role='menu'

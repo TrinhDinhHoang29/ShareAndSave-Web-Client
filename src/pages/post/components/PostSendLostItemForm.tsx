@@ -1,15 +1,16 @@
-import { Package } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { FieldError, useFormContext } from 'react-hook-form'
 
+import DatePicker from '@/components/common/DatePicker'
 import ImageUpload from '@/components/common/ImageUpload'
 import InputText from '@/components/common/InputText'
 import { PostInfo } from '@/models/types'
 
-interface PostSendOldItemFormProps {
+interface PostSendLostItemFormProps {
 	isTransitioning: boolean
 }
 
-const PostSendOldItemForm: React.FC<PostSendOldItemFormProps> = ({
+const PostSendLostItemForm: React.FC<PostSendLostItemFormProps> = ({
 	isTransitioning
 }) => {
 	const {
@@ -25,11 +26,13 @@ const PostSendOldItemForm: React.FC<PostSendOldItemFormProps> = ({
 		>
 			<div className='mb-8 text-center'>
 				<div className='bg-primary/10 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full'>
-					<Package className='text-primary h-8 w-8' />
+					<Search className='text-primary h-8 w-8' />
 				</div>
-				<h3 className='text-foreground mb-2 text-2xl font-bold'>Gửi đồ cũ</h3>
+				<h3 className='text-foreground mb-2 text-2xl font-bold'>
+					Nhặt đồ thất lạc
+				</h3>
 				<p className='text-muted-foreground'>
-					Nhập thông tin bài đăng cho đồ cũ
+					Nhập thông tin bài đăng cho nhặt đồ thất lạc
 				</p>
 			</div>
 
@@ -43,7 +46,7 @@ const PostSendOldItemForm: React.FC<PostSendOldItemFormProps> = ({
 						error={errors.title}
 					/>
 					<p className='text-muted-foreground mt-1 text-sm'>
-						Ví dụ: 'Tặng áo thun cũ còn mới'
+						Ví dụ: 'Nhặt được ví da màu đen'
 					</p>
 				</div>
 				<div>
@@ -56,30 +59,41 @@ const PostSendOldItemForm: React.FC<PostSendOldItemFormProps> = ({
 						error={errors.description}
 					/>
 					<p className='text-muted-foreground mt-1 text-sm'>
-						Ví dụ: 'Áo thun màu xanh, size M, đã qua sử dụng nhưng còn mới 80%'
+						Ví dụ: 'Ví da màu đen, nhặt được ở công viên vào ngày 20/05'
+					</p>
+				</div>
+				<div>
+					<DatePicker
+						name='foundDate'
+						label='Ngày nhặt được'
+						error={errors.foundDate}
+						register={register}
+					/>
+					<p className='text-muted-foreground mt-1 text-sm'>
+						Chọn ngày bạn nhặt được món đồ
 					</p>
 				</div>
 				<div>
 					<InputText
-						name='condition'
-						label='Tình trạng đồ'
-						placeholder='Nhập tình trạng đồ'
+						name='foundLocation'
+						label='Nơi nhặt được'
+						placeholder='Nhập nơi nhặt được'
 						register={register}
-						error={errors.condition}
+						error={errors.foundLocation}
 					/>
 					<p className='text-muted-foreground mt-1 text-sm'>
-						Ví dụ: 'Còn mới 80%'
+						Ví dụ: 'Công viên Tao Đàn, TP.HCM'
 					</p>
 				</div>
 				<div>
 					<InputText
 						name='category'
-						label='Danh mục đồ'
-						placeholder='Nhập danh mục đồ'
+						label='Loại đồ vật'
+						placeholder='Nhập loại đồ vật'
 						register={register}
 						error={errors.category}
 					/>
-					<p className='text-muted-foreground mt-1 text-sm'>Ví dụ: 'Quần áo'</p>
+					<p className='text-muted-foreground mt-1 text-sm'>Ví dụ: 'Ví'</p>
 				</div>
 				<div>
 					<ImageUpload
@@ -98,4 +112,4 @@ const PostSendOldItemForm: React.FC<PostSendOldItemFormProps> = ({
 	)
 }
 
-export default PostSendOldItemForm
+export default PostSendLostItemForm

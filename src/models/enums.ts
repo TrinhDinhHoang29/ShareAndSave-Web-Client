@@ -16,8 +16,8 @@ export enum ERequestType {
 }
 
 export enum EPostType {
-	SEND_OLD = '0',
-	SEND_LOST = '1',
-	FIND = '2',
-	FREE = '3'
+	GIVE_AWAY_OLD_ITEM = '0',
+	FOUND_ITEM = '1',
+	SEEK_LOSE_ITEM = '2',
+	OTHER = '3'
 }

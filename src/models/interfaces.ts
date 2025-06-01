@@ -26,21 +26,58 @@ export interface IApiErrorResponse {
 	error: string
 }
 
+export interface INewItem {
+	name: string
+	quantity: number
+	categoryID?: number | undefined
+}
+
+export interface IOldItem {
+	itemID?: number | undefined
+	quantity: number
+}
+
 export interface IPostRequest {
-	fullName: string
-	email: string
-	phoneNumber: string
-	description: string
+	fullName?: string
+	email?: string
+	phoneNumber?: string
+	author_id?: number
+	info: string
+	type: number
 	images: string[]
-	type: string
-	lostDate?: string
-	lostLocation?: string
-	foundLocation?: string
-	foundDate?: string
-	category?: string
-	condition?: string
-	reward?: string
 	title: string
+	newItems?: INewItem[]
+	oldItems?: IOldItem[]
+}
+
+export interface IPost {
+	authorName: string
+	content: string
+	id: number
+	slug: string
+	status: number // Consider defining an enum for status values
+	title: string
+	type: number // Consider defining an enum for type values
+}
+
+export interface IUser {
+	address: string
+	avatar: string
+	email: string
+	fullName: string
+	goodPoint: number
+	id: number
+	major: string
+	phoneNumber: string
+	roleID: number // Consider defining an enum for roleID values
+	roleName: string
+	status: number // Consider defining an enum for status values
+}
+
+export interface IPostResponse {
+	JWT: string
+	post: IPost
+	user: IUser
 }
 
 export interface IRequest {

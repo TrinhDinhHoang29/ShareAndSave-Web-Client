@@ -1,7 +1,20 @@
 import * as z from 'zod'
 
-import { personalInfoSchema, postInfoSchema, postTypeSchema } from './schema'
+import {
+	loginSchema,
+	personalInfoSchema,
+	postInfoSchema,
+	postTypeSchema,
+	registerSchema
+} from './schema'
 
+//Post
 export type PersonalInfo = z.infer<typeof personalInfoSchema>
 export type PostInfo = z.infer<typeof postInfoSchema>
 export type PostType = z.infer<typeof postTypeSchema>
+
+//Register
+export type RegisterFormData = z.infer<typeof registerSchema>
+
+//Login
+export type LoginFormData = z.infer<typeof loginSchema>

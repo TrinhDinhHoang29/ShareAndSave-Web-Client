@@ -19,27 +19,27 @@ const PostTypeForm: React.FC<PostTypeFormProps> = ({ isTransitioning }) => {
 	// Định nghĩa các tùy chọn cho RadioGroup
 	const postTypeOptions = [
 		{
-			value: EPostType.SEND_OLD, // Đổi thành number
+			value: EPostType.GIVE_AWAY_OLD_ITEM, // Đổi thành number
 			title: 'Gửi đồ cũ',
 			description: 'Đồ đã qua sử dụng nhưng vẫn còn giá trị',
 			icon: <Package size={20} />
 		},
 		{
-			value: EPostType.SEND_LOST,
-			title: 'Gửi đồ thất lạc',
+			value: EPostType.FOUND_ITEM,
+			title: 'Nhặt đồ thất lạc',
 			description: 'Đồ bạn nhặt được và muốn trả lại',
 			icon: <Search size={20} />
 		},
 		{
-			value: EPostType.FIND,
-			title: 'Tìm đồ',
+			value: EPostType.SEEK_LOSE_ITEM,
+			title: 'Tìm đồ thất lạc',
 			description: 'Tìm kiếm đồ bạn đã làm mất',
 			icon: <Gift size={20} />
 		},
 		{
-			value: EPostType.FREE,
-			title: 'Tự do',
-			description: 'Chia sẻ bất kỳ yêu cầu nào khác',
+			value: EPostType.OTHER,
+			title: 'Khác',
+			description: 'Tự do đăng tải theo nội dung mong muốn',
 			icon: <Users size={20} />
 		}
 	]
