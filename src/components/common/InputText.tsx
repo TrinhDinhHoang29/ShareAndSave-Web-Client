@@ -14,6 +14,7 @@ interface InputTextProps {
 	icon?: LucideIcon // For left icon
 	showToggle?: boolean // For password visibility toggle
 	animationDelay?: number // For motion animation
+	autocompleted?: 'off' | 'on' // Thêm prop autocompleted
 }
 
 const InputText: React.FC<InputTextProps> = ({
@@ -26,11 +27,12 @@ const InputText: React.FC<InputTextProps> = ({
 	rows = 8,
 	icon: Icon,
 	showToggle = false,
-	animationDelay = 0.2
+	animationDelay = 0.2,
+	autocompleted = 'on' // Thêm autocompleted vào props
 }) => {
 	const [showPassword, setShowPassword] = React.useState(false)
 
-	const commonClasses = `w-full px-4 py-3 border rounded-lg bg-card text-card-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 ${
+	const commonClasses = `w-full px-4 py-3 border rounded-lg bg-card text-card-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200 ${
 		error
 			? 'border-destructive bg-destructive/10'
 			: 'border-border hover:border-border/80'
@@ -57,13 +59,17 @@ const InputText: React.FC<InputTextProps> = ({
 						rows={rows}
 						className={`${commonClasses} ${Icon ? 'pl-10' : 'pl-4'} resize-none`}
 						placeholder={placeholder}
+						autoComplete={autocompleted} // Áp dụng autocompleted cho textarea
 					/>
 				) : (
 					<input
 						type={type === 'password' && showPassword ? 'text' : type}
 						{...register(name)}
-						className={`${commonClasses} ${showToggle ? 'pr-12' : 'pr-4'} ${Icon && 'pl-12'}`}
+						className={`${commonClasses} ${showToggle ? 'pr-12' : 'pr-4'} ${
+							Icon && 'pl-12'
+						}`}
 						placeholder={placeholder}
+						autoComplete={autocompleted} // Áp dụng autocompleted cho input
 					/>
 				)}
 				{type === 'password' && showToggle && (

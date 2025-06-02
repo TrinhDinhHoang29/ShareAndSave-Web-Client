@@ -21,19 +21,22 @@ export const postInfoSchema = z.object({
 	newItems: z
 		.array(
 			z.object({
-				id: z.string().optional(),
+				itemID: z.number(),
 				quantity: z.number().min(1, 'Số lượng phải lớn hơn 0'),
-				categoryID: z.number().optional(),
-				name: z.string().min(1, 'Tên không được để trống')
+				categoryID: z.number(),
+				name: z.string().min(1, 'Tên không được để trống'),
+				categoryName: z.string()
 			})
 		)
 		.optional(),
 	oldItems: z
 		.array(
 			z.object({
-				id: z.string().optional(),
-				itemID: z.number().optional(),
-				quantity: z.number().min(1, 'Số lượng phải lớn hơn 0')
+				itemID: z.number(),
+				quantity: z.number().min(1, 'Số lượng phải lớn hơn 0'),
+				categoryName: z.string(),
+				categoryID: z.number(),
+				name: z.string().min(1, 'Tên không được để trống')
 			})
 		)
 		.optional()

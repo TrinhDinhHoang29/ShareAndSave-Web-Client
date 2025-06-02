@@ -104,6 +104,7 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({
 					error={errors.fullName}
 					icon={UserIcon}
 					animationDelay={0.2}
+					autocompleted='off'
 				/>
 
 				{/* Phone Number Input */}
@@ -116,6 +117,7 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({
 					error={errors.phoneNumber}
 					icon={PhoneIcon}
 					animationDelay={0.3}
+					autocompleted='off'
 				/>
 
 				{/* Email Input */}
@@ -128,6 +130,7 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({
 					error={errors.email}
 					icon={MailIcon}
 					animationDelay={0.4}
+					autocompleted='off'
 				/>
 
 				{/* Password Input */}
@@ -142,6 +145,7 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({
 						icon={LockIcon}
 						showToggle
 						animationDelay={0.5}
+						autocompleted='off'
 					/>
 
 					{/* Password Strength Indicator */}
@@ -187,6 +191,7 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({
 					icon={LockIcon}
 					showToggle
 					animationDelay={0.6}
+					autocompleted='off'
 				/>
 
 				{/* Terms and Conditions */}

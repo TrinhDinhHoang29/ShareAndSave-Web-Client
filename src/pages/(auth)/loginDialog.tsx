@@ -74,6 +74,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({
 					error={errors.email}
 					icon={MailIcon}
 					animationDelay={0.2}
+					autocompleted='off'
 				/>
 
 				{/* Password Input */}
@@ -87,6 +88,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({
 					icon={LockIcon}
 					showToggle
 					animationDelay={0.3}
+					autocompleted='off'
 				/>
 
 				{/* Forgot Password */}

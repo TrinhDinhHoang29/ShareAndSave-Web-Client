@@ -15,9 +15,11 @@ const DatePicker: React.FC<DatePickerProps> = ({
 }) => {
 	return (
 		<div>
-			<label className='text-foreground mb-2 block text-sm font-medium'>
-				{label}
-			</label>
+			{label && (
+				<label className='text-foreground mb-2 block text-sm font-medium'>
+					{label}
+				</label>
+			)}
 			<input
 				type='datetime-local'
 				{...register(name)}

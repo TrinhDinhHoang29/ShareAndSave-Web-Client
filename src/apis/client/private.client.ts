@@ -15,7 +15,7 @@ const axiosPrivate = axios.create({
 // Request Interceptor: Thêm Access Token vào header
 axiosPrivate.interceptors.request.use(
 	config => {
-		const token = Cookies.get('token')
+		const token = Cookies.get('access_token')
 		if (token) {
 			// config.headers.Authorization = `Bearer ${token}`;
 			config.headers.Authorization = `${token}`

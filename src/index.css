@@ -25,6 +25,8 @@
   --input: #F1F5F9;
   --ring: #2563EB;
   --chart-1: #22C55E;
+  --chart-accent-1: #86EFAC;
+  --chart-accent-foreground-1: #1A2238; /* Thêm foreground cho chart-accent-1 */
   --chart-2: #F59E0B;
   --chart-3: #EF4444;
   --chart-4: #3366FF;
@@ -59,6 +61,8 @@
   --input: #1E293B;
   --ring: #60A5FA;
   --chart-1: #22C55E;
+  --chart-accent-1: #46ef84;
+  --chart-accent-foreground-1: #F1F5F9; /* Thêm foreground cho dark mode */
   --chart-2: #F59E0B;
   --chart-3: #F87171;
   --chart-4: #3B82F6;
@@ -100,6 +104,8 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-chart-1: var(--chart-1);
+  --color-chart-accent-1: var(--chart-accent-1);
+  --color-chart-accent-foreground-1: var(--chart-accent-foreground-1); /* Thêm vào theme */
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);

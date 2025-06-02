@@ -26,15 +26,35 @@ export interface IApiErrorResponse {
 	error: string
 }
 
+export interface IItemSuggestion {
+	id: number
+	categoryID: number
+	name: string
+}
+
+export interface IItem {
+	id: number
+	categoryID: number
+	name: string
+	description: string
+	image: string
+}
+
 export interface INewItem {
 	name: string
 	quantity: number
 	categoryID?: number | undefined
+	categoryName: string
+	id?: string
 }
 
 export interface IOldItem {
 	itemID?: number | undefined
 	quantity: number
+	categoryID?: number | undefined
+	categoryName: string
+	id?: string
+	name?: string
 }
 
 export interface IPostRequest {
@@ -102,4 +122,22 @@ export interface IPagination {
 	totalItems: number
 	itemsPerPage: number
 	onPageChange: (page: number) => void
+}
+
+export interface ICategory {
+	id: number
+	name: string
+}
+
+export interface Interest {
+	id: number
+	name: string
+	date: string
+	status: 'active' | 'completed'
+}
+
+export interface PostInterest {
+	id: number
+	title: string
+	interests: Interest[]
 }

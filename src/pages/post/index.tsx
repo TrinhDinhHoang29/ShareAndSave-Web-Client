@@ -179,10 +179,11 @@ const Post: React.FC = () => {
 				images: requestData.images || [],
 				title: requestData.title,
 				info: infoJson, // Gán content dưới dạng JSON string
-				newItems: requestData.newItems?.map(({ id: any, ...rest }) => rest),
-				oldItems: requestData.oldItems?.map(({ id: any, ...rest }) => rest)
+				newItems: requestData.newItems?.map(({ itemID, ...rest }) => rest),
+				oldItems: requestData.oldItems?.map(
+					({ categoryID, name, ...rest }) => rest
+				)
 			}
-
 			console.log(convertedData)
 			// mutation.mutate(convertedData);
 		}
