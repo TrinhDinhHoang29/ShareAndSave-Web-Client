@@ -128,7 +128,7 @@ const Interest = ({ posts = samplePosts }: { posts?: PostInterest[] }) => {
 				/>
 				{/* Tabs */}
 				<div className='mb-6'>
-					<div className='border-border bg-card/60 flex space-x-1 rounded-xl border p-1 backdrop-blur-sm'>
+					<div className='border-border bg-card/60 flex space-x-1 rounded-xl border px-2 py-1 backdrop-blur-sm'>
 						<button
 							onClick={() => setActiveTab('completed')}
 							className={`flex flex-1 items-center justify-center space-x-2 rounded-lg px-4 py-3 font-medium transition-all duration-200 ${

@@ -19,7 +19,6 @@ const AuthLayoutDialog: React.FC<BaseDialogProps> = ({
 	onClose,
 	title,
 	subtitle,
-	headerColor = 'bg-primary',
 	children,
 	maxWidth = 'max-w-md'
 }) => {
@@ -74,10 +73,10 @@ const AuthLayoutDialog: React.FC<BaseDialogProps> = ({
 									className={`w-full ${maxWidth} bg-card mx-auto max-h-[90vh] overflow-y-auto rounded-2xl shadow-lg will-change-transform`}
 								>
 									{/* Header */}
-									<div className={`relative ${headerColor} px-6 py-8`}>
+									<div className={`bg-background relative px-6 py-8`}>
 										<button
 											onClick={onClose}
-											className='text-primary-foreground hover:bg-primary-foreground/20 absolute top-4 right-4 rounded-full p-2 transition-colors'
+											className='text-foreground hover:bg-fotext-foreground/20 absolute top-4 right-4 rounded-full p-2 transition-colors'
 											aria-label='Close'
 										>
 											<X className='h-5 w-5' />
@@ -93,13 +92,13 @@ const AuthLayoutDialog: React.FC<BaseDialogProps> = ({
 										>
 											<Dialog.Title
 												as='h1'
-												className='text-primary-foreground mb-2 text-xl font-bold'
+												className='text-foreground mb-2 text-xl font-bold'
 											>
 												{title}
 											</Dialog.Title>
 											<Dialog.Description
 												as='p'
-												className='text-primary-foreground/80 text-sm'
+												className='text-foreground/80 text-sm'
 											>
 												{subtitle}
 											</Dialog.Description>

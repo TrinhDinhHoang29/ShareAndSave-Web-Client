@@ -1,12 +1,36 @@
 import { Dialog, Transition } from '@headlessui/react'
-import { Loader } from 'lucide-react'
-import React, { Fragment, useState } from 'react'
-import { v4 as uuidv4 } from 'uuid'
+import { zodResolver } from '@hookform/resolvers/zod'
+import React, { Fragment, useEffect, useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
+import { z } from 'zod'
 
+import ImageUpload from '@/components/common/ImageUpload'
+import InputNumber from '@/components/common/InputNumber'
+import InputSearchAutoComplete from '@/components/common/inputSearchAutoComplete'
+import Selection from '@/components/common/Selection'
 import { useCategoriesQuery } from '@/hooks/queries/use-category-query'
 import { useItemSuggestionsQuery } from '@/hooks/queries/use-item-query'
 import useDebounce from '@/hooks/use-debounce'
 import { ICategory, IItemSuggestion } from '@/models/interfaces'
+
+const itemSchema = z.object({
+	name: z.string().min(1, 'Tên không được để trống'),
+	categoryID: z.number().min(1, 'Vui lòng chọn danh mục'),
+	quantity: z.number().min(1, 'Số lượng phải lớn hơn 0'),
+	image: z
+		.string()
+		.optional()
+		.refine(
+			val => {
+				if (!val) return true
+				const isWebp = val.includes('image/webp') || val.endsWith('.webp')
+				return !isWebp
+			},
+			{
+				message: 'Không chấp nhận ảnh định dạng .webp'
+			}
+		)
+})
 
 interface ItemDialogProps {
 	isOpen: boolean
@@ -18,14 +42,23 @@ interface ItemDialogProps {
 		categoryName: string
 		quantity: number
 		isOldItem: boolean
+		image?: string
 	}) => void
 	existingItems: {
 		itemID: number
 		name: string
-		categoryID?: number
+		categoryID: number
 		categoryName: string
 		quantity: number
+		image?: string
 	}[]
+}
+
+interface FormData {
+	name: string
+	categoryID: number
+	quantity: number
+	image?: string
 }
 
 const ItemDialog: React.FC<ItemDialogProps> = ({
@@ -34,68 +67,92 @@ const ItemDialog: React.FC<ItemDialogProps> = ({
 	onAdd,
 	existingItems
 }) => {
-	const [name, setName] = useState('')
-	const [categoryID, setCategoryID] = useState<number | null>(null)
-	const [quantity, setQuantity] = useState(1)
+	const {
+		register,
+		handleSubmit,
+		watch,
+		setValue,
+		reset,
+		control,
+		formState: { errors }
+	} = useForm<FormData>({
+		resolver: zodResolver(itemSchema),
+		defaultValues: {
+			name: '',
+			categoryID: 0,
+			quantity: 1,
+			image: undefined
+		}
+	})
+
 	const [selectedItemId, setSelectedItemId] = useState<number | null>(null)
+	const [selectedSuggestion, setSelectedSuggestion] =
+		useState<IItemSuggestion | null>(null)
+	const name = watch('name')
+	const debouncedName = useDebounce(name, 300)
+
 	const { data: categories, isLoading: isCategoriesLoading } =
 		useCategoriesQuery()
-
-	const debouncedName = useDebounce(name, 300)
 	const { data: suggestions = [], isLoading: isSuggestionsLoading } =
 		useItemSuggestionsQuery({
 			searchBy: 'name',
 			searchValue: debouncedName
 		})
 
-	const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const value = e.target.value
-		setName(value)
-		setSelectedItemId(null)
-		setCategoryID(null)
-	}
-
-	const handleSelectSuggestion = (item: IItemSuggestion) => {
-		setName(item.name)
-		setSelectedItemId(item.id)
-		setCategoryID(item.categoryID)
-	}
-
-	const handleAdd = () => {
-		if (name && categoryID && quantity >= 1) {
-			const categoryName =
-				categories?.find((c: ICategory) => c.id === categoryID)?.name ||
-				'Không xác định'
-			const isOldItem = !!selectedItemId
-			const itemID = selectedItemId || Math.floor(Math.random() * 1000000) // Tạo itemID ngẫu nhiên cho newItem
-
-			const item = {
-				itemID,
-				name,
-				categoryID,
-				categoryName,
-				quantity,
-				isOldItem
-			}
-
-			const existingItem = existingItems.find(
-				existing => existing.itemID === itemID
-			)
-
-			if (existingItem) {
-				const newQuantity = existingItem.quantity + quantity
-				onAdd({ ...item, quantity: newQuantity })
-			} else {
-				onAdd(item)
-			}
-
-			setName('')
-			setCategoryID(null)
-			setQuantity(1)
+	const handleSelectSuggestion = (suggestion: IItemSuggestion | null) => {
+		if (suggestion) {
+			setValue('name', suggestion.name)
+			setValue('categoryID', suggestion.categoryID)
+			setSelectedItemId(suggestion.id)
+			setSelectedSuggestion(suggestion)
+		} else {
 			setSelectedItemId(null)
-			onClose()
+			setSelectedSuggestion(null)
+			setValue('categoryID', 0)
 		}
 	}
+
+	const onSubmit = (data: FormData) => {
+		const categoryName =
+			categories?.find((c: ICategory) => c.id === data.categoryID)?.name || ''
+		const isOldItem = !!selectedItemId
+		const itemID = selectedItemId || Math.floor(Math.random() * 1000000)
+
+		const item = {
+			itemID,
+			name: data.name,
+			categoryID: data.categoryID,
+			categoryName,
+			quantity: data.quantity,
+			isOldItem,
+			image: data.image
+		}
+
+		const existingItem = existingItems.find(
+			existing => existing.itemID === itemID
+		)
+		if (existingItem) {
+			const newQuantity = existingItem.quantity + data.quantity
+			onAdd({ ...item, quantity: newQuantity })
+		} else {
+			onAdd(item)
+		}
+
+		// Reset form and close dialog
+		reset()
+		setSelectedItemId(null)
+		setSelectedSuggestion(null)
+		onClose() // Đóng dialog ngay sau submit
+	}
+
+	// Reset form and state when dialog closes
+	useEffect(() => {
+		if (!isOpen) {
+			reset()
+			setSelectedItemId(null)
+			setSelectedSuggestion(null)
+		}
+	}, [isOpen, reset])
 
 	return (
 		<Transition
@@ -138,104 +195,71 @@ const ItemDialog: React.FC<ItemDialogProps> = ({
 								>
 									Thêm Món Đồ
 								</Dialog.Title>
-								<div className='mt-4 space-y-4'>
-									<div>
-										<label className='text-foreground block text-sm font-medium'>
-											Tên món đồ *
-										</label>
-										<input
-											type='text'
-											value={name}
-											onChange={handleNameChange}
-											className='border-border focus:ring-primary mt-1 w-full rounded-md border p-2 focus:ring-2 focus:outline-none'
-											placeholder='Nhập tên món đồ'
-										/>
-										{(isSuggestionsLoading || suggestions.length > 0) && (
-											<ul className='border-border bg-card mt-1 max-h-40 overflow-y-auto rounded-md border shadow-sm'>
-												{isSuggestionsLoading ? (
-													<li className='px-3 py-2'>
-														<Loader className='h-5 w-5 animate-spin' />
-													</li>
-												) : (
-													suggestions.map((suggestion: IItemSuggestion) => (
-														<li
-															key={suggestion.id}
-															onClick={() => handleSelectSuggestion(suggestion)}
-															className='text-foreground hover:bg-muted cursor-pointer px-3 py-2'
-														>
-															{suggestion.name}
-														</li>
-													))
-												)}
-											</ul>
+								<form
+									onSubmit={handleSubmit(onSubmit)}
+									className='mt-4 space-y-4'
+								>
+									<InputSearchAutoComplete
+										name='name'
+										label='Tên món đồ *'
+										placeholder='Nhập tên món đồ'
+										register={register}
+										setValue={setValue}
+										error={errors.name}
+										suggestions={suggestions}
+										isSuggestionsLoading={isSuggestionsLoading}
+										onSelectSuggestion={handleSelectSuggestion}
+										animationDelay={0.1}
+									/>
+									<Selection
+										name='categoryID'
+										label='Danh mục *'
+										options={categories || []}
+										isLoading={isCategoriesLoading}
+										register={register}
+										error={errors.categoryID}
+										disabled={!!selectedItemId}
+										animationDelay={0.2}
+									/>
+									<InputNumber
+										name='quantity'
+										label='Số lượng *'
+										register={register}
+										error={errors.quantity}
+										min={1}
+										animationDelay={0.3}
+									/>
+									<Controller
+										name='image'
+										control={control}
+										render={({ field }) => (
+											<ImageUpload
+												name='image'
+												label='Hình ảnh'
+												field={field}
+												error={errors.image}
+												type='single'
+												animationDelay={0.4}
+											/>
 										)}
-									</div>
-									<div>
-										<label className='text-foreground block text-sm font-medium'>
-											Danh mục *
-										</label>
-										<select
-											value={categoryID || ''}
-											onChange={e =>
-												!selectedItemId &&
-												setCategoryID(parseInt(e.target.value))
-											}
-											disabled={!!selectedItemId}
-											className='border-border focus:ring-primary disabled:bg-muted disabled:text-muted-foreground mt-1 w-full rounded-md border p-2 focus:ring-2 focus:outline-none'
+									/>
+									<div className='mt-6 flex justify-end gap-2'>
+										<button
+											type='button'
+											onClick={onClose}
+											className='border-border text-muted-foreground hover:bg-muted rounded-md border px-4 py-2 transition-colors'
 										>
-											<option
-												value=''
-												disabled
-											>
-												Chọn danh mục
-											</option>
-											{isCategoriesLoading ? (
-												<option disabled>
-													<Loader className='h-5 w-5 animate-spin' />
-												</option>
-											) : (
-												categories &&
-												categories.map((category: ICategory) => (
-													<option
-														key={category.id}
-														value={category.id}
-													>
-														{category.name}
-													</option>
-												))
-											)}
-										</select>
+											Hủy
+										</button>
+										<button
+											type='submit'
+											disabled={isSuggestionsLoading || isCategoriesLoading}
+											className='rounded-md bg-indigo-600 px-4 py-2 text-white transition-colors hover:bg-indigo-700 disabled:bg-gray-800 disabled:text-gray-400'
+										>
+											Xác nhận
+										</button>
 									</div>
-									<div>
-										<label className='text-foreground block text-sm font-medium'>
-											Số lượng *
-										</label>
-										<input
-											type='number'
-											value={quantity}
-											onChange={e =>
-												setQuantity(Math.max(1, parseInt(e.target.value) || 1))
-											}
-											className='border-border focus:ring-primary mt-1 w-full rounded-md border p-2 focus:ring-2 focus:outline-none'
-											min='1'
-										/>
-									</div>
-								</div>
-								<div className='mt-6 flex justify-end gap-2'>
-									<button
-										onClick={onClose}
-										className='border-border text-muted-foreground hover:bg-muted rounded-md border px-4 py-2 transition-colors'
-									>
-										Hủy
-									</button>
-									<button
-										onClick={handleAdd}
-										disabled={!name || !categoryID || quantity < 1}
-										className='rounded-md bg-indigo-600 px-4 py-2 text-white transition-colors hover:bg-indigo-700 disabled:bg-gray-800 disabled:text-gray-400'
-									>
-										Xác nhận
-									</button>
-								</div>
+								</form>
 							</Dialog.Panel>
 						</Transition.Child>
 					</div>

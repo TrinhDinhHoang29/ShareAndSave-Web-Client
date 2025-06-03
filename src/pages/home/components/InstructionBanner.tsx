@@ -1,0 +1,420 @@
+import { motion } from 'framer-motion'
+import {
+	ArrowRight,
+	Gift,
+	Heart,
+	Recycle,
+	Search,
+	TrendingUp,
+	Users
+} from 'lucide-react'
+import React from 'react'
+
+export default function HomepageBanner() {
+	const handleGiveAwayClick = () => {
+		console.log('Chuyển đến trang đăng bài cho đồ')
+	}
+
+	const handleFindItemsClick = () => {
+		console.log('Chuyển đến trang tìm đồ thất lạc')
+	}
+
+	const handleExploreClick = () => {
+		console.log('Chuyển đến trang khám phá')
+	}
+
+	// Animation variants
+	const containerVariants = {
+		hidden: { opacity: 0 },
+		visible: {
+			opacity: 1,
+			transition: {
+				delayChildren: 0.3,
+				staggerChildren: 0.2
+			}
+		}
+	}
+
+	const itemVariants = {
+		hidden: { y: 20, opacity: 0 },
+		visible: {
+			y: 0,
+			opacity: 1,
+			transition: {
+				duration: 0.5,
+				ease: 'easeOut'
+			}
+		}
+	}
+
+	const cardVariants = {
+		hidden: { y: 30, opacity: 0 },
+		visible: {
+			y: 0,
+			opacity: 1,
+			transition: {
+				duration: 0.6,
+				ease: 'easeOut'
+			}
+		},
+		hover: {
+			y: -5,
+			scale: 1.02,
+			transition: {
+				duration: 0.2,
+				ease: 'easeInOut'
+			}
+		}
+	}
+
+	const floatVariants = {
+		float: {
+			y: [-10, 10, -10],
+			transition: {
+				duration: 3,
+				repeat: Infinity,
+				ease: 'easeInOut'
+			}
+		}
+	}
+
+	return (
+		<div className='bg-background relative min-h-screen overflow-hidden'>
+			{/* Gradient background with theme colors */}
+			<div className='absolute inset-0'>
+				<div className='from-primary/5 via-background to-accent/20 absolute top-0 left-0 h-full w-full bg-gradient-to-br'></div>
+				<div className='from-primary/10 to-chart-1/10 absolute top-20 left-20 h-64 w-64 rounded-full bg-gradient-to-r blur-3xl'></div>
+				<div className='from-chart-1/8 to-primary/8 absolute top-40 right-20 h-80 w-80 rounded-full bg-gradient-to-r blur-3xl'></div>
+				<div className='from-accent/20 to-secondary/10 absolute bottom-20 left-1/3 h-72 w-72 rounded-full bg-gradient-to-r blur-3xl'></div>
+			</div>
+
+			{/* Floating elements with framer-motion */}
+			<div className='pointer-events-none absolute inset-0 overflow-hidden'>
+				<motion.div
+					className='absolute top-1/4 left-1/5 opacity-20'
+					variants={floatVariants}
+					animate='float'
+				>
+					<Recycle className='text-chart-1 h-6 w-6' />
+				</motion.div>
+				<motion.div
+					className='absolute top-1/3 right-1/4 opacity-20'
+					variants={floatVariants}
+					animate='float'
+					transition={{ delay: 1 }}
+				>
+					<Heart className='text-primary h-5 w-5' />
+				</motion.div>
+				<motion.div
+					className='absolute bottom-1/3 left-1/6 opacity-20'
+					variants={floatVariants}
+					animate='float'
+					transition={{ delay: 2 }}
+				>
+					<Users className='text-secondary h-6 w-6' />
+				</motion.div>
+			</div>
+
+			<div className='relative z-10 container py-20'>
+				<motion.div
+					className='mx-auto max-w-6xl'
+					variants={containerVariants}
+					initial='hidden'
+					animate='visible'
+				>
+					{/* Header section */}
+					<div className='mb-16 text-center'>
+						<motion.div
+							className='glass mb-8 inline-flex items-center gap-2 rounded-full px-6 py-3'
+							variants={itemVariants}
+						>
+							<motion.div
+								animate={{ rotate: 360 }}
+								transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+							>
+								<TrendingUp className='text-primary h-4 w-4' />
+							</motion.div>
+							<span className='text-foreground text-sm font-medium'>
+								Cộng đồng chia sẻ đang phát triển
+							</span>
+						</motion.div>
+
+						<motion.h1
+							className='mb-6 text-4xl leading-tight font-bold lg:text-6xl'
+							variants={itemVariants}
+						>
+							<span className='from-primary via-chart-1 to-primary bg-gradient-to-r bg-clip-text text-transparent'>
+								Chia Sẻ
+							</span>{' '}
+							Tạo Nên
+							<br />
+							<span className='from-secondary via-muted-foreground to-secondary bg-gradient-to-r bg-clip-text text-transparent'>
+								Giá Trị Mới
+							</span>
+						</motion.h1>
+
+						<motion.p
+							className='text-muted-foreground mx-auto mb-8 max-w-2xl text-lg leading-relaxed lg:text-xl'
+							variants={itemVariants}
+						>
+							Nền tảng kết nối cộng đồng chia sẻ đồ cũ và tìm kiếm đồ thất lạc.
+							Biến những món đồ không dùng thành cơ hội giúp đỡ người khác.
+						</motion.p>
+
+						<motion.div
+							className='mb-12 flex flex-wrap justify-center gap-3'
+							variants={itemVariants}
+						>
+							<motion.div
+								className='bg-card border-border flex items-center gap-2 rounded-full border px-4 py-2'
+								whileHover={{ scale: 1.05 }}
+								transition={{ duration: 0.2 }}
+							>
+								<motion.div
+									className='bg-chart-1 h-2 w-2 rounded-full'
+									animate={{ scale: [1, 1.2, 1] }}
+									transition={{ duration: 2, repeat: Infinity }}
+								></motion.div>
+								<span className='text-muted-foreground text-sm'>
+									Hoàn toàn miễn phí
+								</span>
+							</motion.div>
+							<motion.div
+								className='bg-card border-border flex items-center gap-2 rounded-full border px-4 py-2'
+								whileHover={{ scale: 1.05 }}
+								transition={{ duration: 0.2 }}
+							>
+								<motion.div
+									className='bg-primary h-2 w-2 rounded-full'
+									animate={{ scale: [1, 1.2, 1] }}
+									transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+								></motion.div>
+								<span className='text-muted-foreground text-sm'>
+									Bảo mật thông tin
+								</span>
+							</motion.div>
+							<motion.div
+								className='bg-card border-border flex items-center gap-2 rounded-full border px-4 py-2'
+								whileHover={{ scale: 1.05 }}
+								transition={{ duration: 0.2 }}
+							>
+								<motion.div
+									className='bg-chart-2 h-2 w-2 rounded-full'
+									animate={{ scale: [1, 1.2, 1] }}
+									transition={{ duration: 2, repeat: Infinity, delay: 1 }}
+								></motion.div>
+								<span className='text-muted-foreground text-sm'>
+									Cộng đồng thân thiện
+								</span>
+							</motion.div>
+						</motion.div>
+					</div>
+
+					{/* Action cards */}
+					<motion.div
+						className='mb-16 grid gap-6 md:grid-cols-2 lg:grid-cols-3'
+						variants={containerVariants}
+					>
+						{/* Give away card */}
+						<motion.div
+							onClick={handleGiveAwayClick}
+							className='group bg-card border-border relative cursor-pointer overflow-hidden rounded-2xl border p-8 shadow-sm'
+							variants={cardVariants}
+							whileHover='hover'
+							whileTap={{ scale: 0.98 }}
+						>
+							<div className='from-chart-1/5 to-chart-1/10 absolute inset-0 bg-gradient-to-br opacity-0 transition-opacity duration-300 group-hover:opacity-100'></div>
+							<div className='relative z-10'>
+								<motion.div
+									className='from-chart-1/10 to-chart-1/20 mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br'
+									whileHover={{ scale: 1.1, rotate: 5 }}
+									transition={{ duration: 0.2 }}
+								>
+									<Gift className='text-chart-1 h-6 w-6' />
+								</motion.div>
+								<h3 className='text-foreground mb-3 text-xl font-semibold'>
+									Cho Tặng Đồ Cũ
+								</h3>
+								<p className='text-muted-foreground mb-6 text-sm leading-relaxed'>
+									Chia sẻ những món đồ còn tốt mà bạn không sử dụng. Giúp chúng
+									có ý nghĩa mới với người cần.
+								</p>
+								<motion.div
+									className='text-chart-1 flex items-center gap-2 text-sm font-medium'
+									whileHover={{ gap: 12 }}
+									transition={{ duration: 0.2 }}
+								>
+									<span>Đăng bài ngay</span>
+									<ArrowRight className='h-4 w-4' />
+								</motion.div>
+							</div>
+						</motion.div>
+
+						{/* Find lost items card */}
+						<motion.div
+							onClick={handleFindItemsClick}
+							className='group bg-card border-border relative cursor-pointer overflow-hidden rounded-2xl border p-8 shadow-sm'
+							variants={cardVariants}
+							whileHover='hover'
+							whileTap={{ scale: 0.98 }}
+						>
+							<div className='from-primary/5 to-primary/10 absolute inset-0 bg-gradient-to-br opacity-0 transition-opacity duration-300 group-hover:opacity-100'></div>
+							<div className='relative z-10'>
+								<motion.div
+									className='from-primary/10 to-primary/20 mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br'
+									whileHover={{ scale: 1.1, rotate: -5 }}
+									transition={{ duration: 0.2 }}
+								>
+									<Search className='text-primary h-6 w-6' />
+								</motion.div>
+								<h3 className='text-foreground mb-3 text-xl font-semibold'>
+									Tìm Đồ Thất Lạc
+								</h3>
+								<p className='text-muted-foreground mb-6 text-sm leading-relaxed'>
+									Đăng thông tin về đồ vật nhặt được hoặc thất lạc. Kết nối để
+									giúp đồ vật về với chủ nhân.
+								</p>
+								<motion.div
+									className='text-primary flex items-center gap-2 text-sm font-medium'
+									whileHover={{ gap: 12 }}
+									transition={{ duration: 0.2 }}
+								>
+									<span>Đăng thông tin</span>
+									<ArrowRight className='h-4 w-4' />
+								</motion.div>
+							</div>
+						</motion.div>
+
+						{/* Explore card */}
+						<motion.div
+							onClick={handleExploreClick}
+							className='group bg-card border-border relative cursor-pointer overflow-hidden rounded-2xl border p-8 shadow-sm md:col-span-2 lg:col-span-1'
+							variants={cardVariants}
+							whileHover='hover'
+							whileTap={{ scale: 0.98 }}
+						>
+							<div className='from-secondary/5 to-secondary/10 absolute inset-0 bg-gradient-to-br opacity-0 transition-opacity duration-300 group-hover:opacity-100'></div>
+							<div className='relative z-10'>
+								<motion.div
+									className='from-secondary/10 to-secondary/20 mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br'
+									whileHover={{ scale: 1.1, rotate: 10 }}
+									transition={{ duration: 0.2 }}
+								>
+									<Users className='text-secondary h-6 w-6' />
+								</motion.div>
+								<h3 className='text-foreground mb-3 text-xl font-semibold'>
+									Khám Phá Cộng Đồng
+								</h3>
+								<p className='text-muted-foreground mb-6 text-sm leading-relaxed'>
+									Tham gia cộng đồng chia sẻ, kết nối với những người có cùng
+									mong muốn lan tỏa điều tốt đẹp.
+								</p>
+								<motion.div
+									className='text-secondary flex items-center gap-2 text-sm font-medium'
+									whileHover={{ gap: 12 }}
+									transition={{ duration: 0.2 }}
+								>
+									<span>Tham gia ngay</span>
+									<ArrowRight className='h-4 w-4' />
+								</motion.div>
+							</div>
+						</motion.div>
+					</motion.div>
+
+					{/* Stats section */}
+					<motion.div
+						className='glass border-border rounded-2xl border p-8'
+						variants={itemVariants}
+					>
+						<div className='grid grid-cols-2 gap-8 text-center lg:grid-cols-4'>
+							<motion.div
+								className='group'
+								whileHover={{ scale: 1.05 }}
+								transition={{ duration: 0.2 }}
+							>
+								<motion.div
+									className='from-chart-1 to-chart-1/80 mb-2 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent lg:text-3xl'
+									initial={{ opacity: 0, y: 20 }}
+									animate={{ opacity: 1, y: 0 }}
+									transition={{ delay: 0.5, duration: 0.5 }}
+								>
+									1,200+
+								</motion.div>
+								<div className='text-muted-foreground text-sm font-medium'>
+									Món đồ được chia sẻ
+								</div>
+							</motion.div>
+							<motion.div
+								className='group'
+								whileHover={{ scale: 1.05 }}
+								transition={{ duration: 0.2 }}
+							>
+								<motion.div
+									className='from-primary to-primary/80 mb-2 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent lg:text-3xl'
+									initial={{ opacity: 0, y: 20 }}
+									animate={{ opacity: 1, y: 0 }}
+									transition={{ delay: 0.7, duration: 0.5 }}
+								>
+									650+
+								</motion.div>
+								<div className='text-muted-foreground text-sm font-medium'>
+									Thành viên tích cực
+								</div>
+							</motion.div>
+							<motion.div
+								className='group'
+								whileHover={{ scale: 1.05 }}
+								transition={{ duration: 0.2 }}
+							>
+								<motion.div
+									className='from-chart-2 to-chart-2/80 mb-2 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent lg:text-3xl'
+									initial={{ opacity: 0, y: 20 }}
+									animate={{ opacity: 1, y: 0 }}
+									transition={{ delay: 0.9, duration: 0.5 }}
+								>
+									280+
+								</motion.div>
+								<div className='text-muted-foreground text-sm font-medium'>
+									Đồ thất lạc được tìm thấy
+								</div>
+							</motion.div>
+							<motion.div
+								className='group'
+								whileHover={{ scale: 1.05 }}
+								transition={{ duration: 0.2 }}
+							>
+								<motion.div
+									className='from-secondary to-secondary/80 mb-2 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent lg:text-3xl'
+									initial={{ opacity: 0, y: 20 }}
+									animate={{ opacity: 1, y: 0 }}
+									transition={{ delay: 1.1, duration: 0.5 }}
+								>
+									98%
+								</motion.div>
+								<div className='text-muted-foreground text-sm font-medium'>
+									Mức độ hài lòng
+								</div>
+							</motion.div>
+						</div>
+					</motion.div>
+
+					{/* Call to action */}
+					<motion.div
+						className='mt-12 text-center'
+						variants={itemVariants}
+					>
+						<p className='text-muted-foreground mb-4 text-sm'>
+							Bắt đầu hành trình chia sẻ và kết nối với cộng đồng
+						</p>
+						<motion.div
+							className='from-primary to-chart-1 mx-auto h-0.5 w-16 rounded-full bg-gradient-to-r'
+							initial={{ width: 0 }}
+							animate={{ width: 64 }}
+							transition={{ delay: 1.5, duration: 0.8 }}
+						></motion.div>
+					</motion.div>
+				</motion.div>
+			</div>
+		</div>
+	)
+}

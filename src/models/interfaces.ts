@@ -30,6 +30,8 @@ export interface IItemSuggestion {
 	id: number
 	categoryID: number
 	name: string
+	description: string
+	image: string
 }
 
 export interface IItem {
@@ -38,26 +40,33 @@ export interface IItem {
 	name: string
 	description: string
 	image: string
+	alternativeImage: string
 }
 
 export interface INewItem {
 	name: string
 	quantity: number
 	categoryID?: number | undefined
-	categoryName: string
+	categoryName?: string
 	id?: string
+	image?: string
+	itemID?: number | undefined
+	alternativeImage?: string
 }
 
 export interface IOldItem {
 	itemID?: number | undefined
 	quantity: number
 	categoryID?: number | undefined
-	categoryName: string
+	categoryName?: string
 	id?: string
 	name?: string
+	image?: string
+	alternativeImage?: string
 }
 
 export interface IPostRequest {
+	description: string
 	fullName?: string
 	email?: string
 	phoneNumber?: string
@@ -140,4 +149,16 @@ export interface PostInterest {
 	id: number
 	title: string
 	interests: Interest[]
+}
+
+export interface ILoginRequest {
+	device: 'web' | 'mobile'
+	email: string
+	password: string
+}
+
+export interface ILoginResponse {
+	jwt: string
+	refreshToken: string
+	user: IUser
 }

@@ -1,21 +1,30 @@
-import { IApiResponse, IPostRequest, IPostResponse } from '@/models/interfaces'
+import {
+	IApiResponse,
+	ILoginRequest,
+	ILoginResponse
+} from '@/models/interfaces'
 
 import axiosPrivate from '../client/private.client'
+import axiosPublic from '../client/public.client'
 
-const postEndpoints = {
-	post: 'posts'
+const authEndpoints = {
+	login: 'login',
+	logout: 'logout'
 }
 
-const postApi = {
-	async create(
-		data: IPostRequest,
-		signal?: AbortSignal
-	): Promise<IApiResponse<IPostResponse>> {
+const authApi = {
+	async login(data: ILoginRequest): Promise<IApiResponse<ILoginResponse>> {
 		// eslint-disable-next-line no-useless-catch
 		try {
-			return await axiosPrivate.post(postEndpoints.post, data, {
-				signal
-			})
+			return await axiosPublic.post(authEndpoints.login, data)
+		} catch (error) {
+			throw error
+		}
+	},
+	async logout(): Promise<IApiResponse<ILoginResponse>> {
+		// eslint-disable-next-line no-useless-catch
+		try {
+			return await axiosPrivate.post(authEndpoints.logout)
 		} catch (error) {
 			throw error
 		}
@@ -34,7 +43,7 @@ const postApi = {
 	//   async add(data: { ten: string }): Promise<IApiResponse> {
 	//     // eslint-disable-next-line no-useless-catch
 	//     try {
-	//       return await axiosPrivate.post(requestEndpoints.common, data);
+	//       return await axiosPrivate.auth(requestEndpoints.common, data);
 	//     } catch (error) {
 	//       throw error;
 	//     }
@@ -60,4 +69,4 @@ const postApi = {
 	//   },
 }
 
-export default postApi
+export default authApi

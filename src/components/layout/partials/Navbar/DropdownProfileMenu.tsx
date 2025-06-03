@@ -2,10 +2,10 @@ import { UserCircle } from 'lucide-react'
 import React, { useState } from 'react'
 
 import Dropdown from '@/components/common/Dropdown'
-import { useAuth } from '@/context/auth-context'
 import AuthLayoutDialog from '@/pages/(auth)/authLayoutDialog'
 import LoginDialog from '@/pages/(auth)/loginDialog'
 import RegisterDialog from '@/pages/(auth)/registerDialog'
+import useAuthStore from '@/stores/authStore'
 
 import ProfileMenu from './ProfileMenu'
 
@@ -15,7 +15,7 @@ interface DropdownProfileMenuProps {
 
 const DropdownProfileMenu: React.FC<DropdownProfileMenuProps> = () => {
 	const [isOpen, setIsOpen] = useState(false)
-	const { isAuthenticated, user, logout } = useAuth()
+	const { isAuthenticated, user, logout } = useAuthStore()
 	const [isOpenDialog, setIsOpenDialog] = useState(false)
 	const [dialogOptions, setDialogOptions] = useState<
 		| {
@@ -36,14 +36,25 @@ const DropdownProfileMenu: React.FC<DropdownProfileMenuProps> = () => {
 		headColor: 'bg-background',
 		subTitle: 'Đăng nhập để tiếp tục sử dụng dịch vụ'
 	})
+	const setCloseLoginDialog = () => {
+		setIsOpenDialog(false)
+		setDialogOptions({
+			type: 'login',
+			title: 'Chào mừng trở lại!',
+			headColor: 'bg-background',
+			subTitle: 'Đăng nhập để tiếp tục sử dụng dịch vụ'
+		})
+	}
+
 	const renderDialogOptionsComponent = {
 		login: (
 			<LoginDialog
-				onLoginSucess={() => {}}
+				onLoginSucess={setCloseLoginDialog}
 				onRegister={() =>
 					setDialogOptions({
 						type: 'register',
 						title: 'Tạo tài khoản mới',
+
 						headColor: 'bg-background',
 						subTitle: 'Điền thông tin để sử dụng dịch vụ của bạn'
 					})
@@ -93,15 +104,7 @@ const DropdownProfileMenu: React.FC<DropdownProfileMenuProps> = () => {
 			</Dropdown>
 			<AuthLayoutDialog
 				isOpen={isOpenDialog}
-				onClose={() => {
-					setIsOpenDialog(false)
-					setDialogOptions({
-						type: 'login',
-						title: 'Chào mừng trở lại!',
-						headColor: 'bg-background',
-						subTitle: 'Đăng nhập để tiếp tục sử dụng dịch vụ'
-					})
-				}}
+				onClose={setCloseLoginDialog}
 				title={dialogOptions.title}
 				subtitle={dialogOptions.subTitle}
 				headerColor={dialogOptions.headColor}

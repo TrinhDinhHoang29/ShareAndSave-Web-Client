@@ -13,7 +13,7 @@ const Instruction: React.FC = () => {
 			<div className='p-4'>
 				<div className='mb-4 flex items-center gap-2'>
 					<InfoIcon className='text-primary h-5 w-5' />
-					<h2 className='text-lg font-medium'>Hướng dẫn gửi đồ</h2>
+					<h2 className='text-lg font-medium'>Hướng dẫn đăng bài</h2>
 				</div>
 				<div className='space-y-6'>
 					<div className='flex gap-3'>

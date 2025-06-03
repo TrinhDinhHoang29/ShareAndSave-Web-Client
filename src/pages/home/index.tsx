@@ -2,6 +2,8 @@ import PrimaryButton from '@/components/common/PrimaryButton'
 import { useAlertModalContext } from '@/context/alert-modal-context'
 import { formatDateToISO } from '@/lib/utils'
 
+import InstructionBanner from './components/InstructionBanner'
+
 const Home = () => {
 	const { showLoading, showSuccess, showError, close } = useAlertModalContext()
 	const handleClick = async () => {
@@ -43,7 +45,7 @@ const Home = () => {
 
 	return (
 		<>
-			<PrimaryButton onClick={handleClick}>CLick here</PrimaryButton>
+			<InstructionBanner />
 		</>
 	)
 }

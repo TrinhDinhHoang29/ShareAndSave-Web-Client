@@ -1,10 +1,10 @@
 import { JSX } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 
-import { useAuth } from '@/context/auth-context'
+import useAuthStore from '@/stores/authStore'
 
 export const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
-	const { isAuthenticated } = useAuth()
+	const { isAuthenticated } = useAuthStore()
 	const location = useLocation()
 
 	if (!isAuthenticated) {

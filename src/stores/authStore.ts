@@ -1,36 +1,59 @@
-import Cookies from 'js-cookie'
+// stores/authStore.ts
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 
-const ACCESS_TOKEN = 'access_token'
-
-interface AuthUser {
-	id: string
-	email: string
-	role: string[]
-}
+import authApi from '@/apis/modules/auth.api'
+import {
+	clearAccessToken,
+	clearRefreshToken,
+	getAccessToken,
+	setAccessToken,
+	setRefreshToken
+} from '@/lib/token'
+import { ILoginResponse, IUser } from '@/models/interfaces'
 
 interface AuthState {
-	user: AuthUser | null
-	accessToken: string | null
-	setUser: (user: AuthUser | null) => void
-	setAccessToken: (token: string | null) => void
-	reset: () => void
+	user: IUser | null
+	isAuthenticated: boolean
+	isAuthLoading: boolean
+	login: (data: ILoginResponse) => void
+	logout: () => void
+	setAuthLoading: (loading: boolean) => void
 }
 
-export const useAuthStore = create<AuthState>(set => ({
-	user: null,
-	accessToken: Cookies.get(ACCESS_TOKEN) || null,
-	setUser: user => set({ user }),
-	setAccessToken: token => {
-		if (token) {
-			Cookies.set(ACCESS_TOKEN, token)
-		} else {
-			Cookies.remove(ACCESS_TOKEN)
+const useAuthStore = create<AuthState>()(
+	persist(
+		set => ({
+			user: null,
+			isAuthenticated: !!getAccessToken(),
+			isAuthLoading: true,
+			login: data => {
+				setAccessToken(data.jwt)
+				setRefreshToken(data.refreshToken)
+				set({
+					user: data.user,
+					isAuthenticated: true
+				})
+			},
+			logout: async () => {
+				await authApi.logout()
+				clearAccessToken()
+				clearRefreshToken()
+				set({
+					user: null,
+					isAuthenticated: false
+				})
+			},
+			setAuthLoading: loading => set({ isAuthLoading: loading })
+		}),
+		{
+			name: 'auth-store',
+			partialize: state => ({
+				user: state.user,
+				isAuthenticated: state.isAuthenticated
+			})
 		}
-		set({ accessToken: token })
-	},
-	reset: () => {
-		Cookies.remove(ACCESS_TOKEN)
-		set({ user: null, accessToken: null })
-	}
-}))
+	)
+)
+
+export default useAuthStore

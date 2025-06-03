@@ -5,6 +5,7 @@ import React from 'react'
 import { useForm } from 'react-hook-form'
 
 import InputText from '@/components/common/InputText'
+import { useLoginMutaion } from '@/hooks/mutations/use-auth.mutaion'
 import { loginSchema } from '@/models/schema'
 import { LoginFormData } from '@/models/types'
 
@@ -17,36 +18,32 @@ const LoginDialog: React.FC<LoginDialogProps> = ({
 	onLoginSucess,
 	onRegister
 }) => {
-	// const { api, login } = useAuth()
-	const [isLoading, setIsLoading] = React.useState(false)
-
 	const {
 		register,
 		handleSubmit,
 		formState: { errors, isValid },
-		reset
+		reset,
+		setError
 	} = useForm<LoginFormData>({
 		resolver: zodResolver(loginSchema),
 		mode: 'onChange'
 	})
 
+	// const { api, login } = useAuth()
+	const { mutate, isPending } = useLoginMutaion({
+		onSuccess: () => {
+			onLoginSucess()
+		},
+		onError: (message: string) => {
+			setError('password', { message })
+		}
+	})
+
 	const onSubmit = async (data: LoginFormData) => {
-		setIsLoading(true)
-		// try {
-		//   const response = await api.post('/login', {
-		//     emailPhone: data.email,
-		//     password: data.password,
-		//   })
-		//   const { accessToken, refreshToken, user } = response.data
-		//   login(accessToken, refreshToken, user)
-		//   onLoginSucess()
-		//   reset()
-		// } catch (error) {
-		//   console.error('Login error:', error)
-		//   // Optionally show error message to user
-		// } finally {
-		//   setIsLoading(false)
-		// }
+		mutate({
+			device: 'web',
+			...data
+		})
 	}
 
 	const handleClose = () => {
@@ -114,14 +111,14 @@ const LoginDialog: React.FC<LoginDialogProps> = ({
 					whileHover={{ scale: 1.02 }}
 					whileTap={{ scale: 0.98 }}
 					type='submit'
-					disabled={!isValid || isLoading}
+					disabled={!isValid || isPending}
 					className={`w-full rounded-xl py-3 font-semibold text-white transition-all duration-200 ${
-						isValid && !isLoading
+						isValid && !isPending
 							? 'bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl'
 							: 'bg-muted cursor-not-allowed'
 					}`}
 				>
-					{isLoading ? (
+					{isPending ? (
 						<div className='flex items-center justify-center'>
 							<div className='mr-2 h-5 w-5 animate-spin rounded-full border-b-2 border-white'></div>
 							Đang đăng nhập...

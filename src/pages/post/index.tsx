@@ -1,12 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ChevronRight, Package, Send, Star, User } from 'lucide-react'
-import React, { lazy, Suspense, useState } from 'react' // Thêm Suspense và lazy
+import React, { lazy, Suspense, useEffect, useState } from 'react' // Thêm Suspense và lazy
 import { FormProvider, useForm } from 'react-hook-form'
 
 import Loading from '@/components/common/Loading'
 import PrimaryButton from '@/components/common/PrimaryButton'
 import SecondaryButton from '@/components/common/SecondaryButton'
-import { useAuth } from '@/context/auth-context'
 import { useSendItemMutation } from '@/hooks/mutations/useSendItemMutation'
 import {
 	IPostInfoFormData,
@@ -20,6 +19,7 @@ import {
 	postTypeSchema
 } from '@/models/schema'
 import { PersonalInfo, PostInfo, PostType } from '@/models/types'
+import useAuthStore from '@/stores/authStore'
 
 import AutoLoginRedirect from './components/AutoLoginRedirect'
 import Instruction from './components/Instruction'
@@ -44,10 +44,14 @@ const Post: React.FC = () => {
 	const [isCompleted, setIsCompleted] = useState<boolean>(false)
 	const [completedEmail, setCompletedEmail] = useState<string>('')
 	const [postResponse, setPostResponse] = useState<IPostResponse>(Object)
-	const { isAuthenticated, user } = useAuth()
+	const { isAuthenticated } = useAuthStore()
 	const [currentStep, setCurrentStep] = useState<number>(() =>
 		isAuthenticated ? 1 : 0
 	)
+
+	useEffect(() => {
+		setCurrentStep(isAuthenticated ? 1 : 0)
+	}, [isAuthenticated])
 
 	const mutation = useSendItemMutation({
 		onSuccess: (data: IPostResponse) => {
@@ -71,7 +75,7 @@ const Post: React.FC = () => {
 
 	const postTypeForm = useForm<PostType>({
 		resolver: zodResolver(postTypeSchema),
-		defaultValues: formData.postType || { type: '0' }
+		defaultValues: formData.postType || { type: '1' }
 	})
 
 	const postInfoForm = useForm<PostInfo>({
@@ -121,10 +125,10 @@ const Post: React.FC = () => {
 
 	const resetForm = () => {
 		personalForm.reset()
-		postTypeForm.reset({ type: '0' })
+		postTypeForm.reset({ type: '1' })
 		postInfoForm.reset({ description: '' })
 		setFormData(Object)
-		setCurrentStep(0)
+		setCurrentStep(isAuthenticated ? 1 : 0)
 		setIsCompleted(false)
 		setCompletedEmail('')
 		setIsTransitioning(false)
@@ -157,7 +161,8 @@ const Post: React.FC = () => {
 						'images',
 						'title',
 						'newItems',
-						'oldItems'
+						'oldItems',
+						'description'
 					].includes(key) &&
 					value != null && // Không null hoặc undefined
 					value !== '' && // Không rỗng (string)
@@ -171,21 +176,29 @@ const Post: React.FC = () => {
 			const infoJson = JSON.stringify(contentData)
 
 			const convertedData: IPostRequest = {
-				fullName: requestData?.fullName,
-				email: requestData?.email,
-				phoneNumber: requestData?.phoneNumber,
-				author_id: user?.id,
+				// fullName: requestData?.fullName,
+				// email: requestData?.email,
+				// phoneNumber: requestData?.phoneNumber,
+				// author_id: user?.id,
+				description: requestData.description,
 				type: Number(requestData.type),
 				images: requestData.images || [],
 				title: requestData.title,
 				info: infoJson, // Gán content dưới dạng JSON string
-				newItems: requestData.newItems?.map(({ itemID, ...rest }) => rest),
-				oldItems: requestData.oldItems?.map(
-					({ categoryID, name, ...rest }) => rest
-				)
+				newItems: requestData.newItems?.map(item => ({
+					quantity: item.quantity,
+					categoryID: item.categoryID,
+					name: item.name,
+					image: item.image
+				})),
+				oldItems: requestData.oldItems?.map(item => ({
+					itemID: item.itemID,
+					quantity: item.quantity,
+					image: item.image
+				}))
 			}
-			console.log(convertedData)
-			// mutation.mutate(convertedData);
+			// console.log(convertedData)
+			mutation.mutate(convertedData)
 		}
 	}
 
@@ -219,16 +232,16 @@ const Post: React.FC = () => {
 				let FormComponent
 
 				switch (selectedType) {
-					case '0':
+					case '1':
 						FormComponent = PostSendOldItemform
 						break
-					case '1':
+					case '2':
 						FormComponent = PostSendLostItemForm
 						break
-					case '2':
+					case '3':
 						FormComponent = PostFindItemForm
 						break
-					case '3':
+					case '4':
 						FormComponent = PostForm
 						break
 					default:

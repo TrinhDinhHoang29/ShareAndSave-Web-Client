@@ -25,7 +25,9 @@ export const postInfoSchema = z.object({
 				quantity: z.number().min(1, 'Số lượng phải lớn hơn 0'),
 				categoryID: z.number(),
 				name: z.string().min(1, 'Tên không được để trống'),
-				categoryName: z.string()
+				categoryName: z.string(),
+				image: z.string().optional(),
+				alternativeImage: z.string().optional()
 			})
 		)
 		.optional(),
@@ -36,7 +38,9 @@ export const postInfoSchema = z.object({
 				quantity: z.number().min(1, 'Số lượng phải lớn hơn 0'),
 				categoryName: z.string(),
 				categoryID: z.number(),
-				name: z.string().min(1, 'Tên không được để trống')
+				name: z.string().min(1, 'Tên không được để trống'),
+				image: z.string().optional(),
+				alternativeImage: z.string().optional()
 			})
 		)
 		.optional()
@@ -84,12 +88,12 @@ export const registerSchema = z
 export const loginSchema = z.object({
 	email: z
 		.string()
-		.min(1, 'Email hoặc số điện thoại là bắt buộc')
+		.min(1, 'Email là bắt buộc')
 		.refine(value => {
 			const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 			const phoneRegex = /^(0|\+84)[3-9]\d{8}$/
 			return emailRegex.test(value) || phoneRegex.test(value)
-		}, 'Vui lòng nhập email hoặc số điện thoại hợp lệ'),
+		}, 'Vui lòng nhập email hợp lệ'),
 	password: z
 		.string()
 		.min(6, 'Mật khẩu phải có ít nhất 6 ký tự')

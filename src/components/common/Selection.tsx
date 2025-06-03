@@ -1,0 +1,66 @@
+import React from 'react'
+import { FieldError } from 'react-hook-form'
+import { ZodIssue } from 'zod'
+
+interface SelectionProps {
+	name: string
+	label: string
+	options: { id: number; name: string }[]
+	isLoading: boolean
+	register: any
+	error?: FieldError
+	disabled?: boolean
+	animationDelay?: number
+}
+
+const Selection: React.FC<SelectionProps> = ({
+	name,
+	label,
+	options,
+	isLoading,
+	register,
+	error,
+	disabled,
+	animationDelay
+}) => {
+	return (
+		<div
+			className={`space-y-1 transition-all duration-200 ${
+				animationDelay ? `delay-${animationDelay * 100}` : ''
+			}`}
+		>
+			<label className='text-foreground block text-sm font-medium'>
+				{label}
+			</label>
+			<select
+				{...register(name, { valueAsNumber: true })}
+				disabled={disabled || isLoading}
+				className={`border-border bg-card text-foreground focus:border-primary focus:ring-primary w-full rounded-md border p-2 transition-colors ${
+					error
+						? 'border-destructive text-destructive placeholder-destructive'
+						: ''
+				} ${disabled || isLoading ? 'bg-muted text-muted-foreground' : ''}`}
+			>
+				<option
+					value={0}
+					disabled
+				>
+					{isLoading ? 'Đang tải...' : 'Chọn danh mục'}
+				</option>
+				{options.map(option => (
+					<option
+						key={option.id}
+						value={option.id}
+					>
+						{option.name}
+					</option>
+				))}
+			</select>
+			{error && (
+				<p className='text-destructive mt-1 text-sm'>{error.message}</p>
+			)}
+		</div>
+	)
+}
+
+export default Selection

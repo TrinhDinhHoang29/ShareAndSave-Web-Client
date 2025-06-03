@@ -1,6 +1,7 @@
+import { AnimatePresence, motion } from 'framer-motion'
 import { Package, Plus } from 'lucide-react'
 import React, { useState } from 'react'
-import { FieldError, useFormContext } from 'react-hook-form'
+import { Controller, useFormContext } from 'react-hook-form'
 
 import ImageUpload from '@/components/common/ImageUpload'
 import InputText from '@/components/common/InputText'
@@ -19,15 +20,17 @@ interface Item {
 	categoryID: number
 	categoryName: string
 	quantity: number
+	image?: string
+	althernativeImage?: string
 }
 
 const PostSendOldItemForm: React.FC<PostSendOldItemFormProps> = ({
 	isTransitioning
 }) => {
 	const {
+		control,
 		register,
 		formState: { errors },
-		watch,
 		setValue,
 		getValues
 	} = useFormContext<PostInfo>()
@@ -41,9 +44,20 @@ const PostSendOldItemForm: React.FC<PostSendOldItemFormProps> = ({
 		categoryID: number
 		categoryName: string
 		quantity: number
+		image?: string
+		althernativeImage?: string
 		isOldItem: boolean
 	}) => {
-		const { itemID, name, categoryID, categoryName, quantity, isOldItem } = data
+		const {
+			itemID,
+			name,
+			categoryID,
+			categoryName,
+			quantity,
+			image,
+			althernativeImage,
+			isOldItem
+		} = data
 
 		if (isOldItem) {
 			const existingOldItemIndex = oldItems.findIndex(
@@ -51,7 +65,15 @@ const PostSendOldItemForm: React.FC<PostSendOldItemFormProps> = ({
 			)
 			if (existingOldItemIndex !== -1) {
 				const updatedOldItems = [...oldItems]
-				updatedOldItems[existingOldItemIndex].quantity = quantity
+				updatedOldItems[existingOldItemIndex] = {
+					itemID,
+					name,
+					categoryID,
+					categoryName,
+					quantity,
+					image,
+					althernativeImage
+				}
 				setOldItems(updatedOldItems)
 				setValue('oldItems', updatedOldItems)
 			} else {
@@ -60,7 +82,9 @@ const PostSendOldItemForm: React.FC<PostSendOldItemFormProps> = ({
 					name,
 					categoryID,
 					categoryName,
-					quantity
+					quantity,
+					image,
+					althernativeImage
 				}
 				setOldItems(prev => [...prev, newOldItem])
 				setValue('oldItems', [...(getValues('oldItems') || []), newOldItem])
@@ -71,7 +95,15 @@ const PostSendOldItemForm: React.FC<PostSendOldItemFormProps> = ({
 			)
 			if (existingNewItemIndex !== -1) {
 				const updatedNewItems = [...newItems]
-				updatedNewItems[existingNewItemIndex].quantity = quantity
+				updatedNewItems[existingNewItemIndex] = {
+					itemID,
+					name,
+					categoryID,
+					categoryName,
+					quantity,
+					image,
+					althernativeImage
+				}
 				setNewItems(updatedNewItems)
 				setValue('newItems', updatedNewItems)
 			} else {
@@ -80,7 +112,9 @@ const PostSendOldItemForm: React.FC<PostSendOldItemFormProps> = ({
 					name,
 					categoryID,
 					categoryName,
-					quantity
+					quantity,
+					image,
+					althernativeImage
 				}
 				setNewItems(prev => [...prev, newItem])
 				setValue('newItems', [...(getValues('newItems') || []), newItem])
@@ -106,13 +140,19 @@ const PostSendOldItemForm: React.FC<PostSendOldItemFormProps> = ({
 			itemID: item.itemID,
 			name: item.name,
 			categoryName: item.categoryName,
-			quantity: item.quantity
+			quantity: item.quantity,
+			image: item.image,
+			althernativeImage: item.althernativeImage,
+			categoryID: item.categoryID
 		})),
 		...oldItems.map(item => ({
 			itemID: item.itemID,
 			name: item.name,
 			categoryName: item.categoryName,
-			quantity: item.quantity
+			quantity: item.quantity,
+			image: item.image,
+			althernativeImage: item.althernativeImage,
+			categoryID: item.categoryID
 		}))
 	]
 
@@ -157,23 +197,49 @@ const PostSendOldItemForm: React.FC<PostSendOldItemFormProps> = ({
 							<Plus />
 						</button>
 					</div>
-					{allItems.length > 0 && (
-						<ItemTable
-							allItems={allItems}
-							onDelete={handleDeleteItem}
-						/>
-					)}
-					<p className='text-muted-foreground mt-1 text-sm'>
+					<AnimatePresence>
+						{allItems.length > 0 && (
+							<motion.div
+								initial={{ opacity: 0, x: -20 }}
+								animate={{ opacity: 1, x: 0 }}
+								exit={{ opacity: 0, x: -20 }}
+								transition={{ duration: 0.3 }}
+							>
+								<ItemTable
+									allItems={allItems}
+									onDelete={handleDeleteItem}
+								/>
+							</motion.div>
+						)}
+					</AnimatePresence>
+					<motion.p
+						initial={{ opacity: 0 }}
+						animate={{ opacity: 1 }}
+						exit={{ opacity: 0 }}
+						transition={{ duration: 0.3, delay: 0.1 }}
+						className='text-muted-foreground mt-1 text-sm'
+					>
 						Bấm vào dấu "+" để thêm món đồ
-					</p>
+					</motion.p>
 				</div>
 				<div className='space-y-2'>
-					<ImageUpload
+					<Controller
 						name='images'
-						label='Hình ảnh'
-						watch={watch}
-						setValue={setValue}
-						error={errors.images as FieldError}
+						control={control}
+						render={({ field }) => (
+							<ImageUpload
+								name='images'
+								label='Hình ảnh'
+								field={field}
+								error={
+									Array.isArray(errors.images)
+										? errors.images[0]
+										: errors.images
+								}
+								type='multiple'
+								animationDelay={0.4}
+							/>
+						)}
 					/>
 					<p className='text-muted-foreground mt-1 text-sm'>
 						Tải lên hình ảnh của món đồ (nếu có)

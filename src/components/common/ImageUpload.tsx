@@ -1,45 +1,96 @@
+import { motion } from 'framer-motion'
 import { Upload } from 'lucide-react'
-import React, { useState } from 'react'
-import { createPortal } from 'react-dom' // Import createPortal
-import { FieldError, UseFormSetValue, UseFormWatch } from 'react-hook-form'
+import React, { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { FieldError, FieldValues } from 'react-hook-form'
 
-interface ImageUploadProps {
+interface ImageUploadProps<T extends FieldValues> {
 	name: string
 	label: string
-	watch: UseFormWatch<any>
-	setValue: UseFormSetValue<any>
+	field: {
+		value: string | string[] | undefined
+		onChange: (value: string | string[] | undefined) => void
+		onBlur: () => void
+	}
 	error?: FieldError
 	maxImages?: number
+	type?: 'single' | 'multiple'
+	animationDelay?: number
 }
 
-const ImageUpload: React.FC<ImageUploadProps> = ({
+const ImageUpload = <T extends FieldValues>({
 	name,
 	label,
-	watch,
-	setValue,
+	field,
 	error,
-	maxImages = 4
-}) => {
-	const images: string[] = watch(name) || []
-	const [selectedImage, setSelectedImage] = useState<string | null>(null) // State để theo dõi ảnh được chọn
+	maxImages = 4,
+	type = 'multiple',
+	animationDelay = 0.2
+}: ImageUploadProps<T>) => {
+	const isSingle = type === 'single'
+	const [selectedImage, setSelectedImage] = useState<string | null>(null)
+	const [isMounted, setIsMounted] = useState(false)
+
+	useEffect(() => {
+		setIsMounted(true)
+		return () => setIsMounted(false)
+	}, [])
 
 	const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const files = Array.from(e.target.files || [])
-		const newImages = files.map(file => {
-			const reader = new FileReader()
-			return new Promise<string>(resolve => {
-				reader.onloadend = () => resolve(reader.result as string)
-				reader.readAsDataURL(file)
-			})
+		const files = e.target.files
+		if (!files || files.length === 0) {
+			console.warn('No files selected')
+			return
+		}
+
+		const validFiles = Array.from(files).filter(file => {
+			const isWebp =
+				file.type === 'image/webp' || file.name.toLowerCase().endsWith('.webp')
+			if (isWebp) {
+				console.warn(`File ${file.name} is .webp and will be skipped`)
+				return false
+			}
+			return true
 		})
 
-		Promise.all(newImages).then(imageUrls => {
-			const currentImages = watch(name) || []
-			setValue(name, [...currentImages, ...imageUrls].slice(0, maxImages))
-		})
+		if (validFiles.length === 0) {
+			console.warn('All selected files are .webp and were skipped')
+			return
+		}
+
+		if (isSingle && validFiles[0]) {
+			const reader = new FileReader()
+			reader.onloadend = () => {
+				const result = reader.result as string
+				field.onChange(result)
+				console.log('Uploaded single image:', result.substring(0, 50) + '...')
+			}
+			reader.onerror = () => console.error('Error reading file')
+			reader.readAsDataURL(validFiles[0])
+		} else if (!isSingle) {
+			const newImages = validFiles.map(file => {
+				const reader = new FileReader()
+				return new Promise<string>((resolve, reject) => {
+					reader.onloadend = () => resolve(reader.result as string)
+					reader.onerror = reject
+					reader.readAsDataURL(file)
+				})
+			})
+
+			Promise.all(newImages)
+				.then(imageUrls => {
+					const currentImages: string[] = Array.isArray(field.value)
+						? (field.value as string[])
+						: []
+					field.onChange([...currentImages, ...imageUrls].slice(0, maxImages))
+					console.log('Uploaded multiple images:', imageUrls.length)
+				})
+				.catch(err => console.error('Error processing images:', err))
+		}
+
+		e.target.value = ''
 	}
 
-	// Component Overlay tách biệt để sử dụng Portal
 	const ImageOverlay = ({
 		image,
 		onClose
@@ -47,65 +98,109 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 		image: string
 		onClose: () => void
 	}) => {
+		if (!isMounted) return null
 		return createPortal(
 			<div
-				className='bg-opacity-75 fixed inset-0 z-50 flex items-center justify-center bg-black/50'
+				className='fixed inset-0 z-50 flex items-center justify-center bg-black/50'
 				onClick={e => {
-					if (e.target === e.currentTarget) onClose() // Đóng khi click ra ngoài
+					if (e.target === e.currentTarget) onClose()
 				}}
 			>
-				<div className='max-h-4xl relative flex max-w-4xl items-center justify-center p-4'>
+				<div className='relative flex max-w-4xl items-center p-4'>
 					<img
 						src={image}
-						alt='Selected view'
-						className='max-h-full max-w-full rounded-lg bg-white object-contain shadow-2xl'
+						alt='Preview'
+						className='max-h-[500px] max-w-full rounded-lg bg-white object-contain shadow-2xl'
 					/>
 				</div>
 				<button
-					onClick={onClose} // Đóng khi click nút ✕
+					onClick={onClose}
 					className='absolute top-5 right-5 flex h-10 w-10 items-center justify-center rounded-full bg-red-500 text-lg font-bold text-white hover:bg-red-600'
 				>
 					✕
 				</button>
 			</div>,
-			document.body // Đặt overlay trực tiếp vào body
+			document.body
 		)
 	}
 
+	const renderUploadArea = () => (
+		<>
+			<Upload className='text-muted-foreground mx-auto mb-3 h-10 w-10' />
+			<input
+				type='file'
+				accept='image/jpeg,image/jpg,image/png,image/gif' // Loại trừ .webp
+				multiple={!isSingle}
+				onChange={handleImageUpload}
+				className='hidden'
+				id={`image-upload-${name}`}
+			/>
+			<label
+				htmlFor={`image-upload-${name}`}
+				className='cursor-pointer'
+			>
+				<span className='text-primary hover:text-primary/80 font-medium'>
+					Tải lên hình ảnh
+				</span>
+				<br />
+				<span className='text-muted-foreground text-sm'>
+					Hoặc kéo thả vào đây
+				</span>
+			</label>
+		</>
+	)
+
 	return (
-		<div>
+		<motion.div
+			initial={{ opacity: 0, x: -20 }}
+			animate={{ opacity: 1, x: 0 }}
+			transition={{ delay: animationDelay, duration: 0.3 }}
+		>
 			<label className='text-foreground mb-2 block text-sm font-medium'>
 				{label}
 			</label>
 			<div className='border-border bg-card hover:bg-muted/20 rounded-lg border-2 border-dashed p-6 text-center transition-colors duration-200'>
-				{!images.length ? (
-					<>
-						<Upload className='text-muted-foreground mx-auto mb-3 h-10 w-10' />
-						<input
-							type='file'
-							accept='image/*'
-							multiple
-							onChange={handleImageUpload}
-							className='hidden'
-							id='image-upload'
-						/>
-						<label
-							htmlFor='image-upload'
-							className='cursor-pointer'
-						>
-							<span className='text-primary hover:text-primary/80 font-medium'>
-								Tải lên hình ảnh
-							</span>
-							<br />
-							<span className='text-muted-foreground text-sm'>
-								Hoặc kéo thả vào đây
-							</span>
-						</label>
-					</>
+				{isSingle ? (
+					!field.value ? (
+						renderUploadArea()
+					) : (
+						<div>
+							<div className='group relative'>
+								<img
+									src={
+										typeof field.value === 'string' ? field.value : undefined
+									}
+									alt='Preview'
+									className='h-48 w-full cursor-pointer rounded-lg border object-cover'
+									onClick={() =>
+										setSelectedImage(
+											typeof field.value === 'string' ? field.value : null
+										)
+									}
+								/>
+								<button
+									type='button'
+									onClick={() => {
+										field.onChange(undefined)
+										setSelectedImage(null)
+										console.log('Image removed')
+									}}
+									className='bg-destructive hover:bg-destructive/80 absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100'
+								>
+									✕
+								</button>
+								<p className='text-chart-1 mt-1 text-center text-xs'>
+									✓ Hình ảnh đã được tải lên
+								</p>
+							</div>
+						</div>
+					)
+				) : !field.value?.length ? (
+					renderUploadArea()
 				) : (
 					<div>
 						<div className='mb-4 grid grid-cols-2 gap-4'>
-							{images.map((image, index) => (
+							{(field.value as string[]).map((image, index) => (
 								<div
 									key={index}
 									className='group relative'
@@ -114,14 +209,17 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 										src={image}
 										alt={`Preview ${index}`}
 										className='h-48 w-full cursor-pointer rounded-lg border object-cover'
-										onClick={() => setSelectedImage(image)} // Kích hoạt overlay khi click
+										onClick={() => setSelectedImage(image)}
 									/>
 									<button
 										type='button'
 										onClick={() => {
-											const newImages = images.filter((_, i) => i !== index)
-											setValue(name, newImages)
-											if (selectedImage === image) setSelectedImage(null) // Đóng nếu ảnh bị xóa
+											const newImages = (field.value as string[]).filter(
+												(_, i) => i !== index
+											)
+											field.onChange(newImages.length ? newImages : undefined)
+											if (selectedImage === image) setSelectedImage(null)
+											console.log('Removed image at index:', index)
 										}}
 										className='bg-destructive hover:bg-destructive/80 absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100'
 									>
@@ -133,21 +231,21 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 								</div>
 							))}
 						</div>
-						{images.length < maxImages && (
+						{field.value.length < maxImages && (
 							<div>
 								<input
 									type='file'
-									accept='image/*'
+									accept='image/jpeg,image/jpg,image/png,image/gif'
 									multiple
 									onChange={handleImageUpload}
 									className='hidden'
-									id='image-upload-more'
+									id={`image-upload-more-${name}`}
 								/>
 								<label
-									htmlFor='image-upload-more'
+									htmlFor={`image-upload-more-${name}`}
 									className='text-primary hover:text-primary/80 cursor-pointer font-medium'
 								>
-									Tải thêm hình ảnh ({images.length}/{maxImages})
+									Tải thêm hình ảnh ({field.value.length}/{maxImages})
 								</label>
 							</div>
 						)}
@@ -157,15 +255,13 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 			{error && (
 				<p className='text-destructive mt-1 text-sm'>{error.message}</p>
 			)}
-
-			{/* Sử dụng Portal để hiển thị overlay toàn màn hình */}
 			{selectedImage && (
 				<ImageOverlay
 					image={selectedImage}
 					onClose={() => setSelectedImage(null)}
 				/>
 			)}
-		</div>
+		</motion.div>
 	)
 }
 

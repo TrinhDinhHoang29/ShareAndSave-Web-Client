@@ -3,8 +3,8 @@ import { Loader2 } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { useAuth } from '@/context/auth-context'
 import { IPostResponse } from '@/models/interfaces'
+import useAuthStore from '@/stores/authStore'
 
 interface AutoLoginRedirectProps {
 	info: IPostResponse
@@ -12,7 +12,7 @@ interface AutoLoginRedirectProps {
 
 const AutoLoginRedirect: React.FC<AutoLoginRedirectProps> = ({ info }) => {
 	const navigate = useNavigate()
-	const { login } = useAuth()
+	const { login } = useAuthStore()
 	const timeRedirect = 5000 // Thời gian đếm ngược (5 giây)
 
 	const [timeLeft, setTimeLeft] = useState<number>(timeRedirect / 1000) // Thời gian còn lại (tính bằng giây)
@@ -34,7 +34,7 @@ const AutoLoginRedirect: React.FC<AutoLoginRedirectProps> = ({ info }) => {
 			try {
 				if (info.JWT) {
 					await new Promise(resolve => setTimeout(resolve, timeRedirect)) // Đợi đủ timeRedirect
-					login(info.JWT, info.user)
+					// login(info.JWT, info.user)
 					navigate('/') // Chuyển hướng sau khi đăng nhập
 				} else {
 					throw new Error('No token found')

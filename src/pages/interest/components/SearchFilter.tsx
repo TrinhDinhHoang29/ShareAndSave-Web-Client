@@ -1,4 +1,3 @@
-import { AnimatePresence, motion } from 'framer-motion'
 import { Calendar, ChevronDown, Search, X } from 'lucide-react'
 import React, { useState } from 'react'
 
@@ -60,9 +59,7 @@ const SearchFilter: React.FC<SearchFilterProps> = ({ onSearch, activeTab }) => {
 		<div className='mb-6 flex flex-col gap-4 sm:flex-row sm:items-center'>
 			{/* Search By Dropdown */}
 			<div className='relative w-full sm:w-40'>
-				<motion.button
-					whileHover={{ scale: 1.05 }}
-					whileTap={{ scale: 0.95 }}
+				<button
 					onClick={() => setIsSearchDropdownOpen(!isSearchDropdownOpen)}
 					className='border-border bg-card/05 text-foreground flex w-full items-center justify-between rounded-lg border px-4 py-2 text-sm'
 				>
@@ -70,42 +67,29 @@ const SearchFilter: React.FC<SearchFilterProps> = ({ onSearch, activeTab }) => {
 					<ChevronDown
 						className={`h-4 w-4 transition-transform ${isSearchDropdownOpen ? 'rotate-180' : ''}`}
 					/>
-				</motion.button>
-				<AnimatePresence>
-					{isSearchDropdownOpen && (
-						<motion.div
-							initial={{ opacity: 0, y: -10 }}
-							animate={{ opacity: 1, y: 0 }}
-							exit={{ opacity: 0, y: -10 }}
-							transition={{ duration: 0.2 }}
-							className='border-border bg-card absolute z-10 mt-2 w-full rounded-lg border shadow-lg'
-						>
-							<div className='py-1'>
-								{['post', 'person'].map(type => (
-									<button
-										key={type}
-										onClick={() =>
-											handleSearchBySelect(type as 'post' | 'person')
-										}
-										className='text-foreground hover:bg-muted w-full px-4 py-2 text-left text-sm'
-									>
-										{type === 'post' ? 'Bài đăng' : 'Người quan tâm'}
-									</button>
-								))}
-							</div>
-						</motion.div>
-					)}
-				</AnimatePresence>
+				</button>
+				{isSearchDropdownOpen && (
+					<div className='border-border bg-card absolute z-10 mt-2 w-full rounded-lg border shadow-lg'>
+						<div className='px-2 py-1'>
+							{['post', 'person'].map(type => (
+								<button
+									key={type}
+									onClick={() =>
+										handleSearchBySelect(type as 'post' | 'person')
+									}
+									className='text-foreground hover:bg-muted w-full rounded-md px-4 py-2 text-left text-sm'
+								>
+									{type === 'post' ? 'Bài đăng' : 'Người quan tâm'}
+								</button>
+							))}
+						</div>
+					</div>
+				)}
 			</div>
 
 			{/* Search Input */}
 			<div className='relative flex-1'>
-				<motion.div
-					initial={{ scale: 1 }}
-					whileFocus={{ scale: 1.02 }}
-					transition={{ duration: 0.2 }}
-					className='relative'
-				>
+				<div className='relative'>
 					<Search className='text-muted-foreground absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2' />
 					<input
 						type='text'
@@ -122,14 +106,12 @@ const SearchFilter: React.FC<SearchFilterProps> = ({ onSearch, activeTab }) => {
 							<X className='h-5 w-5' />
 						</button>
 					)}
-				</motion.div>
+				</div>
 			</div>
 
 			{/* Sort Dropdown */}
 			<div className='relative w-full sm:w-40'>
-				<motion.button
-					whileHover={{ scale: 1.05 }}
-					whileTap={{ scale: 0.95 }}
+				<button
 					onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
 					className='border-border bg-card/05 text-foreground flex w-full items-center justify-between rounded-lg border px-4 py-2 text-sm'
 				>
@@ -140,30 +122,22 @@ const SearchFilter: React.FC<SearchFilterProps> = ({ onSearch, activeTab }) => {
 					<ChevronDown
 						className={`h-4 w-4 transition-transform ${isSortDropdownOpen ? 'rotate-180' : ''}`}
 					/>
-				</motion.button>
-				<AnimatePresence>
-					{isSortDropdownOpen && (
-						<motion.div
-							initial={{ opacity: 0, y: -10 }}
-							animate={{ opacity: 1, y: 0 }}
-							exit={{ opacity: 0, y: -10 }}
-							transition={{ duration: 0.2 }}
-							className='border-border bg-card absolute z-10 mt-2 w-full rounded-lg border shadow-lg'
-						>
-							<div className='py-1'>
-								{['newest', 'oldest'].map(type => (
-									<button
-										key={type}
-										onClick={() => handleSortSelect(type as SortOrder['type'])}
-										className='text-foreground hover:bg-muted w-full px-4 py-2 text-left text-sm'
-									>
-										{type === 'newest' ? 'Mới nhất' : 'Cũ nhất'}
-									</button>
-								))}
-							</div>
-						</motion.div>
-					)}
-				</AnimatePresence>
+				</button>
+				{isSortDropdownOpen && (
+					<div className='border-border bg-card absolute z-10 mt-2 w-full rounded-lg border shadow-lg'>
+						<div className='px-2 py-1'>
+							{['newest', 'oldest'].map(type => (
+								<button
+									key={type}
+									onClick={() => handleSortSelect(type as SortOrder['type'])}
+									className='text-foreground hover:bg-muted w-full rounded-md px-4 py-2 text-left text-sm'
+								>
+									{type === 'newest' ? 'Mới nhất' : 'Cũ nhất'}
+								</button>
+							))}
+						</div>
+					</div>
+				)}
 			</div>
 		</div>
 	)
