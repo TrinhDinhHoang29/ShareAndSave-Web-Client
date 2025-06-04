@@ -5,7 +5,7 @@ import { useState } from 'react'
 
 import { PostInterest } from '@/models/interfaces'
 
-import { PostItem } from './components/PostItem'
+import { PostItem } from './components/PostInterestItem'
 import SearchFilter from './components/SearchFilter'
 
 // Sample data

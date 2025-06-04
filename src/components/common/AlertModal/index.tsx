@@ -1,11 +1,17 @@
 import clsx from 'clsx'
-import { AlertCircle, CheckCircle, XCircle } from 'lucide-react'
+import { AlertCircle, CheckCircle, Info, XCircle } from 'lucide-react'
 import React from 'react'
 
 import AnimatedIcon from './AnimatedIcon'
 import BaseModal from './BaseModal'
 
-export type ModalState = 'loading' | 'success' | 'error' | 'warning' | 'closed'
+export type ModalState =
+	| 'loading'
+	| 'success'
+	| 'error'
+	| 'warning'
+	| 'info'
+	| 'closed'
 
 interface AlertModalProps {
 	isOpen: boolean
@@ -22,6 +28,9 @@ interface AlertModalProps {
 	warningTitle?: string
 	warningMessage?: string
 	warningButtonText?: string
+	infoTitle?: string
+	infoMessage?: string
+	infoButtonText?: string
 	modalState?: ModalState
 }
 
@@ -40,6 +49,9 @@ const AlertModal: React.FC<AlertModalProps> = ({
 	warningTitle = 'Cảnh báo',
 	warningMessage = 'Vui lòng kiểm tra lại thông tin.',
 	warningButtonText = 'Đã hiểu',
+	infoTitle = 'Thông báo',
+	infoMessage = 'Đây là thông tin quan trọng.',
+	infoButtonText = 'Đã biết',
 	modalState = 'loading'
 }) => {
 	const LoadingContent = () => (
@@ -216,6 +228,61 @@ const AlertModal: React.FC<AlertModalProps> = ({
 		</div>
 	)
 
+	const InfoContent = () => (
+		<div className='relative p-8 text-center'>
+			<div className='pointer-events-none absolute inset-0'>
+				{[...Array(4)].map((_, i) => (
+					<div
+						key={i}
+						className={clsx(
+							'float absolute h-2 w-2 rounded-full bg-gradient-to-r from-blue-400 to-cyan-500 opacity-40'
+						)}
+						style={{
+							left: `${15 + i * 20}%`,
+							top: `${15 + (i % 2) * 15}%`,
+							animationDelay: `${i * 0.8}s`,
+							animationDuration: '3s'
+						}}
+					/>
+				))}
+			</div>
+			<AnimatedIcon
+				className={clsx(
+					'mx-auto flex h-20 w-20 items-center justify-center rounded-full',
+					'mb-6 bg-gradient-to-br from-blue-100 to-cyan-200 shadow-lg'
+				)}
+				type='pulse'
+			>
+				<Info className='h-10 w-10 text-blue-600' />
+			</AnimatedIcon>
+			<h3
+				className={clsx('modal-enter mb-4 text-2xl font-bold text-gray-900')}
+				style={{ animationDelay: '0.2s' }}
+			>
+				{infoTitle}
+			</h3>
+			<p
+				className={clsx(
+					'modal-enter mb-8 text-lg leading-relaxed text-gray-600'
+				)}
+				style={{ animationDelay: '0.3s' }}
+			>
+				{infoMessage}
+			</p>
+			<button
+				onClick={onClose}
+				className={clsx(
+					'w-full rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-600 px-6 py-4 text-white',
+					'font-semibold transition-all duration-300 hover:from-blue-600 hover:to-cyan-700',
+					'button-ripple modal-enter shadow-lg hover:scale-105 hover:shadow-blue-200 active:scale-95'
+				)}
+				style={{ animationDelay: '0.4s' }}
+			>
+				{infoButtonText}
+			</button>
+		</div>
+	)
+
 	const renderContent = () => {
 		switch (modalState) {
 			case 'success':
@@ -224,6 +291,8 @@ const AlertModal: React.FC<AlertModalProps> = ({
 				return <ErrorContent />
 			case 'warning':
 				return <WarningContent />
+			case 'info':
+				return <InfoContent />
 			case 'loading':
 			default:
 				return <LoadingContent />

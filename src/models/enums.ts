@@ -21,3 +21,14 @@ export enum EPostType {
 	SEEK_LOSE_ITEM = '3',
 	OTHER = '4'
 }
+
+export enum EPostSTatus {
+	PENDING = '1',
+	REJECTED = '2',
+	APPROVED = '3'
+}
+
+export enum ESortOrder {
+	ASC = 'Asc',
+	DESC = 'DESC'
+}

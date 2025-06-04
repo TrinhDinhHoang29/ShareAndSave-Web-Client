@@ -5,12 +5,12 @@ import postApi from '@/apis/modules/post.api'
 import { useAlertModalContext } from '@/context/alert-modal-context'
 import {
 	IApiErrorResponse,
-	IPostRequest,
-	IPostResponse
+	IPostActionRequest,
+	IPostActionResponse
 } from '@/models/interfaces'
 
 interface UseSendItemMutationOptions {
-	onSuccess?: (data: IPostResponse) => void
+	onSuccess?: (data: IPostActionResponse) => void
 	onError?: () => void
 	onSettled?: () => void
 }
@@ -24,7 +24,7 @@ export const useSendItemMutation = ({
 	const abortControllerRef = useRef<AbortController | null>(null)
 
 	return useMutation({
-		mutationFn: (data: IPostRequest) => {
+		mutationFn: (data: IPostActionRequest) => {
 			abortControllerRef.current = new AbortController()
 			return postApi.create(data, abortControllerRef.current.signal)
 		},

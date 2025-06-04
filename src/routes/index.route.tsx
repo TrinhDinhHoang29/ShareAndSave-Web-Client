@@ -5,9 +5,12 @@ import Loading from '@/components/common/Loading'
 import LayoutDefault from '@/components/layout'
 // Lazy load các components
 const Home = lazy(() => import('@/pages/home'))
-const Post = lazy(() => import('@/pages/post'))
+const PostAction = lazy(() => import('@/pages/postAction'))
 const SendRequest = lazy(() => import('@/pages/profile/send-request/send'))
 const Interest = lazy(() => import('@/pages/interest'))
+const PostDetail = lazy(() => import('@/pages/post-detail'))
+const Post = lazy(() => import('@/pages/post'))
+
 // Error Boundary Component
 const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
 	return (
@@ -38,10 +41,31 @@ function AppRouter() {
 					)
 				},
 				{
+					path: 'bai-dang',
+					children: [
+						{
+							path: ':id',
+							element: (
+								<ErrorBoundary>
+									<PostDetail />
+								</ErrorBoundary>
+							)
+						},
+						{
+							path: '',
+							element: (
+								<ErrorBoundary>
+									<Post />
+								</ErrorBoundary>
+							)
+						}
+					]
+				},
+				{
 					path: 'dang-bai',
 					element: (
 						<ErrorBoundary>
-							<Post />
+							<PostAction />
 						</ErrorBoundary>
 					)
 				},

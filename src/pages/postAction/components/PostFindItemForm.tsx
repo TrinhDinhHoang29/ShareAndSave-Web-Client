@@ -1,5 +1,5 @@
 import { Gift } from 'lucide-react'
-import { FieldError, useFormContext } from 'react-hook-form'
+import { Controller, FieldError, useFormContext } from 'react-hook-form'
 
 import DatePicker from '@/components/common/DatePicker'
 import ImageUpload from '@/components/common/ImageUpload'
@@ -16,8 +16,7 @@ const PostFindItemForm: React.FC<PostFindItemFormProps> = ({
 	const {
 		register,
 		formState: { errors },
-		watch,
-		setValue
+		control
 	} = useFormContext<PostInfo>()
 
 	return (
@@ -111,12 +110,23 @@ const PostFindItemForm: React.FC<PostFindItemFormProps> = ({
 					</p>
 				</div>
 				<div>
-					<ImageUpload
+					<Controller
 						name='images'
-						label='Hình ảnh'
-						watch={watch}
-						setValue={setValue}
-						error={errors.images as FieldError}
+						control={control}
+						render={({ field }) => (
+							<ImageUpload
+								name='images'
+								label='Hình ảnh'
+								field={field}
+								error={
+									Array.isArray(errors.images)
+										? errors.images[0]
+										: errors.images
+								}
+								type='multiple'
+								animationDelay={0.4}
+							/>
+						)}
 					/>
 					<p className='text-muted-foreground mt-1 text-sm'>
 						Tải lên hình ảnh của món đồ (nếu có)

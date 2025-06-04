@@ -1,9 +1,26 @@
 import { LucideIcon } from 'lucide-react'
 
-import { ERequestStatus, ERequestType } from './enums'
+import {
+	EPostSTatus,
+	EPostType,
+	ERequestStatus,
+	ERequestType,
+	ESortOrder
+} from './enums'
 import { PersonalInfo, PostInfo, PostType } from './types'
 
-export interface IPostInfoFormData {
+export interface IListParams<T> {
+	page?: number
+	limit?: number
+	searchBy?: string
+	searchValue?: string
+	type?: EPostType
+	status?: EPostSTatus
+	sort?: keyof T | ''
+	order?: ESortOrder
+}
+
+export interface IPostActionInfoFormData {
 	personalInfo: PersonalInfo
 	postInfo: PostInfo
 	postType: PostType
@@ -41,6 +58,9 @@ export interface IItem {
 	description: string
 	image: string
 	alternativeImage: string
+	itemID?: number
+	categoryName?: string
+	quantity?: number
 }
 
 export interface INewItem {
@@ -65,7 +85,7 @@ export interface IOldItem {
 	alternativeImage?: string
 }
 
-export interface IPostRequest {
+export interface IPostActionRequest {
 	description: string
 	fullName?: string
 	email?: string
@@ -79,7 +99,7 @@ export interface IPostRequest {
 	oldItems?: IOldItem[]
 }
 
-export interface IPost {
+export interface IPostAction {
 	authorName: string
 	content: string
 	id: number
@@ -103,9 +123,9 @@ export interface IUser {
 	status: number // Consider defining an enum for status values
 }
 
-export interface IPostResponse {
+export interface IPostActionResponse {
 	JWT: string
-	post: IPost
+	post: IPostAction
 	user: IUser
 }
 
@@ -145,6 +165,15 @@ export interface Interest {
 	status: 'active' | 'completed'
 }
 
+export interface IUserInterest {
+	id: number
+	postID: number
+	status: number
+	userAvatar: string
+	userID: number
+	userName: string
+}
+
 export interface PostInterest {
 	id: number
 	title: string
@@ -161,4 +190,40 @@ export interface ILoginResponse {
 	jwt: string
 	refreshToken: string
 	user: IUser
+}
+
+export interface IPost {
+	authorID: number
+	authorName: string
+	content: string
+	createdAt: string
+	description: string
+	id: number
+	images: string[]
+	info: string
+	interestCount: number
+	itemCount: number
+	slug: string
+	status: number
+	tags: string[]
+	title: string
+	type: number
+}
+
+export interface IPostDetail {
+	authorID: number
+	authorName: string
+	content: string
+	createdAt: string
+	description: string
+	id: number
+	images: string[]
+	info: string
+	interests: IUserInterest[]
+	items: IItem[]
+	slug: string
+	status: number
+	tags: string[]
+	title: string
+	type: number
 }

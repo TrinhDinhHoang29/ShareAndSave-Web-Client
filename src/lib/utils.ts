@@ -60,6 +60,21 @@ export function formatDateToISOWithTimeZone(
 	)
 }
 
+export const formatDateVN = (dateString: string) => {
+	try {
+		return new Date(dateString).toLocaleDateString('vi-VN', {
+			weekday: 'long',
+			year: 'numeric',
+			month: 'long',
+			day: 'numeric',
+			hour: '2-digit',
+			minute: '2-digit'
+		})
+	} catch {
+		return dateString
+	}
+}
+
 export function getDeviceType() {
 	const ua = navigator.userAgent
 	if (/mobile/i.test(ua)) return 'mobile'

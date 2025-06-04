@@ -16,6 +16,9 @@ interface AlertModalConfig {
 	warningTitle?: string
 	warningMessage?: string
 	warningButtonText?: string
+	infoTitle?: string
+	infoMessage?: string
+	infoButtonText?: string
 }
 
 interface AlertModalContextType {
@@ -26,6 +29,7 @@ interface AlertModalContextType {
 	showSuccess: (config?: Partial<AlertModalConfig>) => void
 	showError: (config?: Partial<AlertModalConfig>) => void
 	showWarning: (config?: Partial<AlertModalConfig>) => void
+	showInfo: (config?: Partial<AlertModalConfig>) => void
 	close: () => void
 }
 

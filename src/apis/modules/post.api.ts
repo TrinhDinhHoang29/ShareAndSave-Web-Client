@@ -1,16 +1,25 @@
-import { IApiResponse, IPostRequest, IPostResponse } from '@/models/interfaces'
+import {
+	IApiResponse,
+	IListParams,
+	IPost,
+	IPostActionRequest,
+	IPostActionResponse,
+	IPostDetail
+} from '@/models/interfaces'
 
 import axiosPrivate from '../client/private.client'
+import axiosPublic from '../client/public.client'
 
 const postEndpoints = {
-	post: 'posts'
+	post: 'posts',
+	listPosts: 'client/posts'
 }
 
 const postApi = {
 	async create(
-		data: IPostRequest,
+		data: IPostActionRequest,
 		signal?: AbortSignal
-	): Promise<IApiResponse<IPostResponse>> {
+	): Promise<IApiResponse<IPostActionResponse>> {
 		// eslint-disable-next-line no-useless-catch
 		try {
 			return await axiosPrivate.post(postEndpoints.post, data, {
@@ -19,18 +28,22 @@ const postApi = {
 		} catch (error) {
 			throw error
 		}
+	},
+	async list(
+		params: IListParams<IPost>
+	): Promise<IApiResponse<{ posts: IPost[] }>> {
+		return axiosPublic.get(postEndpoints.listPosts, {
+			params
+		})
+	},
+	async detail(id: number): Promise<IApiResponse<{ post: IPostDetail }>> {
+		// eslint-disable-next-line no-useless-catch
+		try {
+			return await axiosPublic.get(postEndpoints.post + '/' + id)
+		} catch (error) {
+			throw error
+		}
 	}
-	//   async list(params: {
-	//     page?: number;
-	//     limit?: number;
-	//     filters?: FilterSearch[];
-	//     sort?: keyof Irequest | "";
-	//     order?: ESortOrderValue;
-	//   }): Promise<IApiResponse<Irequest[]>> {
-	//     return axiosPrivate.get(requestEndpoints.common, {
-	//       params: { ...params, filters: JSON.stringify(params.filters) },
-	//     });
-	//   },
 	//   async add(data: { ten: string }): Promise<IApiResponse> {
 	//     // eslint-disable-next-line no-useless-catch
 	//     try {
