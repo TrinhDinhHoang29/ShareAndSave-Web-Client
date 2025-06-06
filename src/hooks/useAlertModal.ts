@@ -18,6 +18,11 @@ interface AlertModalConfig {
 	infoTitle?: string
 	infoMessage?: string
 	infoButtonText?: string
+	confirmTitle?: string
+	confirmMessage?: string
+	confirmButtonText?: string
+	cancelButtonText?: string
+	onConfirm?: () => void
 }
 
 interface AlertModalReturn {
@@ -29,6 +34,7 @@ interface AlertModalReturn {
 	showError: (config?: Partial<AlertModalConfig>) => void
 	showWarning: (config?: Partial<AlertModalConfig>) => void
 	showInfo: (config?: Partial<AlertModalConfig>) => void
+	showConfirm: (config?: Partial<AlertModalConfig>) => void
 	close: () => void
 }
 
@@ -106,6 +112,19 @@ export const useAlertModal = (): AlertModalReturn => {
 		}, 100)
 	}
 
+	const showConfirm = (confirmConfig: Partial<AlertModalConfig> = {}) => {
+		debounceAction(() => {
+			if (isOpen) {
+				setConfig(prev => ({ ...prev, ...confirmConfig }))
+				setModalState('confirm')
+			} else {
+				setConfig(confirmConfig)
+				setModalState('confirm')
+				setIsOpen(true)
+			}
+		}, 100)
+	}
+
 	const close = () => {
 		if (debounceRef.current) {
 			clearTimeout(debounceRef.current)
@@ -126,6 +145,7 @@ export const useAlertModal = (): AlertModalReturn => {
 		showError,
 		showWarning,
 		showInfo,
+		showConfirm,
 		close
 	}
 }

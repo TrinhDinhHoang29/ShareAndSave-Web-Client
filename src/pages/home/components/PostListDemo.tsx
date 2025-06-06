@@ -26,7 +26,7 @@ const PostListItemDemo: React.FC = () => {
 							<PostItem
 								key={post.id}
 								post={post}
-								onPostClick={id => navigate('/bai-dang' + '/' + id)}
+								onPostClick={slug => navigate('/bai-dang' + '/' + slug)}
 							/>
 						))
 					)}

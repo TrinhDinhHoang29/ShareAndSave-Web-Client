@@ -1,5 +1,11 @@
 import clsx from 'clsx'
-import { AlertCircle, CheckCircle, Info, XCircle } from 'lucide-react'
+import {
+	AlertCircle,
+	CheckCircle,
+	HelpCircle,
+	Info,
+	XCircle
+} from 'lucide-react'
 import React from 'react'
 
 import AnimatedIcon from './AnimatedIcon'
@@ -11,6 +17,7 @@ export type ModalState =
 	| 'error'
 	| 'warning'
 	| 'info'
+	| 'confirm'
 	| 'closed'
 
 interface AlertModalProps {
@@ -31,6 +38,11 @@ interface AlertModalProps {
 	infoTitle?: string
 	infoMessage?: string
 	infoButtonText?: string
+	confirmTitle?: string
+	confirmMessage?: string
+	confirmButtonText?: string
+	cancelButtonText?: string
+	onConfirm?: () => void
 	modalState?: ModalState
 }
 
@@ -52,6 +64,11 @@ const AlertModal: React.FC<AlertModalProps> = ({
 	infoTitle = 'Thông báo',
 	infoMessage = 'Đây là thông tin quan trọng.',
 	infoButtonText = 'Đã biết',
+	confirmTitle = 'Xác nhận',
+	confirmMessage = 'Bạn có chắc chắn muốn thực hiện hành động này?',
+	confirmButtonText = 'Xác nhận',
+	cancelButtonText = 'Hủy',
+	onConfirm,
 	modalState = 'loading'
 }) => {
 	const LoadingContent = () => (
@@ -283,6 +300,74 @@ const AlertModal: React.FC<AlertModalProps> = ({
 		</div>
 	)
 
+	const ConfirmContent = () => (
+		<div className='relative p-8 text-center'>
+			<div className='pointer-events-none absolute inset-0'>
+				{[...Array(3)].map((_, i) => (
+					<div
+						key={i}
+						className={clsx(
+							'float absolute h-2 w-2 rounded-full bg-gradient-to-r from-indigo-400 to-purple-500 opacity-30'
+						)}
+						style={{
+							left: `${20 + i * 25}%`,
+							top: `${10 + (i % 2) * 25}%`,
+							animationDelay: `${i * 1}s`,
+							animationDuration: '4s'
+						}}
+					/>
+				))}
+			</div>
+			<AnimatedIcon
+				className={clsx(
+					'mx-auto flex h-20 w-20 items-center justify-center rounded-full',
+					'mb-6 bg-gradient-to-br from-indigo-100 to-purple-200 shadow-lg'
+				)}
+				type='pulse'
+			>
+				<HelpCircle className='h-10 w-10 text-indigo-600' />
+			</AnimatedIcon>
+			<h3
+				className={clsx('modal-enter mb-4 text-2xl font-bold text-gray-900')}
+				style={{ animationDelay: '0.2s' }}
+			>
+				{confirmTitle}
+			</h3>
+			<p
+				className={clsx(
+					'modal-enter mb-8 text-lg leading-relaxed text-gray-600'
+				)}
+				style={{ animationDelay: '0.3s' }}
+			>
+				{confirmMessage}
+			</p>
+			<div className={clsx('flex gap-4')}>
+				<button
+					onClick={onClose}
+					className={clsx(
+						'flex-1 rounded-2xl bg-gray-100 px-6 py-4 text-gray-700',
+						'font-semibold transition-all duration-300 hover:bg-gray-200',
+						'button-ripple modal-enter hover:scale-105 active:scale-95'
+					)}
+					style={{ animationDelay: '0.4s' }}
+				>
+					{cancelButtonText}
+				</button>
+				<button
+					onClick={onConfirm}
+					className={clsx(
+						'flex-1 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-4 text-white',
+						'font-semibold transition-all duration-300 hover:from-indigo-600 hover:to-purple-700',
+						'button-ripple modal-enter shadow-lg hover:scale-105 hover:shadow-indigo-200 active:scale-95'
+					)}
+					style={{ animationDelay: '0.5s' }}
+				>
+					{confirmButtonText}
+				</button>
+			</div>
+		</div>
+	)
+
 	const renderContent = () => {
 		switch (modalState) {
 			case 'success':
@@ -293,6 +378,8 @@ const AlertModal: React.FC<AlertModalProps> = ({
 				return <WarningContent />
 			case 'info':
 				return <InfoContent />
+			case 'confirm':
+				return <ConfirmContent />
 			case 'loading':
 			default:
 				return <LoadingContent />

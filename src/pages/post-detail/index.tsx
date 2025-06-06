@@ -16,14 +16,20 @@ import {
 	Users,
 	X
 } from 'lucide-react'
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
 import { ChatDialog } from '@/components/common/ChatDialog'
 import Loading from '@/components/common/Loading'
 import { useAlertModalContext } from '@/context/alert-modal-context'
+import {
+	useCreateInterestMutation,
+	useDeleteInterestMutation
+} from '@/hooks/mutations/use-interest.mutation'
 import { useDetailPostQuery } from '@/hooks/queries/use-post-query'
 import { formatDateVN } from '@/lib/utils'
+import { IUserInterest } from '@/models/interfaces'
+import useAuthStore from '@/stores/authStore'
 
 import Instruction from '../postAction/components/Instruction'
 
@@ -49,11 +55,54 @@ const PostDetail: React.FC = () => {
 	const [showAllItems, setShowAllItems] = useState(false)
 	const [isShowChatDialog, setIsShowChatDialog] = useState(false)
 	const { showInfo } = useAlertModalContext()
+	const { user } = useAuthStore()
 
 	const params = useParams()
-	const id = Number(params.id)
+	const slug = params.slug
 
-	const { data: post, isLoading, isError, error } = useDetailPostQuery(id)
+	const {
+		data: post,
+		isLoading,
+		isError,
+		error
+	} = useDetailPostQuery(slug || '')
+	const {
+		mutate: createInterestMutatation,
+		isPending: isCreateInterestPending
+	} = useCreateInterestMutation({
+		onSuccess: (interestID: number) => {
+			setIsInterested(!isInterested)
+			const newUserInterest: IUserInterest = {
+				id: interestID,
+				postID: post?.id || 0,
+				status: 1,
+				userAvatar: user?.avatar || '',
+				userID: user?.id || 0,
+				userName: user?.fullName || ''
+			}
+			post?.interests.push(newUserInterest)
+			console.log('Create', interestID)
+		}
+	})
+	const {
+		mutate: deleteInterestMutatation,
+		isPending: isDeleteInterestPending
+	} = useDeleteInterestMutation({
+		onSuccess: (interestID: number) => {
+			setIsInterested(!isInterested)
+			if (post?.interests && post.interests.length > 0) {
+				post.interests = post?.interests.filter(i => i.id !== interestID)
+			}
+			console.log('Delete', interestID)
+		}
+	})
+
+	useEffect(() => {
+		if (post?.interests && post.interests.length > 0) {
+			const isMeInterested = post.interests.some(i => i.userID === user?.id)
+			setIsInterested(isMeInterested)
+		}
+	}, [post])
 
 	const sumItems = useMemo(() => {
 		return post?.items?.reduce((acc, cur) => acc + (cur.quantity || 0), 0) || 0
@@ -142,12 +191,11 @@ const PostDetail: React.FC = () => {
 		)
 	}
 
-	const handleInterest = () => {
-		setIsInterested(!isInterested)
-		// onInterest?.(post.id);
-		// If interested, can start chatting
+	const handleInterest = async () => {
 		if (!isInterested) {
-			console.log('Can now chat with author')
+			createInterestMutatation({ postID: post.id })
+		} else {
+			deleteInterestMutatation(post.id)
 		}
 	}
 
@@ -226,7 +274,7 @@ const PostDetail: React.FC = () => {
 								)}
 							</motion.div>
 
-							<div className='gap-8'>
+							<div className='gap-8 space-y-6'>
 								{/* Main Content */}
 								<div className='space-y-8'>
 									{/* Images */}
@@ -509,32 +557,25 @@ const PostDetail: React.FC = () => {
 									)}
 
 									{/* Interested Users */}
-									{post.interests && post.interests.length > 0 && (
-										<motion.div
-											initial={{ opacity: 0, y: 20 }}
-											animate={{ opacity: 1, y: 0 }}
-											transition={{ delay: 0.8 }}
-											className='space-y-4'
-										>
-											<div className='flex items-center justify-between'>
-												<h2 className='text-foreground flex items-center gap-2 text-xl font-semibold'>
-													<Users className='h-5 w-5' />
-													Những người quan tâm ({post.interests.length})
-												</h2>
-												{post.interests.length > 4 && (
-													<button
-														onClick={() => setShowAllInterests(true)}
-														className='text-primary hover:text-primary/80 text-sm font-medium'
-													>
-														Xem tất cả
-													</button>
-												)}
-											</div>
-											<div className='gap-4'>
-												{post.interests.slice(0, 4).map(interest => (
+									<motion.div
+										initial={{ opacity: 0, y: 20 }}
+										animate={{ opacity: 1, y: 0 }}
+										transition={{ delay: 0.8 }}
+										className='space-y-4'
+									>
+										<div className='flex items-center justify-between'>
+											<h2 className='text-foreground flex items-center gap-2 text-xl font-semibold'>
+												<Users className='h-5 w-5' />
+												Những người quan tâm ({post.interests.length})
+											</h2>
+										</div>
+										<div className='glass flex items-center rounded-xl p-6'>
+											{post.interests &&
+												post.interests.length > 0 &&
+												post.interests.map(interest => (
 													<div
 														key={interest.id}
-														className='border-border hover:bg-accent/50 flex cursor-pointer flex-col items-center gap-2 rounded-lg border p-3 transition-colors'
+														className='flex cursor-pointer flex-col items-center gap-2 p-2 transition-colors'
 													>
 														<div className='bg-muted h-12 w-12 overflow-hidden rounded-full'>
 															{interest.userAvatar ? (
@@ -554,20 +595,8 @@ const PostDetail: React.FC = () => {
 														</p>
 													</div>
 												))}
-											</div>
-											{post.interests.length > 4 && (
-												<div className='text-center'>
-													<button
-														onClick={() => setShowAllInterests(true)}
-														className='text-primary hover:text-primary/80 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium'
-													>
-														<Plus className='h-4 w-4' />
-														Và {post.interests.length - 4} người khác
-													</button>
-												</div>
-											)}
-										</motion.div>
-									)}
+										</div>
+									</motion.div>
 								</div>
 
 								{/* Sidebar */}
@@ -587,10 +616,16 @@ const PostDetail: React.FC = () => {
 													: 'bg-accent text-accent-foreground hover:bg-accent/80'
 											}`}
 										>
-											<Heart
-												className={`h-5 w-5 ${isInterested ? 'fill-current' : ''}`}
-											/>
-											{isInterested ? 'Đã quan tâm' : 'Tôi quan tâm'}
+											{isCreateInterestPending || isDeleteInterestPending ? (
+												<Loading />
+											) : (
+												<>
+													<Heart
+														className={`h-5 w-5 ${isInterested ? 'fill-current' : ''}`}
+													/>
+													{isInterested ? 'Đã quan tâm' : 'Quan tâm'}
+												</>
+											)}
 										</button>
 
 										<button

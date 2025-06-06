@@ -1,24 +1,28 @@
 import { Dialog, Transition } from '@headlessui/react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Check, Minus, Package, Plus, Send, User, X } from 'lucide-react'
+import {
+	Check,
+	CheckCircle,
+	ChevronLeft,
+	ChevronRight,
+	Eye,
+	EyeOff,
+	Minus,
+	Package,
+	Plus,
+	Send,
+	User,
+	X
+} from 'lucide-react'
 import React, { Fragment, useState } from 'react'
 
+import { useAlertModalContext } from '@/context/alert-modal-context'
+import { IItem } from '@/models/interfaces'
 import useAuthStore from '@/stores/authStore'
-
-export interface IItem {
-	id: number
-	categoryID: number
-	name: string
-	description: string
-	image: string
-	alternativeImage: string
-	itemID?: number
-	categoryName?: string
-	quantity?: number
-}
 
 interface RequestItem extends IItem {
 	requestedQuantity: number
+	isConfirmed?: boolean // Thêm trạng thái xác nhận
 }
 
 export const ChatDialog = ({
@@ -53,6 +57,9 @@ export const ChatDialog = ({
 	// State cho việc quản lý yêu cầu
 	const [selectedItems, setSelectedItems] = useState<RequestItem[]>([])
 	const [pendingRequests, setPendingRequests] = useState<RequestItem[]>([])
+	const [currentRequestIndex, setCurrentRequestIndex] = useState(0)
+	const [isRequestsVisible, setIsRequestsVisible] = useState(true) // State cho việc ẩn/hiện yêu cầu
+	const { showConfirm } = useAlertModalContext()
 	const { user } = useAuthStore()
 	const authorId = user?.id
 
@@ -84,56 +91,52 @@ export const ChatDialog = ({
 		}
 	}
 
-	// Xử lý chọn item (cho người không phải tác giả) - chỉ toggle select, không thêm vào header ngay
+	// Xử lý chọn item - thêm hoặc bỏ chọn item
 	const handleItemSelect = (item: IItem) => {
-		const existingItem = selectedItems.find(selected => selected.id === item.id)
-		if (existingItem) {
-			setSelectedItems(
-				selectedItems.filter(selected => selected.id !== item.id)
+		const isInPendingRequests = pendingRequests.some(
+			i => i.itemID === item.itemID
+		)
+		if (!isInPendingRequests) {
+			const existingItem = selectedItems.find(
+				selected => selected.itemID === item.itemID || 0
 			)
+			if (existingItem) {
+				// Nếu đã chọn thì bỏ chọn
+				setSelectedItems(prev =>
+					prev.filter(selected => selected.itemID !== item.itemID || 0)
+				)
+			} else {
+				// Nếu chưa chọn thì thêm vào với số lượng mặc định là 1
+				setSelectedItems(prev => [...prev, { ...item, requestedQuantity: 1 }])
+			}
 		} else {
-			setSelectedItems([...selectedItems, { ...item, requestedQuantity: 1 }])
+			return
 		}
 	}
 
-	// Thay đổi số lượng yêu cầu
-	const handleQuantityChange = (
-		itemId: number,
-		change: number,
-		isRequest = false
-	) => {
-		if (isRequest) {
-			setPendingRequests(prev =>
-				prev.map(item =>
-					item.id === itemId
-						? {
-								...item,
-								requestedQuantity: Math.max(1, item.requestedQuantity + change)
-							}
-						: item
-				)
-			)
-		} else {
-			setSelectedItems(prev =>
-				prev.map(item => {
-					if (item.id === itemId) {
-						const originalItem = items.find(i => i.id === itemId)
-						const maxQuantity = originalItem?.quantity || 1
-						const newQuantity = Math.max(
-							1,
-							Math.min(maxQuantity, item.requestedQuantity + change)
-						)
-						return { ...item, requestedQuantity: newQuantity }
-					}
-					return item
-				})
-			)
-		}
+	// Thay đổi số lượng yêu cầu cho item cụ thể
+	const handleQuantityChange = (itemId: number, change: number) => {
+		setSelectedItems(prev =>
+			prev.map(item => {
+				if (item.itemID === itemId) {
+					console.log(item, itemId)
+					const originalItem = items.find(i => i.itemID === itemId)
+					const maxQuantity = originalItem?.quantity || 1
+					const newQuantity = Math.max(
+						1,
+						Math.min(maxQuantity, item.requestedQuantity + change)
+					)
+					// console.log({ ...item, requestedQuantity: newQuantity })
+					return { ...item, requestedQuantity: newQuantity }
+				}
+				return item
+			})
+		)
 	}
 
 	// Xóa item khỏi danh sách đã chọn
 	const handleRemoveSelectedItem = (itemId: number) => {
-		setSelectedItems(prev => prev.filter(item => item.id !== itemId))
+		setSelectedItems(prev => prev.filter(item => item.itemID !== itemId))
 	}
 
 	// Gửi yêu cầu trao đổi
@@ -141,22 +144,89 @@ export const ChatDialog = ({
 		if (selectedItems.length > 0) {
 			setPendingRequests([...pendingRequests, ...selectedItems])
 			setSelectedItems([])
+			setCurrentRequestIndex(0) // Reset về item đầu tiên
 			// Ở đây có thể thêm logic gửi API
 		}
 	}
 
+	// Thay đổi số lượng trong pending requests (cho tác giả)
+	const handlePendingQuantityChange = (itemId: number, change: number) => {
+		setPendingRequests(prev =>
+			prev.map(item =>
+				item.itemID || 0 === itemId
+					? {
+							...item,
+							requestedQuantity: Math.max(1, item.requestedQuantity + change)
+						}
+					: item
+			)
+		)
+	}
+
 	// Xóa item khỏi pending requests (ở header)
 	const handleRemovePendingRequest = (itemId: number) => {
-		setPendingRequests(prev => prev.filter(item => item.id !== itemId))
+		setPendingRequests(prev => {
+			const newRequests = prev.filter(item => item.itemID !== itemId)
+			// Điều chỉnh currentRequestIndex nếu cần
+			if (currentRequestIndex >= newRequests.length && newRequests.length > 0) {
+				setCurrentRequestIndex(newRequests.length - 1)
+			} else if (newRequests.length === 0) {
+				setCurrentRequestIndex(0)
+			}
+			return newRequests
+		})
 	}
 
 	// Xác nhận yêu cầu (cho tác giả)
 	const handleConfirmRequest = () => {
+		showConfirm({
+			confirmTitle: 'Hành động này không thể hoàn tác',
+			confirmMessage:
+				'Khi bạn xác nhận, người đăng sẽ thấy được yêu cầu bạn đã gửi.',
+			confirmButtonText: 'Xác nhận',
+			cancelButtonText: 'Hủy',
+			onConfirm: () => {
+				console.log(pendingRequests)
+			}
+		})
 		// Logic xử lý xác nhận yêu cầu
-		console.log('Confirming requests:', pendingRequests)
+
 		// Có thể clear requests sau khi xác nhận
-		setPendingRequests([])
+		// setPendingRequests([])
+		// setCurrentRequestIndex(0)
 	}
+
+	// Xác nhận một yêu cầu cụ thể
+	const handleConfirmSingleRequest = (itemId: number) => {
+		setPendingRequests(prev =>
+			prev.map(item =>
+				item.itemID === itemId ? { ...item, isConfirmed: true } : item
+			)
+		)
+		console.log('Confirming single request for item:', itemId)
+		// Ở đây có thể thêm logic gửi API cho yêu cầu cụ thể
+	}
+
+	// Ẩn/hiện yêu cầu đã gửi
+	const toggleRequestsVisibility = () => {
+		setIsRequestsVisible(!isRequestsVisible)
+	}
+
+	// Navigation functions cho carousel
+	const handlePrevRequest = () => {
+		setCurrentRequestIndex(prev =>
+			prev > 0 ? prev - 1 : pendingRequests.length - 1
+		)
+	}
+
+	const handleNextRequest = () => {
+		setCurrentRequestIndex(prev =>
+			prev < pendingRequests.length - 1 ? prev + 1 : 0
+		)
+	}
+
+	// Get current item
+	const currentRequestItem = pendingRequests[currentRequestIndex]
 
 	return (
 		<Transition
@@ -209,7 +279,7 @@ export const ChatDialog = ({
 							{/* Main Chat Area */}
 							<div className='flex flex-1 flex-col'>
 								{/* Header */}
-								<div className={`bg-primary text-primary-foreground p-6`}>
+								<div className={`bg-primary text-primary-foreground px-6 py-4`}>
 									<div className='flex items-start justify-between'>
 										<div className='flex items-center space-x-3'>
 											<div className='bg-primary-foreground/20 flex h-12 w-12 items-center justify-center rounded-full backdrop-blur-sm'>
@@ -236,106 +306,224 @@ export const ChatDialog = ({
 										</button>
 									</div>
 
-									{/* Pending Requests Display - Chỉ hiển thị khi đã gửi yêu cầu */}
+									{/* Pending Requests Display - Carousel Style */}
 									{pendingRequests.length > 0 && (
-										<div className='bg-primary-foreground/10 mt-4 rounded-xl p-4 backdrop-blur-sm'>
-											{/* Header */}
-											<div className='mb-4 flex items-center justify-between'>
+										<div className='mt-4'>
+											{/* Header với nút ẩn/hiện */}
+											<div className='flex items-center justify-between'>
 												<h4 className='text-primary-foreground flex items-center gap-2 font-semibold'>
 													<Package className='h-5 w-5' />
 													{isAuthor ? 'Yêu cầu trao đổi' : 'Yêu cầu đã gửi'}
-													<span className='bg-primary-foreground/20 text-primary-foreground rounded-full px-2 py-1 text-xs font-medium'>
-														{pendingRequests.length}
-													</span>
+													{!isRequestsVisible && (
+														<span className='bg-primary-foreground/20 text-primary-foreground rounded-full px-2 py-1 text-xs font-medium'>
+															{pendingRequests.length}
+														</span>
+													)}
+													{isRequestsVisible && currentRequestItem && (
+														<span className='bg-primary-foreground/20 text-primary-foreground rounded-full px-2 py-1 text-xs font-medium'>
+															{currentRequestIndex + 1}/{pendingRequests.length}
+														</span>
+													)}
 												</h4>
-												{isAuthor && (
+
+												<div className='flex items-center gap-2'>
+													{/* Nút ẩn/hiện yêu cầu */}
 													<button
-														onClick={handleConfirmRequest}
-														className='flex items-center gap-2 rounded-lg bg-green-500 px-4 py-2 text-sm font-medium text-white shadow-lg transition-all duration-200 hover:bg-green-600 hover:shadow-xl'
+														onClick={toggleRequestsVisibility}
+														className='bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200'
+														title={
+															isRequestsVisible
+																? 'Ẩn yêu cầu'
+																: 'Hiển thị yêu cầu'
+														}
 													>
-														<Check className='h-4 w-4' />
-														Xác nhận tất cả
+														{isRequestsVisible ? (
+															<>
+																<EyeOff className='h-4 w-4' />
+																Ẩn
+															</>
+														) : (
+															<>
+																<Eye className='h-4 w-4' />
+																Hiện
+															</>
+														)}
 													</button>
-												)}
+
+													{isAuthor ? (
+														<button
+															onClick={handleConfirmRequest}
+															className='flex items-center gap-2 rounded-lg bg-green-500 px-4 py-2 text-sm font-medium text-white shadow-lg transition-all duration-200 hover:bg-green-600 hover:shadow-xl'
+														>
+															<Check className='h-4 w-4' />
+															Xác nhận
+														</button>
+													) : (
+														<button
+															onClick={handleConfirmRequest}
+															className='flex items-center gap-2 rounded-lg bg-green-500 px-4 py-2 text-sm font-medium text-white shadow-lg transition-all duration-200 hover:bg-green-600 hover:shadow-xl'
+														>
+															<Check className='h-4 w-4' />
+															Xác nhận
+														</button>
+													)}
+												</div>
 											</div>
 
-											{/* Items Grid */}
-											<div className='grid max-h-32 grid-cols-1 gap-3 overflow-y-auto'>
-												{pendingRequests.map(item => (
+											{/* Content khi hiển thị */}
+											{isRequestsVisible && currentRequestItem && (
+												<div className='bg-primary-foreground/10 relative mt-3 rounded-xl p-4 backdrop-blur-sm'>
+													{/* Navigation Buttons */}
+													{pendingRequests.length > 1 && (
+														<>
+															<button
+																onClick={handlePrevRequest}
+																className='bg-primary-foreground/20 hover:bg-primary-foreground/30 absolute top-1/2 -left-1 z-10 -translate-x-2 -translate-y-1/2 rounded-full p-1 backdrop-blur-sm transition-all duration-200'
+															>
+																<ChevronLeft className='text-primary-foreground h-4 w-4' />
+															</button>
+															<button
+																onClick={handleNextRequest}
+																className='bg-primary-foreground/20 hover:bg-primary-foreground/30 absolute top-1/2 -right-1 z-10 translate-x-2 -translate-y-1/2 rounded-full p-1 backdrop-blur-sm transition-all duration-200'
+															>
+																<ChevronRight className='text-primary-foreground h-4 w-4' />
+															</button>
+														</>
+													)}
+
+													{/* Current Item Display */}
 													<motion.div
-														key={item.id}
-														initial={{ opacity: 0, scale: 0.95 }}
-														animate={{ opacity: 1, scale: 1 }}
-														exit={{ opacity: 0, scale: 0.95 }}
-														className='bg-primary-foreground/20 hover:bg-primary-foreground/30 flex items-center gap-3 rounded-lg p-3 transition-all duration-200'
+														key={currentRequestItem.itemID || 0}
+														initial={{ opacity: 0, x: 20 }}
+														animate={{ opacity: 1, x: 0 }}
+														exit={{ opacity: 0, x: -20 }}
+														transition={{ duration: 0.3 }}
+														className={`bg-primary-foreground/20 hover:bg-primary-foreground/25 flex items-center gap-4 rounded-lg p-2 transition-all duration-200 ${currentRequestItem.isConfirmed ? 'ring-2 ring-green-400' : ''}`}
 													>
 														<div className='relative'>
 															<img
-																src={item.image}
-																alt={item.name}
-																className='h-12 w-12 rounded-lg object-cover shadow-md'
+																src={currentRequestItem.image}
+																alt={currentRequestItem.name}
+																className='h-16 w-16 rounded-md object-cover shadow-md'
 															/>
-															<div className='absolute -top-1 -right-1 rounded-full bg-blue-500 px-1.5 py-0.5 text-xs font-medium text-white'>
-																{item.requestedQuantity}
+															<div className='absolute -top-2 -right-2 rounded-full bg-blue-500 px-2 py-1 text-sm font-medium text-white shadow-lg'>
+																{currentRequestItem.requestedQuantity}
 															</div>
+															{currentRequestItem.isConfirmed && (
+																<div className='absolute -bottom-1 -left-1 rounded-full bg-green-500 p-1'>
+																	<CheckCircle className='h-3 w-3 text-white' />
+																</div>
+															)}
 														</div>
 
 														<div className='min-w-0 flex-1'>
-															<h5 className='text-primary-foreground truncate text-sm font-medium'>
-																{item.name}
+															<h5 className='text-primary-foreground mb-1 flex items-center gap-2 text-base font-semibold'>
+																{currentRequestItem.name}
+																{currentRequestItem.isConfirmed && (
+																	<span className='rounded-full bg-green-500 px-2 py-1 text-xs font-medium text-white'>
+																		Đã xác nhận
+																	</span>
+																)}
 															</h5>
-															<p className='text-primary-foreground/70 mt-1 text-xs'>
-																{item.categoryName && `${item.categoryName} • `}
-																Có sẵn: {item.quantity || 0}
+															<p className='text-primary-foreground/80 mb-2 text-sm'>
+																{currentRequestItem.description}
+															</p>
+															<p className='text-primary-foreground/70 text-xs'>
+																{currentRequestItem.categoryName &&
+																	`${currentRequestItem.categoryName} • `}
+																Có sẵn: {currentRequestItem.quantity || 0}
 															</p>
 														</div>
 
-														<div className='flex items-center gap-2'>
+														<div className='flex items-center gap-3'>
 															{isAuthor ? (
-																// Điều chỉnh cho tác giả
-																<div className='bg-primary-foreground/20 flex items-center gap-1 rounded-lg p-1'>
-																	<button
-																		onClick={() =>
-																			handleQuantityChange(item.id, -1, true)
-																		}
-																		className='bg-primary-foreground/30 hover:bg-primary-foreground/50 flex h-7 w-7 items-center justify-center rounded-md transition-colors'
-																	>
-																		<Minus className='text-primary-foreground h-3 w-3' />
-																	</button>
-																	<span className='text-primary-foreground w-8 text-center text-sm font-medium'>
-																		{item.requestedQuantity}
-																	</span>
-																	<button
-																		onClick={() =>
-																			handleQuantityChange(item.id, 1, true)
-																		}
-																		className='bg-primary-foreground/30 hover:bg-primary-foreground/50 flex h-7 w-7 items-center justify-center rounded-md transition-colors'
-																	>
-																		<Plus className='text-primary-foreground h-3 w-3' />
-																	</button>
+																<div className='flex items-center gap-2'>
+																	{/* Nút xác nhận đơn lẻ */}
+																	{!currentRequestItem.isConfirmed && (
+																		<button
+																			onClick={() =>
+																				handleConfirmSingleRequest(
+																					currentRequestItem.itemID || 0
+																				)
+																			}
+																			className='flex items-center gap-1 rounded-lg bg-green-500 px-3 py-2 text-sm font-medium text-white shadow-lg transition-all duration-200 hover:bg-green-600'
+																			title='Xác nhận yêu cầu này'
+																		>
+																			<Check className='h-4 w-4' />
+																			Xác nhận
+																		</button>
+																	)}
+
+																	{/* Điều chỉnh số lượng cho tác giả */}
+																	<div className='bg-primary-foreground/30 flex items-center gap-2 rounded-lg p-2'>
+																		<button
+																			onClick={() =>
+																				handlePendingQuantityChange(
+																					currentRequestItem.itemID || 0,
+																					-1
+																				)
+																			}
+																			className='bg-primary-foreground/40 hover:bg-primary-foreground/60 flex h-8 w-8 items-center justify-center rounded-md transition-colors'
+																		>
+																			<Minus className='text-primary-foreground h-4 w-4' />
+																		</button>
+																		<span className='text-primary-foreground w-8 text-center text-sm font-semibold'>
+																			{currentRequestItem.requestedQuantity}
+																		</span>
+																		<button
+																			onClick={() =>
+																				handlePendingQuantityChange(
+																					currentRequestItem.itemID || 0,
+																					1
+																				)
+																			}
+																			className='bg-primary-foreground/40 hover:bg-primary-foreground/60 flex h-8 w-8 items-center justify-center rounded-md transition-colors'
+																		>
+																			<Plus className='text-primary-foreground h-4 w-4' />
+																		</button>
+																	</div>
 																</div>
 															) : (
 																// Nút xóa cho người gửi yêu cầu
 																<button
 																	onClick={() =>
-																		handleRemovePendingRequest(item.id)
+																		handleRemovePendingRequest(
+																			currentRequestItem.itemID || 0
+																		)
 																	}
-																	className='group flex h-8 w-8 items-center justify-center rounded-md bg-red-500/80 transition-colors hover:bg-red-500'
+																	className='group flex h-8 w-8 items-center justify-center rounded-md bg-red-500/80 transition-all duration-200 hover:bg-red-500 hover:shadow-lg'
 																	title='Xóa yêu cầu'
 																>
-																	<X className='h-4 w-4 text-white transition-transform group-hover:scale-110' />
+																	<X className='h-5 w-5 text-white transition-transform group-hover:scale-110' />
 																</button>
 															)}
 														</div>
 													</motion.div>
-												))}
-											</div>
+
+													{/* Dots Indicator */}
+													{pendingRequests.length > 1 && (
+														<div className='mt-3 flex justify-center gap-2'>
+															{pendingRequests.map((_, index) => (
+																<button
+																	key={index}
+																	onClick={() => setCurrentRequestIndex(index)}
+																	className={`h-2 w-2 rounded-full transition-all duration-200 ${
+																		index === currentRequestIndex
+																			? 'bg-primary-foreground w-6'
+																			: 'bg-primary-foreground/40 hover:bg-primary-foreground/60'
+																	}`}
+																/>
+															))}
+														</div>
+													)}
+												</div>
+											)}
 										</div>
 									)}
 								</div>
 
 								{/* Messages */}
-								<div className='bg-muted max-h-[400px] min-h-[350px] flex-1 overflow-y-auto p-6'>
+								<div className='bg-muted max-h-[350px] min-h-[300px] flex-1 overflow-y-auto px-6 py-4'>
 									<AnimatePresence>
 										{messages.map(msg => (
 											<motion.div
@@ -370,14 +558,14 @@ export const ChatDialog = ({
 								</div>
 
 								{/* Input */}
-								<div className='border-border bg-card border-t p-4'>
+								<div className='border-border bg-card border-t px-4 py-2'>
 									<div className='flex space-x-3'>
 										<input
 											type='text'
 											value={message}
 											onChange={e => setMessage(e.target.value)}
 											onKeyPress={handleKeyPress}
-											className='border-border focus:ring-chart-accent-1 flex-1 rounded-xl border px-4 py-3 text-sm transition-all duration-200 focus:border-transparent focus:ring-2 focus:outline-none'
+											className='border-border focus:ring-primary flex-1 rounded-xl border px-3 text-sm transition-all duration-200 focus:border-transparent focus:ring-2 focus:outline-none'
 											placeholder='Nhập tin nhắn...'
 										/>
 										<button
@@ -402,8 +590,10 @@ export const ChatDialog = ({
 										<p className='text-muted-foreground mb-3 text-xs'>
 											Chọn những vật phẩm bạn muốn trao đổi
 										</p>
+
+										{/* Hiển thị danh sách items đã chọn */}
 										{selectedItems.length > 0 && (
-											<div className='bg-primary/10 border-primary/20 rounded-lg border p-3'>
+											<div className='bg-primary/10 border-primary/20 mb-3 rounded-lg border p-3'>
 												<div className='mb-2 flex items-center justify-between'>
 													<span className='text-primary text-sm font-medium'>
 														Đã chọn: {selectedItems.length} vật phẩm
@@ -415,6 +605,61 @@ export const ChatDialog = ({
 														Xóa tất cả
 													</button>
 												</div>
+
+												{/* Danh sách items đã chọn với số lượng */}
+												<div className='mb-3 max-h-32 space-y-2 overflow-y-auto'>
+													{selectedItems.map(item => (
+														<div
+															key={item.itemID || 0}
+															className='bg-background/50 flex items-center gap-2 rounded-md p-2'
+														>
+															<img
+																src={item.image}
+																alt={item.name}
+																className='h-8 w-8 rounded object-cover'
+															/>
+															<div className='min-w-0 flex-1'>
+																<p className='truncate text-xs font-medium'>
+																	{item.name}
+																</p>
+															</div>
+															<div className='flex items-center gap-1'>
+																<button
+																	onClick={() =>
+																		handleQuantityChange(item.itemID || 0, -1)
+																	}
+																	className='bg-muted hover:bg-muted/80 flex h-6 w-6 items-center justify-center rounded transition-colors'
+																>
+																	<Minus className='h-3 w-3' />
+																</button>
+																<span className='w-6 text-center text-xs font-medium'>
+																	{item.requestedQuantity}
+																</span>
+																<button
+																	onClick={() =>
+																		handleQuantityChange(item.itemID || 0, 1)
+																	}
+																	disabled={
+																		item.requestedQuantity >=
+																		(item.quantity || 1)
+																	}
+																	className='bg-muted hover:bg-muted/80 flex h-6 w-6 items-center justify-center rounded transition-colors disabled:opacity-50'
+																>
+																	<Plus className='h-3 w-3' />
+																</button>
+																<button
+																	onClick={() =>
+																		handleRemoveSelectedItem(item.itemID || 0)
+																	}
+																	className='ml-1 text-red-500 hover:text-red-700'
+																>
+																	<X className='h-3 w-3' />
+																</button>
+															</div>
+														</div>
+													))}
+												</div>
+
 												<button
 													onClick={handleSendRequest}
 													className={`bg-primary hover:bg-primary/90 focus:ring-primary text-primary-foreground flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium shadow-lg transition-all duration-200 hover:shadow-xl`}
@@ -426,17 +671,17 @@ export const ChatDialog = ({
 										)}
 									</div>
 
+									{/* Danh sách tất cả items có thể chọn */}
 									<div className='flex-1 space-y-3 overflow-y-auto p-4'>
 										{items.map(item => {
-											const selectedItem = selectedItems.find(
-												selected => selected.id === item.id
+											const isSelected = selectedItems.some(
+												selected => selected.itemID === item.itemID || 0
 											)
-											const isSelected = !!selectedItem
 											const availableQuantity = item.quantity || 0
 
 											return (
 												<motion.div
-													key={item.id}
+													key={item.itemID || 0}
 													initial={{ opacity: 0, y: 10 }}
 													animate={{ opacity: 1, y: 0 }}
 													className={`cursor-pointer rounded-xl border p-4 transition-all duration-200 ${
@@ -491,52 +736,6 @@ export const ChatDialog = ({
 															</div>
 														</div>
 													</div>
-
-													{isSelected && (
-														<motion.div
-															initial={{ opacity: 0, height: 0 }}
-															animate={{ opacity: 1, height: 'auto' }}
-															className='border-primary/20 mt-4 border-t pt-4'
-														>
-															<div className='flex items-center justify-between'>
-																<span className='text-foreground text-sm font-medium'>
-																	Số lượng yêu cầu:
-																</span>
-																<div className='flex items-center gap-2'>
-																	<button
-																		onClick={e => {
-																			e.stopPropagation()
-																			handleQuantityChange(item.id, -1)
-																		}}
-																		className='bg-muted hover:bg-muted/80 flex h-8 w-8 items-center justify-center rounded-lg transition-colors'
-																	>
-																		<Minus className='h-4 w-4' />
-																	</button>
-																	<div className='w-12 text-center'>
-																		<span className='text-primary font-semibold'>
-																			{selectedItem.requestedQuantity}
-																		</span>
-																		<span className='text-muted-foreground text-xs'>
-																			/{availableQuantity}
-																		</span>
-																	</div>
-																	<button
-																		onClick={e => {
-																			e.stopPropagation()
-																			handleQuantityChange(item.id, 1)
-																		}}
-																		disabled={
-																			selectedItem.requestedQuantity >=
-																			availableQuantity
-																		}
-																		className='bg-muted hover:bg-muted/80 flex h-8 w-8 items-center justify-center rounded-lg transition-colors disabled:cursor-not-allowed disabled:opacity-50'
-																	>
-																		<Plus className='h-4 w-4' />
-																	</button>
-																</div>
-															</div>
-														</motion.div>
-													)}
 												</motion.div>
 											)
 										})}

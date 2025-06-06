@@ -16,15 +16,14 @@ export const useListPostQuery = (params: IListParams<IPost>) => {
 	})
 }
 
-export const useDetailPostQuery = (id: number | null | undefined) => {
+export const useDetailPostQuery = (slug: string) => {
 	return useQuery<IPostDetail | null>({
-		queryKey: ['posts', id], // Key để cache, dựa trên id
+		queryKey: ['posts', slug], // Key để cache, dựa trên id
 		queryFn: async () => {
-			if (!id || id <= 0) return null // Trả về null nếu id không hợp lệ
-			const res = await postApi.detail(id)
+			const res = await postApi.detail(slug)
 			return res.data.post.id === 0 ? null : res.data.post // Trả về null nếu post không tồn tại
 		},
-		enabled: !!id && id > 0, // Chỉ chạy query khi id tồn tại và lớn hơn 0
+		enabled: !!slug, // Chỉ chạy query khi id tồn tại và lớn hơn 0
 		staleTime: 5 * 60 * 1000, // Dữ liệu tươi trong 5 phút
 		gcTime: 10 * 60 * 1000 // Cache trong 10 phút
 	})

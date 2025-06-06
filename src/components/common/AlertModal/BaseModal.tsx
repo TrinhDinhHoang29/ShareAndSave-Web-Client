@@ -24,9 +24,13 @@ const BaseModal: React.FC<BaseModalProps> = ({
 		<div
 			className={clsx(
 				'fixed inset-0 bg-gradient-to-br from-black/40 via-gray-900/50 to-black/60',
-				'modal-backdrop z-50 flex items-center justify-center p-4'
+				'modal-backdrop z-[1000] flex items-center justify-center p-4'
 			)}
-			onClick={e => e.target === e.currentTarget && backdropClose && onClose()}
+			onClick={e => {
+				if (e.target === e.currentTarget && backdropClose) {
+					onClose()
+				}
+			}}
 		>
 			<div
 				className={clsx(

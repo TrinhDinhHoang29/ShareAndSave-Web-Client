@@ -1,15 +1,18 @@
 import {
 	IApiResponse,
 	ILoginRequest,
-	ILoginResponse
+	ILoginResponse,
+	IUser
 } from '@/models/interfaces'
 
 import axiosPrivate from '../client/private.client'
 import axiosPublic from '../client/public.client'
 
 const authEndpoints = {
-	login: 'login',
-	logout: 'logout'
+	login: 'client/login',
+	logout: 'client/logout',
+	refreshToken: 'refresh-token',
+	getMe: 'client/get-me'
 }
 
 const authApi = {
@@ -25,6 +28,24 @@ const authApi = {
 		// eslint-disable-next-line no-useless-catch
 		try {
 			return await axiosPrivate.post(authEndpoints.logout)
+		} catch (error) {
+			throw error
+		}
+	},
+	async refreshToken(data: {
+		refreshToken: string
+	}): Promise<IApiResponse<{ jwt: string }>> {
+		// eslint-disable-next-line no-useless-catch
+		try {
+			return await axiosPrivate.post(authEndpoints.refreshToken, data)
+		} catch (error) {
+			throw error
+		}
+	},
+	async getMe(): Promise<IApiResponse<{ user: IUser }>> {
+		// eslint-disable-next-line no-useless-catch
+		try {
+			return await axiosPrivate.get(authEndpoints.getMe)
 		} catch (error) {
 			throw error
 		}

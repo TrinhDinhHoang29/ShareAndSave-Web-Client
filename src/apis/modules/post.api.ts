@@ -12,7 +12,8 @@ import axiosPublic from '../client/public.client'
 
 const postEndpoints = {
 	post: 'posts',
-	listPosts: 'client/posts'
+	listPosts: 'client/posts',
+	detail: 'posts/slug'
 }
 
 const postApi = {
@@ -36,10 +37,10 @@ const postApi = {
 			params
 		})
 	},
-	async detail(id: number): Promise<IApiResponse<{ post: IPostDetail }>> {
+	async detail(slug: string): Promise<IApiResponse<{ post: IPostDetail }>> {
 		// eslint-disable-next-line no-useless-catch
 		try {
-			return await axiosPublic.get(postEndpoints.post + '/' + id)
+			return await axiosPublic.get(postEndpoints.detail + '/' + slug)
 		} catch (error) {
 			throw error
 		}

@@ -44,7 +44,7 @@ function AppRouter() {
 					path: 'bai-dang',
 					children: [
 						{
-							path: ':id',
+							path: ':slug',
 							element: (
 								<ErrorBoundary>
 									<PostDetail />

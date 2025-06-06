@@ -6,7 +6,7 @@ import { IPost } from '@/models/interfaces'
 
 interface PostItemProps {
 	post: IPost
-	onPostClick?: (id: number) => void
+	onPostClick?: (slug: string) => void
 }
 
 const PostItem: React.FC<PostItemProps> = ({ post, onPostClick }) => {
@@ -67,7 +67,7 @@ const PostItem: React.FC<PostItemProps> = ({ post, onPostClick }) => {
 			animate={{ opacity: 1, y: 0 }}
 			whileHover={{ y: -4, transition: { duration: 0.2 } }}
 			className='group bg-card border-border/50 relative cursor-pointer overflow-hidden rounded-xl border shadow-sm transition-all duration-300 hover:shadow-lg'
-			onClick={() => onPostClick?.(post.id)}
+			onClick={() => onPostClick?.(post.slug)}
 		>
 			{/* Header với hình ảnh nếu có */}
 			{post.images && post.images.length > 0 && (
