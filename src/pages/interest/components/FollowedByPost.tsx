@@ -1,19 +1,18 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronDown, Hash, User } from 'lucide-react'
+import { ChevronDown, FileTextIcon, User } from 'lucide-react'
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
-import { PostInterest } from '@/models/interfaces'
+import { getTypeInfo } from '@/models/constants'
+import { EPostType } from '@/models/enums'
+import { IPostInterest } from '@/models/interfaces'
 
 import { InterestItem } from './InterestItem'
 
-export const PostItem = ({
-	post,
-	activeTab
-}: {
-	post: PostInterest
-	activeTab: 'active' | 'completed'
-}) => {
+export const PostItem = ({ post }: { post: IPostInterest }) => {
 	const [isExpanded, setIsExpanded] = useState(false)
+	const typeInfo = getTypeInfo(post.type.toString() as EPostType)
+	const navigate = useNavigate()
 
 	return (
 		<div className='border-border bg-card/80 overflow-hidden rounded-2xl border shadow-lg backdrop-blur-sm transition-shadow duration-200 hover:shadow-xl'>
@@ -22,30 +21,42 @@ export const PostItem = ({
 				onClick={() => setIsExpanded(!isExpanded)}
 			>
 				<div className='flex items-center space-x-4'>
-					<div
-						className={`flex h-12 w-12 items-center justify-center rounded-xl shadow-lg ${
-							activeTab === 'active' ? 'bg-chart-1' : 'bg-primary'
-						}`}
-					>
-						<Hash className='text-primary-foreground h-6 w-6' />
-					</div>
-					<div>
-						<h3 className='text-foreground font-manrope text-xl font-semibold'>
-							{post.title}
-						</h3>
-						<p className='text-muted-foreground mt-1 text-sm'>
-							Bài đăng #{post.id}
-						</p>
+					<div className='flex items-center space-x-4'>
+						<div
+							className={`bg-primary flex h-12 w-12 items-center justify-center rounded-xl shadow-lg`}
+						>
+							<span className='text-primary-foreground text-lg'>
+								{typeInfo.icon}
+							</span>
+						</div>
+						<div>
+							<div className='space-y-2'>
+								<span
+									className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${typeInfo.color}`}
+								>
+									{typeInfo.label}
+								</span>
+								<h3 className='text-foreground font-manrope truncate text-xl font-semibold'>
+									{post.title}
+								</h3>
+							</div>
+						</div>
 					</div>
 				</div>
 
 				<div className='flex items-center space-x-3'>
+					<button
+						onClick={e => {
+							e.stopPropagation()
+							navigate(`/bai-dang/${post.slug}`)
+						}}
+						title='Xem bài đăng'
+						className={`bg-secondary/80 text-secondary-foreground hover:bg-secondary flex items-center space-x-2 rounded-full px-6 py-3 font-medium`}
+					>
+						<FileTextIcon className='h-4 w-4' />
+					</button>
 					<div
-						className={`flex items-center space-x-2 rounded-full px-4 py-2 font-medium ${
-							activeTab === 'active'
-								? 'bg-chart-accent-1 text-chart-accent-foreground-1'
-								: 'bg-accent text-accent-foreground'
-						}`}
+						className={`bg-accent text-accent-foreground flex items-center space-x-2 rounded-full px-4 py-2 font-medium`}
 					>
 						<User className='h-4 w-4' />
 						<span>{post.interests.length}</span>
@@ -75,10 +86,9 @@ export const PostItem = ({
 								<div className='space-y-4'>
 									{post.interests.map(interest => (
 										<InterestItem
+											userInterest={interest}
 											key={interest.id}
-											interest={interest}
 											postTitle={post.title}
-											activeTab={activeTab}
 										/>
 									))}
 								</div>

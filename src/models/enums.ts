@@ -32,3 +32,8 @@ export enum ESortOrder {
 	ASC = 'Asc',
 	DESC = 'DESC'
 }
+
+export enum EInterestType {
+	INTERESTED = 1,
+	FOLLWED_BY = 2
+}

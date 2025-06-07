@@ -7,6 +7,7 @@ import {
 	clearAccessToken,
 	clearRefreshToken,
 	getAccessToken,
+	getRefreshToken,
 	setAccessToken,
 	setRefreshToken
 } from '@/lib/token'
@@ -19,13 +20,14 @@ interface AuthState {
 	login: (data: ILoginResponse) => void
 	logout: () => void
 	setAuthLoading: (loading: boolean) => void
+	syncAuthState: () => Promise<void> // Thêm phương thức đồng bộ trạng thái
 }
 
 const useAuthStore = create<AuthState>()(
 	persist(
 		set => ({
 			user: null,
-			isAuthenticated: !!getAccessToken(),
+			isAuthenticated: false, // Không dựa vào getAccessToken() ban đầu
 			isAuthLoading: true,
 			login: data => {
 				setAccessToken(data.jwt)
@@ -44,7 +46,27 @@ const useAuthStore = create<AuthState>()(
 					isAuthenticated: false
 				})
 			},
-			setAuthLoading: loading => set({ isAuthLoading: loading })
+			setAuthLoading: loading => set({ isAuthLoading: loading }),
+			syncAuthState: async () => {
+				const accessToken = getAccessToken()
+				const refreshToken = getRefreshToken()
+				if (!accessToken && !refreshToken) {
+					set({ user: null, isAuthenticated: false })
+					return
+				}
+				try {
+					const response = await authApi.getMe() // Kiểm tra token bằng API
+					set({
+						user: response.data.user,
+						isAuthenticated: true
+					})
+				} catch (error) {
+					console.error('Sync auth failed:', error)
+					clearAccessToken()
+					clearRefreshToken()
+					set({ user: null, isAuthenticated: false })
+				}
+			}
 		}),
 		{
 			name: 'auth-store',

@@ -1,7 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 
 import authApi from '@/apis/modules/auth.api'
-import { useAlertModalContext } from '@/context/alert-modal-context'
 import { IApiErrorResponse } from '@/models/interfaces'
 import useAuthStore from '@/stores/authStore'
 
@@ -16,7 +15,6 @@ export const useLoginMutaion = ({
 	onError,
 	onSettled
 }: useLoginMutaionOptions = {}) => {
-	const { showError } = useAlertModalContext()
 	const { login } = useAuthStore()
 
 	return useMutation({
@@ -26,13 +24,9 @@ export const useLoginMutaion = ({
 				login(res.data)
 				onSuccess?.()
 			} else {
-				showError({
-					errorTitle: 'Lỗi gửi yêu cầu',
-					errorMessage:
-						res.message ||
-						'Đã xảy ra lỗi khi gửi yêu cầu. Vui lòng thử lại sau.',
-					errorButtonText: 'Thử lại'
-				})
+				const errorMessage = res.message
+				const cleanedMessage = errorMessage.split(':')[0].trim()
+				onError?.(cleanedMessage)
 			}
 		},
 		onError: (error: any) => {

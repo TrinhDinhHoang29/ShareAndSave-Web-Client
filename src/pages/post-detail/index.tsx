@@ -28,6 +28,8 @@ import {
 } from '@/hooks/mutations/use-interest.mutation'
 import { useDetailPostQuery } from '@/hooks/queries/use-post-query'
 import { formatDateVN } from '@/lib/utils'
+import { getTypeInfo } from '@/models/constants'
+import { EPostType } from '@/models/enums'
 import { IUserInterest } from '@/models/interfaces'
 import useAuthStore from '@/stores/authStore'
 
@@ -78,7 +80,8 @@ const PostDetail: React.FC = () => {
 				status: 1,
 				userAvatar: user?.avatar || '',
 				userID: user?.id || 0,
-				userName: user?.fullName || ''
+				userName: user?.fullName || '',
+				createdAt: new Date().toISOString()
 			}
 			post?.interests.push(newUserInterest)
 			console.log('Create', interestID)
@@ -129,46 +132,6 @@ const PostDetail: React.FC = () => {
 	if (isError) return <div>Lỗi: {error?.message}</div>
 	if (!post) return <div>Bài đăng không tồn tại hoặc ID không hợp lệ</div>
 
-	const getTypeInfo = (type: number) => {
-		switch (type) {
-			case 1:
-				return {
-					label: 'Cho tặng đồ cũ',
-					color:
-						'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
-					icon: '🎁'
-				}
-			case 2:
-				return {
-					label: 'Tìm thấy đồ',
-					color:
-						'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
-					icon: '🔍'
-				}
-			case 3:
-				return {
-					label: 'Tìm đồ bị mất',
-					color:
-						'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400',
-					icon: '❓'
-				}
-			case 4:
-				return {
-					label: 'Khác',
-					color:
-						'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400',
-					icon: '📝'
-				}
-			default:
-				return {
-					label: 'Khác',
-					color:
-						'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400',
-					icon: '📝'
-				}
-		}
-	}
-
 	const parsePostInfo = () => {
 		if (!post.info) return null
 
@@ -217,7 +180,7 @@ const PostDetail: React.FC = () => {
 		}
 	}
 
-	const typeInfo = getTypeInfo(post.type)
+	const typeInfo = getTypeInfo(post.type.toString() as EPostType)
 	const parsedInfo = parsePostInfo()
 
 	return (
@@ -569,7 +532,7 @@ const PostDetail: React.FC = () => {
 												Những người quan tâm ({post.interests.length})
 											</h2>
 										</div>
-										<div className='glass flex items-center rounded-xl p-6'>
+										<div className='glass grid grid-cols-8 rounded-xl p-6'>
 											{post.interests &&
 												post.interests.length > 0 &&
 												post.interests.map(interest => (
@@ -602,46 +565,48 @@ const PostDetail: React.FC = () => {
 								{/* Sidebar */}
 								<div className='space-y-6'>
 									{/* Action Buttons */}
-									<motion.div
-										initial={{ opacity: 0, x: 20 }}
-										animate={{ opacity: 1, x: 0 }}
-										transition={{ delay: 0.4 }}
-										className='glass space-y-4 rounded-xl p-6'
-									>
-										<button
-											onClick={handleInterest}
-											className={`flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 font-medium transition-all ${
-												isInterested
-													? 'bg-primary text-primary-foreground hover:bg-primary/90'
-													: 'bg-accent text-accent-foreground hover:bg-accent/80'
-											}`}
+									{user?.id !== post.authorID && (
+										<motion.div
+											initial={{ opacity: 0, x: 20 }}
+											animate={{ opacity: 1, x: 0 }}
+											transition={{ delay: 0.4 }}
+											className='glass space-y-4 rounded-xl p-6'
 										>
-											{isCreateInterestPending || isDeleteInterestPending ? (
-												<Loading />
-											) : (
-												<>
-													<Heart
-														className={`h-5 w-5 ${isInterested ? 'fill-current' : ''}`}
-													/>
-													{isInterested ? 'Đã quan tâm' : 'Quan tâm'}
-												</>
-											)}
-										</button>
+											<button
+												onClick={handleInterest}
+												className={`flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 font-medium transition-all ${
+													isInterested
+														? 'bg-primary text-primary-foreground hover:bg-primary/90'
+														: 'bg-accent text-accent-foreground hover:bg-accent/80'
+												}`}
+											>
+												{isCreateInterestPending || isDeleteInterestPending ? (
+													<Loading />
+												) : (
+													<>
+														<Heart
+															className={`h-5 w-5 ${isInterested ? 'fill-current' : ''}`}
+														/>
+														{isInterested ? 'Đã quan tâm' : 'Quan tâm'}
+													</>
+												)}
+											</button>
 
-										<button
-											type='button'
-											onClick={handleChat}
-											className={clsx(
-												'text-primary-foreground flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 font-medium transition-colors',
-												isInterested
-													? 'bg-chart-1/90 hover:bg-chart-1 cursor-pointer'
-													: 'bg-chart-1/20 hover:bg-chart-1/30 cursor-not-allowed'
-											)}
-										>
-											<MessageCircle className='h-5 w-5' />
-											Trò chuyện
-										</button>
-									</motion.div>
+											<button
+												type='button'
+												onClick={handleChat}
+												className={clsx(
+													'text-primary-foreground flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 font-medium transition-colors',
+													isInterested
+														? 'bg-chart-1/90 hover:bg-chart-1 cursor-pointer'
+														: 'bg-chart-1/20 hover:bg-chart-1/30 cursor-not-allowed'
+												)}
+											>
+												<MessageCircle className='h-5 w-5' />
+												Trò chuyện
+											</button>
+										</motion.div>
+									)}
 
 									{/* Author Info */}
 									<motion.div
@@ -767,10 +732,12 @@ const PostDetail: React.FC = () => {
 			</div>
 			{isShowChatDialog && (
 				<ChatDialog
-					userName={post.authorName}
 					postTitle={post.title}
 					items={post.items}
-					userId={post.authorID}
+					sender={{
+						id: post.authorID,
+						name: post.authorName
+					}}
 					onClose={() => setIsShowChatDialog(false)}
 				/>
 			)}

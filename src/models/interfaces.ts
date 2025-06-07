@@ -1,6 +1,7 @@
 import { LucideIcon } from 'lucide-react'
 
 import {
+	EInterestType,
 	EPostSTatus,
 	EPostType,
 	ERequestStatus,
@@ -172,12 +173,20 @@ export interface IUserInterest {
 	userAvatar: string
 	userID: number
 	userName: string
+	createdAt: string
 }
 
-export interface PostInterest {
+export interface IPostInterest {
 	id: number
 	title: string
-	interests: Interest[]
+	authorID: number
+	authorName: string
+	description: string
+	slug: string
+	type: EPostType
+	updatedAt: string
+	interests: IUserInterest[]
+	items: IItem[]
 }
 
 export interface ILoginRequest {
@@ -226,4 +235,23 @@ export interface IPostDetail {
 	tags: string[]
 	title: string
 	type: number
+}
+
+export interface IListPostInterestParams {
+	page?: number
+	limit?: number
+	sort?: string
+	order?: ESortOrder
+	type: EInterestType
+	search?: string
+}
+
+export interface IPostInterestResponse {
+	interests: IPostInterest[]
+	totalPage: number
+}
+
+export interface ISender {
+	id: number
+	name: string
 }

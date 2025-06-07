@@ -1,3 +1,4 @@
+// main.tsx
 import '@/index.css'
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -8,6 +9,9 @@ import { BrowserRouter } from 'react-router-dom'
 import App from '@/App'
 import { FontProvider } from '@/context/font-context'
 import { ThemeProvider } from '@/context/theme-context'
+
+import { AlertModalProvider } from './context/alert-modal-context'
+import { AuthDialogProvider } from './context/auth-dialog-context'
 
 const queryClient = new QueryClient({
 	defaultOptions: {
@@ -26,9 +30,13 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 				storageKey='vite-ui-theme'
 			>
 				<FontProvider>
-					<BrowserRouter>
-						<App />
-					</BrowserRouter>
+					<AuthDialogProvider>
+						<AlertModalProvider>
+							<BrowserRouter>
+								<App />
+							</BrowserRouter>
+						</AlertModalProvider>
+					</AuthDialogProvider>
 				</FontProvider>
 			</ThemeProvider>
 		</QueryClientProvider>

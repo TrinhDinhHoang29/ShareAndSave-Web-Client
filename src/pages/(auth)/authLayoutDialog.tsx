@@ -8,7 +8,7 @@ interface BaseDialogProps {
 	isOpen: boolean
 	onClose: () => void
 	title: string
-	subtitle: string
+	subTitle: string
 	headerColor?: string // Optional, defaults to bg-primary
 	children: React.ReactNode
 	maxWidth?: string
@@ -18,7 +18,7 @@ const AuthLayoutDialog: React.FC<BaseDialogProps> = ({
 	isOpen,
 	onClose,
 	title,
-	subtitle,
+	subTitle,
 	children,
 	maxWidth = 'max-w-md'
 }) => {
@@ -100,7 +100,7 @@ const AuthLayoutDialog: React.FC<BaseDialogProps> = ({
 												as='p'
 												className='text-foreground/80 text-sm'
 											>
-												{subtitle}
+												{subTitle}
 											</Dialog.Description>
 										</motion.div>
 									</div>

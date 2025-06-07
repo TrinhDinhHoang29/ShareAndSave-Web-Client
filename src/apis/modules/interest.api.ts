@@ -1,4 +1,8 @@
-import { IApiResponse } from '@/models/interfaces'
+import {
+	IApiResponse,
+	IListPostInterestParams,
+	IPostInterestResponse
+} from '@/models/interfaces'
 
 import axiosPrivate from '../client/private.client'
 
@@ -7,9 +11,13 @@ const interestEndpoints = {
 }
 
 const interestApi = {
-	// async list(): Promise<IApiResponse<{ categories: Iinterest[] }>> {
-	//     return axiosPublic.get(interestEndpoints.common)
-	// },
+	async list(
+		params: IListPostInterestParams
+	): Promise<IApiResponse<IPostInterestResponse>> {
+		return axiosPrivate.get(interestEndpoints.common, {
+			params
+		})
+	},
 	async create(data: {
 		postID: number
 	}): Promise<IApiResponse<{ interestID: number }>> {

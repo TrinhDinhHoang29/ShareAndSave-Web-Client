@@ -6,7 +6,7 @@ import PostItem from '@/pages/post/components/PostItem'
 
 // Demo component để test
 const PostListItemDemo: React.FC = () => {
-	const { data: posts, isLoading } = useListPostQuery({})
+	const { data: posts, isLoading } = useListPostQuery({ limit: 20 })
 	const navigate = useNavigate()
 
 	return (

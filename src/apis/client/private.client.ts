@@ -1,3 +1,4 @@
+// axiosPrivate.ts
 import axios from 'axios'
 
 import {
@@ -8,10 +9,10 @@ import {
 	setAccessToken,
 	setRefreshToken
 } from '@/lib/token'
+import useAuthStore from '@/stores/authStore'
 
 import authApi from '../modules/auth.api'
 
-// Tạo instance axios
 const axiosPrivate = axios.create({
 	baseURL: import.meta.env.VITE_API_URL,
 	timeout: 1000000,
@@ -22,10 +23,10 @@ const axiosPrivate = axios.create({
 	}
 })
 
-// Request Interceptor: Thêm Access Token vào header
+// Request Interceptor
 axiosPrivate.interceptors.request.use(
 	config => {
-		const token = getAccessToken() // Sử dụng hàm từ module của bạn
+		const token = getAccessToken()
 		if (token) {
 			config.headers.Authorization = `Bearer ${token}`
 		}
@@ -37,44 +38,53 @@ axiosPrivate.interceptors.request.use(
 	}
 )
 
-// Response Interceptor: Xử lý authentication và authorization
+// Response Interceptor
 axiosPrivate.interceptors.response.use(
-	response => response.data, // Thành công
+	response => response.data,
 	async error => {
 		const originalRequest = error.config
+		const { setAuthLoading, logout } = useAuthStore.getState()
 
-		// Xử lý lỗi Authentication (401 Unauthorized)
 		if (error.response?.status === 401 && !originalRequest._retry) {
-			originalRequest._retry = true // Đánh dấu request đã retry để tránh vòng lặp vô hạn
+			const isDuplicate =
+				error.response.data.message ===
+				'Có ai đó đã đăng nhập trên cùng loại thiết bị, hoặc đổi mật khẩu'
+			if (isDuplicate) {
+				clearAccessToken()
+				clearRefreshToken()
+				window.location.href = '/phien-dang-nhap'
+				return Promise.reject(error)
+			}
+
+			originalRequest._retry = true
 
 			try {
-				const refreshToken = getRefreshToken() // Lấy refresh token
+				setAuthLoading(true)
+				const refreshToken = getRefreshToken()
 				if (!refreshToken) {
 					throw new Error('No refresh token available')
 				}
 
-				// Gọi API refresh token
 				const response = await authApi.refreshToken({ refreshToken })
-
 				const jwt = response.data.jwt
-				setAccessToken(jwt) // Lưu access token mới
+				setAccessToken(jwt)
 				setRefreshToken(jwt) // Giả sử API trả về refresh token mới trong jwt, nếu không thì bỏ dòng này
 
-				// Cập nhật header của request gốc với token mới
 				originalRequest.headers.Authorization = `Bearer ${jwt}`
-
-				// Thực hiện lại request gốc
 				return axiosPrivate(originalRequest)
 			} catch (refreshError) {
 				console.error('Refresh token failed:', refreshError)
-				clearAccessToken() // Xóa access token
-				clearRefreshToken() // Xóa refresh token
+				logout() // Cập nhật trạng thái auth khi refresh thất bại
 				return Promise.reject(refreshError)
+			} finally {
+				setAuthLoading(false)
 			}
 		}
 
-		// Các lỗi khác
-		console.error('Response error:', error)
+		console.error(
+			'Response error:',
+			error.response?.data?.message || error.message
+		)
 		return Promise.reject(error)
 	}
 )

@@ -17,7 +17,7 @@ import {
 import React, { Fragment, useState } from 'react'
 
 import { useAlertModalContext } from '@/context/alert-modal-context'
-import { IItem } from '@/models/interfaces'
+import { IItem, ISender } from '@/models/interfaces'
 import useAuthStore from '@/stores/authStore'
 
 interface RequestItem extends IItem {
@@ -26,17 +26,15 @@ interface RequestItem extends IItem {
 }
 
 export const ChatDialog = ({
-	userName,
+	sender,
 	postTitle,
 	onClose,
-	items = [],
-	userId
+	items = []
 }: {
-	userName: string
 	postTitle: string
 	onClose: () => void
 	items?: IItem[]
-	userId: number
+	sender: ISender
 }) => {
 	const [message, setMessage] = useState('')
 	const [messages, setMessages] = useState([
@@ -61,9 +59,9 @@ export const ChatDialog = ({
 	const [isRequestsVisible, setIsRequestsVisible] = useState(true) // State cho việc ẩn/hiện yêu cầu
 	const { showConfirm } = useAlertModalContext()
 	const { user } = useAuthStore()
-	const authorId = user?.id
+	const receiverID = user?.id
 
-	const isAuthor = userId === authorId
+	const isAuthor = receiverID === sender.id
 	const hasItems = items && items.length > 0
 
 	const handleSend = () => {
@@ -290,7 +288,7 @@ export const ChatDialog = ({
 													as='h3'
 													className='font-manrope text-lg font-semibold'
 												>
-													{userName}
+													{sender.name}
 												</Dialog.Title>
 												<p className='text-primary-foreground/90 text-sm'>
 													{postTitle}

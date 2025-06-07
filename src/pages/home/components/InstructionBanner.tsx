@@ -8,7 +8,6 @@ import {
 	TrendingUp,
 	Users
 } from 'lucide-react'
-import React from 'react'
 
 export default function HomepageBanner() {
 	const handleGiveAwayClick = () => {

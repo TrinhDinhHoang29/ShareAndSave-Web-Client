@@ -66,9 +66,7 @@ export const formatDateVN = (dateString: string) => {
 			weekday: 'long',
 			year: 'numeric',
 			month: 'long',
-			day: 'numeric',
-			hour: '2-digit',
-			minute: '2-digit'
+			day: 'numeric'
 		})
 	} catch {
 		return dateString
@@ -89,4 +87,13 @@ export function getDeviceId() {
 		localStorage.setItem('deviceId', deviceId)
 	}
 	return deviceId // Ví dụ: 'abc-123-xyz'
+}
+
+export const getInitials = (name: string) => {
+	return name
+		.split(' ')
+		.map(word => word.charAt(0))
+		.join('')
+		.toUpperCase()
+		.slice(0, 2)
 }
