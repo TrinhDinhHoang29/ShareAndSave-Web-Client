@@ -1,10 +1,11 @@
+import { EPostType } from '@/models/enums'
 import {
 	IApiResponse,
-	IListParams,
-	IPost,
+	IListTypeParams,
 	IPostActionRequest,
 	IPostActionResponse,
-	IPostDetail
+	IPostDetail,
+	IPostResponse
 } from '@/models/interfaces'
 
 import axiosPrivate from '../client/private.client'
@@ -31,8 +32,8 @@ const postApi = {
 		}
 	},
 	async list(
-		params: IListParams<IPost>
-	): Promise<IApiResponse<{ posts: IPost[] }>> {
+		params: IListTypeParams<EPostType>
+	): Promise<IApiResponse<IPostResponse>> {
 		return axiosPublic.get(postEndpoints.listPosts, {
 			params
 		})

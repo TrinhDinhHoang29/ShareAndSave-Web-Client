@@ -10,14 +10,13 @@ import {
 } from './enums'
 import { PersonalInfo, PostInfo, PostType } from './types'
 
-export interface IListParams<T> {
+export interface IListPostParams {
 	page?: number
 	limit?: number
-	searchBy?: string
-	searchValue?: string
+	search?: string
 	type?: EPostType
 	status?: EPostSTatus
-	sort?: keyof T | ''
+	sort?: string
 	order?: ESortOrder
 }
 
@@ -219,6 +218,11 @@ export interface IPost {
 	type: number
 }
 
+export interface IPostResponse {
+	posts: IPost[]
+	totalPage: number
+}
+
 export interface IPostDetail {
 	authorID: number
 	authorName: string
@@ -237,12 +241,12 @@ export interface IPostDetail {
 	type: number
 }
 
-export interface IListPostInterestParams {
+export interface IListTypeParams<T> {
 	page?: number
 	limit?: number
 	sort?: string
 	order?: ESortOrder
-	type: EInterestType
+	type?: T
 	search?: string
 }
 

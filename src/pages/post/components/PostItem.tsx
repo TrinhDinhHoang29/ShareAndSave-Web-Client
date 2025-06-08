@@ -1,7 +1,10 @@
 import { motion } from 'framer-motion'
-import { Calendar, Eye, Heart, Package, Tag, User } from 'lucide-react'
+import { Calendar, Heart, Package, User } from 'lucide-react'
 import React from 'react'
 
+import { formatDateVN } from '@/lib/utils'
+import { getTypeInfo } from '@/models/constants'
+import { EPostType } from '@/models/enums'
 import { IPost } from '@/models/interfaces'
 
 interface PostItemProps {
@@ -10,57 +13,9 @@ interface PostItemProps {
 }
 
 const PostItem: React.FC<PostItemProps> = ({ post, onPostClick }) => {
-	const formatDate = (dateString: string) => {
-		try {
-			return new Date(dateString).toLocaleDateString('vi-VN', {
-				day: '2-digit',
-				month: '2-digit',
-				year: 'numeric'
-			})
-		} catch {
-			return dateString
-		}
-	}
-
 	const truncateText = (text: string, maxLength: number) => {
 		return text.length > maxLength ? text.substring(0, maxLength) + '...' : text
 	}
-
-	const getTypeInfo = (type: number) => {
-		switch (type) {
-			case 1:
-				return {
-					label: 'Cho tặng đồ cũ',
-					color:
-						'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-				}
-			case 2:
-				return {
-					label: 'Tìm thấy đồ',
-					color:
-						'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-				}
-			case 3:
-				return {
-					label: 'Tìm đồ bị mất',
-					color:
-						'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400'
-				}
-			case 4:
-				return {
-					label: 'Khác',
-					color:
-						'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'
-				}
-			default:
-				return {
-					label: 'Khác',
-					color:
-						'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'
-				}
-		}
-	}
-
 	return (
 		<motion.article
 			initial={{ opacity: 0, y: 20 }}
@@ -113,35 +68,37 @@ const PostItem: React.FC<PostItemProps> = ({ post, onPostClick }) => {
 				</p>
 
 				{/* Author & Date */}
-				<div className='text-muted-foreground mb-4 flex items-center justify-between text-sm'>
-					<div className='flex items-center gap-2'>
-						<User className='h-4 w-4' />
-						<span>{post.authorName}</span>
-					</div>
-					<div className='flex items-center gap-2'>
+				<div className='mb-4 flex items-center justify-between'>
+					<div className='text-muted-foreground flex items-center gap-2 text-sm'>
 						<Calendar className='h-4 w-4' />
-						<span>{formatDate(post.createdAt)}</span>
+						<span>{formatDateVN(post.createdAt)}</span>
 					</div>
-				</div>
-
-				{/* Stats & Type */}
-				<div className='flex items-center justify-between'>
 					<div className='text-muted-foreground flex items-center gap-4 text-sm'>
 						<div className='flex items-center gap-1'>
 							<Heart className='h-4 w-4' />
 							<span>{post.interestCount}</span>
 						</div>
-						<div className='flex items-center gap-1'>
-							<Package className='h-4 w-4' />
-							<span>{post.itemCount}</span>
-						</div>
+						{post.itemCount > 0 && (
+							<div className='flex items-center gap-1'>
+								<Package className='h-4 w-4' />
+								<span>{post.itemCount}</span>
+							</div>
+						)}
+					</div>
+				</div>
+
+				{/* Stats & Type */}
+				<div className='flex items-center justify-between'>
+					<div className='text-muted-foreground flex items-center gap-2 text-sm'>
+						<User className='h-4 w-4' />
+						<span>{post.authorName}</span>
 					</div>
 
 					<div className='flex items-center gap-2'>
 						<span
-							className={`rounded-full px-2 py-1 text-xs font-medium ${getTypeInfo(post.type).color}`}
+							className={`rounded-full px-2 py-1 text-xs font-medium ${getTypeInfo(post.type.toString() as EPostType).color}`}
 						>
-							{getTypeInfo(post.type).label}
+							{getTypeInfo(post.type.toString() as EPostType).label}
 						</span>
 					</div>
 				</div>

@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query'
 import clsx from 'clsx'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
@@ -56,6 +57,7 @@ const PostDetail: React.FC = () => {
 	const [showAllInterests, setShowAllInterests] = useState(false)
 	const [showAllItems, setShowAllItems] = useState(false)
 	const [isShowChatDialog, setIsShowChatDialog] = useState(false)
+	const queryClient = useQueryClient()
 	const { showInfo } = useAlertModalContext()
 	const { user } = useAuthStore()
 
@@ -84,7 +86,7 @@ const PostDetail: React.FC = () => {
 				createdAt: new Date().toISOString()
 			}
 			post?.interests.push(newUserInterest)
-			console.log('Create', interestID)
+			queryClient.invalidateQueries({ queryKey: ['postInterests'] })
 		}
 	})
 	const {
@@ -96,7 +98,7 @@ const PostDetail: React.FC = () => {
 			if (post?.interests && post.interests.length > 0) {
 				post.interests = post?.interests.filter(i => i.id !== interestID)
 			}
-			console.log('Delete', interestID)
+			queryClient.invalidateQueries({ queryKey: ['postInterests'] })
 		}
 	})
 

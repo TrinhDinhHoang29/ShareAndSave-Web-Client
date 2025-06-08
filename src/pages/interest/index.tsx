@@ -1,20 +1,65 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { CheckCircle, Eye, Frown, Smile } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import Loading from '@/components/common/Loading'
+import Pagination from '@/components/common/Pagination'
+import { useDeleteInterestMutation } from '@/hooks/mutations/use-interest.mutation'
 import useListPostInterestQuery from '@/hooks/queries/use-interest.query'
-import { EInterestType } from '@/models/enums'
+import useDebounce from '@/hooks/use-debounce'
+import { EInterestType, ESortOrder } from '@/models/enums'
+import { IListPostInterestParams } from '@/models/interfaces'
 
 import { PostItem } from './components/FollowedByPost'
 import { InterestedPost } from './components/InterestedPost'
 
 const Interest = () => {
 	const [activeTab, setActiveTab] = useState<EInterestType>(1)
+	const [search, setSearch] = useState('')
+	const [currentPage, setCurrentPage] = useState(1)
+	const [order, setOrder] = useState<ESortOrder>(ESortOrder.DESC) // Mặc định là mới nhất
 
-	const { data, isPending } = useListPostInterestQuery({ type: activeTab })
+	const debouncedSearch = useDebounce(search, 500) // Debounce search 500ms
+
+	const params: IListPostInterestParams = useMemo(
+		() => ({
+			type: activeTab,
+			page: currentPage,
+			limit: 5, // Giới hạn 5 item mỗi trang
+			sort: 'createdAt', // Sắp xếp theo created_at
+			order, // ASC hoặc DESC
+			search: debouncedSearch || undefined // Chỉ gửi search nếu có giá trị
+		}),
+		[activeTab, currentPage, order, debouncedSearch]
+	)
+
+	const { data, isPending } = useListPostInterestQuery(params)
 	const listPostInterest = data?.interests
-	const totalPage = data?.totalPage
+	const totalPage = data?.totalPage || 1
+	const queryClient = useQueryClient()
+
+	// Mutation để hủy quan tâm
+	const { mutate: deleteInterestMutation, isPending: isDeleteInterestPending } =
+		useDeleteInterestMutation({
+			onSuccess: (interestID: number) => {
+				queryClient.invalidateQueries({ queryKey: ['postInterests', params] }) // Làm mới cache
+				if (listPostInterest && listPostInterest.length > 0) {
+					const slug = listPostInterest.filter(
+						post => post.interests[0].id === interestID
+					)[0].slug
+					queryClient.invalidateQueries({ queryKey: ['posts', slug] })
+				}
+			},
+			onError: message => {
+				console.error('Error unfollowing:', message)
+				// Có thể hiển thị thông báo lỗi nếu cần
+			}
+		})
+
+	const handleDeleteInterest = (postID: number) => {
+		deleteInterestMutation(postID)
+	}
 
 	const getTotalCount = useMemo(() => {
 		return listPostInterest?.length || 0
@@ -31,6 +76,26 @@ const Interest = () => {
 						Quản lý và theo dõi các quan tâm từ người dùng
 					</p>
 				</div>
+
+				{/* Search và Sort */}
+				<div className='mb-6 flex items-center justify-between gap-4'>
+					<input
+						type='text'
+						value={search}
+						onChange={e => setSearch(e.target.value)}
+						placeholder='Tìm kiếm bài đăng, người dùng...'
+						className='bg-card text-foreground focus:ring-primary h-full w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:outline-none'
+					/>
+					<select
+						value={order}
+						onChange={e => setOrder(e.target.value as ESortOrder)}
+						className='bg-card text-foreground focus:ring-primary rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:outline-none'
+					>
+						<option value='DESC'>Mới nhất</option>
+						<option value='ASC'>Cũ nhất</option>
+					</select>
+				</div>
+
 				{/* Tabs */}
 				<div className='mb-6'>
 					<div className='border-border bg-card/60 flex space-x-1 rounded-xl border p-2 backdrop-blur-sm'>
@@ -80,8 +145,7 @@ const Interest = () => {
 						</button>
 					</div>
 				</div>
-
-				<div className='space-y-6'>
+				<div className='relative space-y-6'>
 					<AnimatePresence mode='wait'>
 						<motion.div
 							key={activeTab}
@@ -91,14 +155,25 @@ const Interest = () => {
 							transition={{ duration: 0.2 }}
 							className='space-y-4'
 						>
-							{isPending ? (
-								<div className='flex items-center justify-center'>
-									<Loading />
-								</div>
-							) : listPostInterest && listPostInterest.length > 0 ? (
+							{isPending ||
+								(isDeleteInterestPending && (
+									<Loading
+										overlay={true}
+										position='in'
+										size='md'
+										variant='spinner'
+										color='primary'
+										text='Đang tải...'
+									/>
+								))}
+							{listPostInterest && listPostInterest.length > 0 ? (
 								listPostInterest.map(post =>
 									post.interests.length > 0 && activeTab === 1 ? (
-										<InterestedPost post={post} />
+										<InterestedPost
+											key={`${post.id}-${activeTab}`}
+											post={post}
+											onDeleteInterest={handleDeleteInterest}
+										/>
 									) : (
 										<PostItem
 											key={`${post.id}-${activeTab}`}
@@ -124,6 +199,13 @@ const Interest = () => {
 							)}
 						</motion.div>
 					</AnimatePresence>
+					{totalPage > 1 && (
+						<Pagination
+							currentPage={currentPage}
+							totalPages={totalPage}
+							setCurrentPage={setCurrentPage}
+						/>
+					)}
 				</div>
 			</div>
 		</div>

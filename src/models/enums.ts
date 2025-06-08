@@ -29,7 +29,7 @@ export enum EPostSTatus {
 }
 
 export enum ESortOrder {
-	ASC = 'Asc',
+	ASC = 'ASC',
 	DESC = 'DESC'
 }
 

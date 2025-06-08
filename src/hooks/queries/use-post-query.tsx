@@ -1,14 +1,19 @@
 import { useQuery } from '@tanstack/react-query'
 
 import postApi from '@/apis/modules/post.api'
-import { IListParams, IPost, IPostDetail } from '@/models/interfaces'
+import { EPostType } from '@/models/enums'
+import {
+	IListTypeParams,
+	IPostDetail,
+	IPostResponse
+} from '@/models/interfaces'
 
-export const useListPostQuery = (params: IListParams<IPost>) => {
-	return useQuery<IPost[]>({
+export const useListPostQuery = (params: IListTypeParams<EPostType>) => {
+	return useQuery<IPostResponse>({
 		queryKey: ['posts', params], // Key để cache, dựa trên params
 		queryFn: async () => {
 			const res = await postApi.list(params)
-			return res.data.posts || []
+			return res.data
 		},
 		// keepPreviousData: true, // Giữ dữ liệu cũ khi thay đổi page/limit (option not available in current react-query version)
 		staleTime: 5 * 60 * 1000, // Dữ liệu tươi trong 5 phút

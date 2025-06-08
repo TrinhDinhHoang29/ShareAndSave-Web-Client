@@ -1,10 +1,9 @@
 import React from 'react'
 import { FieldError } from 'react-hook-form'
-import { ZodIssue } from 'zod'
 
 interface SelectionProps {
 	name: string
-	label: string
+	label?: string
 	options: { id: number; name: string }[]
 	isLoading: boolean
 	register: any
@@ -29,9 +28,11 @@ const Selection: React.FC<SelectionProps> = ({
 				animationDelay ? `delay-${animationDelay * 100}` : ''
 			}`}
 		>
-			<label className='text-foreground block text-sm font-medium'>
-				{label}
-			</label>
+			{label && (
+				<label className='text-foreground block text-sm font-medium'>
+					{label}
+				</label>
+			)}
 			<select
 				{...register(name, { valueAsNumber: true })}
 				disabled={disabled || isLoading}

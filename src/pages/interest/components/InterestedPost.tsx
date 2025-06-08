@@ -1,5 +1,5 @@
 import { AnimatePresence } from 'framer-motion'
-import { FileText, MessageCircle } from 'lucide-react'
+import { FileText, Heart, MessageCircle } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
@@ -8,7 +8,13 @@ import { getTypeInfo } from '@/models/constants'
 import { EPostType } from '@/models/enums'
 import { IPostInterest } from '@/models/interfaces'
 
-export const InterestedPost = ({ post }: { post: IPostInterest }) => {
+export const InterestedPost = ({
+	post,
+	onDeleteInterest
+}: {
+	post: IPostInterest
+	onDeleteInterest: (postID: number) => void
+}) => {
 	const [showChat, setShowChat] = useState(false)
 	const typeInfo = getTypeInfo(post.type.toString() as EPostType)
 	const navigate = useNavigate()
@@ -51,6 +57,15 @@ export const InterestedPost = ({ post }: { post: IPostInterest }) => {
 							onClick={() => navigate(`/bai-dang/${post.slug}`)}
 						>
 							<FileText className='text-muted-foreground h-5 w-5' />
+						</button>
+
+						<button
+							className={`text-primary-foreground bg-destructive rounded-xl p-3 shadow-lg transition-all duration-200 hover:shadow-xl`}
+							onClick={() => onDeleteInterest(post.id)}
+							aria-label='Hủy quan tâm'
+							title='Hủy quan tâm'
+						>
+							<Heart className='h-5 w-5' />
 						</button>
 
 						<button

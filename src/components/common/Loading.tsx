@@ -7,6 +7,8 @@ interface LoadingProps {
 	color?: 'primary' | 'secondary' | 'accent' | 'white'
 	text?: string
 	fullScreen?: boolean
+	position?: 'in' | 'out'
+	overlay?: boolean // Thêm prop overlay
 }
 
 const Loading: React.FC<LoadingProps> = ({
@@ -14,7 +16,9 @@ const Loading: React.FC<LoadingProps> = ({
 	variant = 'spinner',
 	color = 'primary',
 	text,
-	fullScreen = false
+	fullScreen = false,
+	position = 'out',
+	overlay = false // Mặc định là false
 }) => {
 	// Size configurations
 	const sizeClasses = {
@@ -97,7 +101,9 @@ const Loading: React.FC<LoadingProps> = ({
 	// Container classes
 	const containerClasses = fullScreen
 		? 'fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center'
-		: 'flex items-center justify-center'
+		: position === 'in'
+			? `absolute inset-0 z-50 flex items-center justify-center ${overlay ? 'bg-background/80 backdrop-blur-sm' : ''}` // Thêm overlay khi position='in' và overlay=true
+			: 'flex items-center justify-center'
 
 	const renderLoadingVariant = () => {
 		switch (variant) {
