@@ -13,6 +13,7 @@ const Interest = lazy(() => import('@/pages/interest'))
 const PostDetail = lazy(() => import('@/pages/post-detail'))
 const Post = lazy(() => import('@/pages/post'))
 const LoginSession = lazy(() => import('@/pages/LoginSession'))
+const Dowload = lazy(() => import('@/pages/dowload'))
 
 // Error Boundary Component
 const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
@@ -88,6 +89,14 @@ function AppRouter() {
 								<Interest />
 							</ErrorBoundary>
 						</PrivateRoute>
+					)
+				},
+				{
+					path: 'tai-xuong',
+					element: (
+						<ErrorBoundary>
+							<Dowload />
+						</ErrorBoundary>
 					)
 				},
 				{

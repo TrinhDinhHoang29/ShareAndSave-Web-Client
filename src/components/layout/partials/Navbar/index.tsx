@@ -1,6 +1,6 @@
 import { Bell, Download, Menu, Moon, Sun } from 'lucide-react'
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 import { useTheme } from '@/context/theme-context'
 
@@ -8,6 +8,7 @@ import DropdownProfileMenu from './DropdownProfileMenu'
 
 const Navbar: React.FC = () => {
 	const { theme, setTheme } = useTheme()
+	const navigate = useNavigate()
 
 	return (
 		<nav className='bg-background text-foreground sticky top-0 z-40 flex h-20 items-center justify-between px-16 shadow-md transition-colors'>
@@ -49,6 +50,7 @@ const Navbar: React.FC = () => {
 				<button
 					className='border-muted-foreground text-secondary rounded-md border-2 border-solid p-2 shadow-md transition-colors hover:opacity-90'
 					title='Tải xuống'
+					onClick={() => navigate('/tai-xuong')}
 				>
 					<Download size={22} />
 				</button>

@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { Frown, Smile } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { Frown } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import Pagination from '@/components/common/Pagination'
@@ -22,11 +22,15 @@ const Post = () => {
 
 	const debouncedSearch = useDebounce(search, 500)
 
+	useEffect(() => {
+		setCurrentPage(1)
+	}, [debouncedSearch, selectedType])
+
 	const params: IListTypeParams<EPostType> = useMemo(
 		() => ({
 			type: (selectedType as EPostType) || undefined, // Nếu rỗng, không gửi type
 			page: currentPage,
-			limit: 6, // Giới hạn 8 item mỗi trang
+			limit: 6, // Giới hạn 6 item mỗi trang
 			sort: 'createdAt', // Sắp xếp theo createdAt
 			order, // ASC hoặc DESC
 			search: debouncedSearch || undefined // Chỉ gửi search nếu có giá trị

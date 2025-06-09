@@ -75,12 +75,12 @@ const PostItem: React.FC<PostItemProps> = ({ post, onPostClick }) => {
 					</div>
 					<div className='text-muted-foreground flex items-center gap-4 text-sm'>
 						<div className='flex items-center gap-1'>
-							<Heart className='h-4 w-4' />
+							<Heart className='text-destructive h-4 w-4' />
 							<span>{post.interestCount}</span>
 						</div>
 						{post.itemCount > 0 && (
 							<div className='flex items-center gap-1'>
-								<Package className='h-4 w-4' />
+								<Package className='text-primary h-4 w-4' />
 								<span>{post.itemCount}</span>
 							</div>
 						)}

@@ -23,6 +23,7 @@ import { useParams } from 'react-router-dom'
 import { ChatDialog } from '@/components/common/ChatDialog'
 import Loading from '@/components/common/Loading'
 import { useAlertModalContext } from '@/context/alert-modal-context'
+import { useAuthDialog } from '@/context/auth-dialog-context'
 import {
 	useCreateInterestMutation,
 	useDeleteInterestMutation
@@ -34,7 +35,7 @@ import { EPostType } from '@/models/enums'
 import { IUserInterest } from '@/models/interfaces'
 import useAuthStore from '@/stores/authStore'
 
-import Instruction from '../postAction/components/Instruction'
+import RelatedPosts from './components/RelatedPosts'
 
 // Info types based on post type
 interface FoundItemInfo {
@@ -59,7 +60,8 @@ const PostDetail: React.FC = () => {
 	const [isShowChatDialog, setIsShowChatDialog] = useState(false)
 	const queryClient = useQueryClient()
 	const { showInfo } = useAlertModalContext()
-	const { user } = useAuthStore()
+	const { user, isAuthenticated } = useAuthStore()
+	const { openDialog } = useAuthDialog()
 
 	const params = useParams()
 	const slug = params.slug
@@ -117,7 +119,6 @@ const PostDetail: React.FC = () => {
 		if (isInterested) {
 			setIsShowChatDialog(true)
 		} else {
-			console.log('Bal')
 			showInfo({
 				infoTitle: 'Thông tin hỗ trợ',
 				infoMessage: 'Bạn phải "Quan Tâm" mới được thực hiện "Trò chuyện"',
@@ -157,10 +158,14 @@ const PostDetail: React.FC = () => {
 	}
 
 	const handleInterest = async () => {
-		if (!isInterested) {
-			createInterestMutatation({ postID: post.id })
+		if (isAuthenticated) {
+			if (!isInterested) {
+				createInterestMutatation({ postID: post.id })
+			} else {
+				deleteInterestMutatation(post.id)
+			}
 		} else {
-			deleteInterestMutatation(post.id)
+			openDialog({})
 		}
 	}
 
@@ -184,6 +189,7 @@ const PostDetail: React.FC = () => {
 
 	const typeInfo = getTypeInfo(post.type.toString() as EPostType)
 	const parsedInfo = parsePostInfo()
+	const showItemsNumber = 5
 
 	return (
 		<>
@@ -445,8 +451,8 @@ const PostDetail: React.FC = () => {
 											<div className='grid gap-4'>
 												{(showAllItems
 													? post.items
-													: post.items.slice(0, 6)
-												).map((item, index) => (
+													: post.items.slice(0, showItemsNumber)
+												).map(item => (
 													<div
 														key={item.itemID}
 														className='border-border hover:bg-accent/50 flex items-center gap-4 rounded-lg border p-4 transition-colors'
@@ -482,14 +488,15 @@ const PostDetail: React.FC = () => {
 													</div>
 												))}
 											</div>
-											{!showAllItems && post.items.length > 6 && (
+											{!showAllItems && post.items.length > showItemsNumber && (
 												<div className='text-center'>
 													<button
 														onClick={() => setShowAllItems(true)}
 														className='text-primary hover:text-primary/80 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium'
 													>
 														<Plus className='h-4 w-4' />
-														Xem thêm {post.items.length - 6} vật phẩm
+														Xem thêm {post.items.length - showItemsNumber} vật
+														phẩm
 													</button>
 												</div>
 											)}
@@ -534,10 +541,9 @@ const PostDetail: React.FC = () => {
 												Những người quan tâm ({post.interests.length})
 											</h2>
 										</div>
-										<div className='glass grid grid-cols-8 rounded-xl p-6'>
-											{post.interests &&
-												post.interests.length > 0 &&
-												post.interests.map(interest => (
+										{post.interests && post.interests.length > 0 && (
+											<div className='glass grid grid-cols-8 rounded-xl p-6'>
+												{post.interests.map(interest => (
 													<div
 														key={interest.id}
 														className='flex cursor-pointer flex-col items-center gap-2 p-2 transition-colors'
@@ -560,7 +566,8 @@ const PostDetail: React.FC = () => {
 														</p>
 													</div>
 												))}
-										</div>
+											</div>
+										)}
 									</motion.div>
 								</div>
 
@@ -727,8 +734,11 @@ const PostDetail: React.FC = () => {
 							</div>
 						</div>
 					</div>
-					<div className='top-0 col-span-1 md:top-16'>
-						<Instruction />
+					<div className='top-0 col-span-1 space-y-6 md:top-16'>
+						<RelatedPosts
+							type={post.type.toString() as EPostType}
+							postID={post.id}
+						/>
 					</div>
 				</div>
 			</div>

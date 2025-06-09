@@ -259,3 +259,8 @@ export interface ISender {
 	id: number
 	name: string
 }
+
+export interface RequestItem extends IItem {
+	requestedQuantity: number
+	isConfirmed?: boolean // Thêm trạng thái xác nhận
+}
