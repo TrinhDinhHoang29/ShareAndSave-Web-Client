@@ -1,56 +1,115 @@
 // ChatDialog/index.tsx
 import { Dialog, Transition } from '@headlessui/react'
-import { Fragment, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 
-import { IItem, ISender } from '@/models/interfaces'
+import { useCreateTransactionMutation } from '@/hooks/mutations/use-transaction.mutation'
+import { useDetailTransactionQuery } from '@/hooks/queries/use-transaction.query'
+import { ETransactionStatus } from '@/models/enums'
+import {
+	IDetailTransactionParams,
+	IItem,
+	IReceiver,
+	ITransactionItem,
+	ITransactionRequest
+} from '@/models/interfaces'
 import useAuthStore from '@/stores/authStore'
 
 import { ChatHeaderWithRequests } from './ChatHeaderWithRequests'
 import { ChatMessagesPanel } from './ChatMessagesPanel'
 import { ItemSidebar } from './ItemSidebar'
 
-interface RequestItem extends IItem {
-	requestedQuantity: number
-	isConfirmed?: boolean
-}
-
 interface ChatDialogProps {
-	sender: ISender
+	receiver: IReceiver
+	postID: number
 	postTitle: string
 	onClose: () => void
 	items?: IItem[]
+	interestID: number
+	authorID: number
 }
 
 export const ChatDialog = ({
-	sender,
+	interestID,
+	receiver,
 	postTitle,
 	onClose,
-	items = []
+	items = [],
+	postID,
+	authorID
 }: ChatDialogProps) => {
+	const detailTransactionParams: IDetailTransactionParams = useMemo(
+		() => ({
+			postID,
+			searchBy: 'interestID',
+			searchValue: interestID.toString()
+		}),
+		[interestID, postID]
+	)
+	const { data: transactionData } = useDetailTransactionQuery(
+		detailTransactionParams
+	)
 	const [message, setMessage] = useState('')
 	const [messages, setMessages] = useState([
 		{
 			id: 1,
-			sender: 'other',
+			receiver: 'other',
 			text: 'Xin chào, tôi quan tâm đến bài đăng của bạn.',
 			time: '10:30'
 		},
 		{
 			id: 2,
-			sender: 'user',
+			receiver: 'user',
 			text: 'Chào bạn! Cảm ơn bạn đã quan tâm. Bạn cần thêm thông tin gì không?',
 			time: '10:32'
 		}
 	])
-	const [selectedItems, setSelectedItems] = useState<RequestItem[]>([])
-	const [pendingRequests, setPendingRequests] = useState<RequestItem[]>([])
+	const [selectedItems, setSelectedItems] = useState<ITransactionItem[]>([])
+	const [transactionItems, setTransactionItems] = useState<ITransactionItem[]>(
+		[]
+	)
 	const [currentRequestIndex, setCurrentRequestIndex] = useState(0)
 	const [isRequestsVisible, setIsRequestsVisible] = useState(true)
-	const [isAllConfirmed, setIsAllConfirmed] = useState(false)
+	const [transactionStatus, setTransactionStatus] =
+		useState<ETransactionStatus>(ETransactionStatus.DEFAULT)
+	const {
+		mutate: createTransactionMutation,
+		isPending: isCreateTransactionPending
+	} = useCreateTransactionMutation({
+		onSuccess: (code: number) => {
+			if (code === 200) {
+				setTransactionStatus(ETransactionStatus.PENDING)
+				setSelectedItems([])
+			}
+		}
+	})
+
+	const handleConfirmRequest = () => {
+		const transactionRequest: ITransactionRequest = {
+			interestID,
+			items: transactionItems.map(item => ({
+				postItemID: item.postItemID,
+				quantity: item.quantity
+			}))
+		}
+		createTransactionMutation(transactionRequest)
+	}
 
 	const { user } = useAuthStore()
-	const receiverID = user?.id
-	const isAuthor = receiverID === sender.id
+	const senderID = user?.id
+	const isAuthor = senderID === authorID
+
+	useEffect(() => {
+		if (transactionData) {
+			setTransactionItems(
+				transactionData.items.map(item => ({
+					...item,
+					currentQuantity:
+						items.find(i => i.id === item.postItemID)?.currentQuantity || 0
+				}))
+			)
+			setTransactionStatus(transactionData.status)
+		}
+	}, [transactionData])
 
 	const handleSend = () => {
 		if (message.trim()) {
@@ -58,7 +117,7 @@ export const ChatDialog = ({
 				...messages,
 				{
 					id: messages.length + 1,
-					sender: 'user',
+					receiver: 'user',
 					text: message,
 					time: new Date().toLocaleTimeString([], {
 						hour: '2-digit',
@@ -106,12 +165,12 @@ export const ChatDialog = ({
 						<Dialog.Panel className='bg-card flex w-full max-w-4xl overflow-hidden rounded-2xl shadow-2xl'>
 							<div className='flex flex-1 flex-col'>
 								<ChatHeaderWithRequests
-									sender={sender}
+									receiver={receiver}
 									postTitle={postTitle}
-									pendingRequests={pendingRequests}
+									transactionItems={transactionItems}
 									currentRequestIndex={currentRequestIndex}
 									isRequestsVisible={isRequestsVisible}
-									isAllConfirmed={isAllConfirmed}
+									transactionStatus={transactionStatus}
 									isAuthor={isAuthor}
 									onClose={onClose}
 									toggleRequestsVisibility={() =>
@@ -119,22 +178,17 @@ export const ChatDialog = ({
 									}
 									handlePrevRequest={() =>
 										setCurrentRequestIndex(prev =>
-											prev > 0 ? prev - 1 : pendingRequests.length - 1
+											prev > 0 ? prev - 1 : transactionItems.length - 1
 										)
 									}
 									handleNextRequest={() =>
 										setCurrentRequestIndex(prev =>
-											prev < pendingRequests.length - 1 ? prev + 1 : 0
+											prev < transactionItems.length - 1 ? prev + 1 : 0
 										)
 									}
-									handleConfirmRequest={() => {
-										setPendingRequests(prev =>
-											prev.map(item => ({ ...item, isConfirmed: true }))
-										)
-										setIsAllConfirmed(true)
-									}}
+									handleConfirmRequest={handleConfirmRequest}
 									handleConfirmSingleRequest={itemId => {
-										setPendingRequests(prev =>
+										setTransactionItems(prev =>
 											prev.map(item =>
 												item.itemID === itemId
 													? { ...item, isConfirmed: true }
@@ -143,26 +197,28 @@ export const ChatDialog = ({
 										)
 									}}
 									handlePendingQuantityChange={(itemId, delta) => {
-										setPendingRequests(prev =>
+										setTransactionItems(prev =>
 											prev.map(item =>
 												item.itemID === itemId
 													? {
 															...item,
 															requestedQuantity: Math.max(
 																1,
-																item.requestedQuantity + delta
+																item.quantity + delta
 															)
 														}
 													: item
 											)
 										)
 									}}
-									handleRemovePendingRequest={itemId => {
-										setPendingRequests(prev =>
+									handleRemovePendingRequest={(itemId, index) => {
+										setTransactionItems(prev =>
 											prev.filter(item => item.itemID !== itemId)
 										)
+										setCurrentRequestIndex(index > 0 ? index - 1 : index)
 									}}
 									setCurrentRequestIndex={setCurrentRequestIndex}
+									isCreateTransactionPending={isCreateTransactionPending}
 								/>
 								<ChatMessagesPanel
 									messages={messages}
@@ -182,9 +238,9 @@ export const ChatDialog = ({
 								items={items}
 								selectedItems={selectedItems}
 								isAuthor={isAuthor}
-								isAllConfirmed={isAllConfirmed}
+								transactionStatus={transactionStatus}
 								handleItemSelect={item => {
-									const isInPending = pendingRequests.some(
+									const isInPending = transactionItems.some(
 										i => i.itemID === item.itemID
 									)
 									const exists = selectedItems.find(
@@ -194,7 +250,17 @@ export const ChatDialog = ({
 										setSelectedItems(prev =>
 											exists
 												? prev.filter(i => i.itemID !== item.itemID)
-												: [...prev, { ...item, requestedQuantity: 1 }]
+												: [
+														...prev,
+														{
+															itemID: item.itemID || 0,
+															itemName: item.name,
+															itemImage: item.image,
+															postItemID: item.id,
+															quantity: 1,
+															currentQuantity: item.quantity || 1
+														}
+													]
 										)
 									}
 								}}
@@ -204,12 +270,12 @@ export const ChatDialog = ({
 											item.itemID === itemId
 												? {
 														...item,
-														requestedQuantity: Math.max(
+														quantity: Math.max(
 															1,
 															Math.min(
 																items.find(i => i.itemID === itemId)
 																	?.quantity || 1,
-																item.requestedQuantity + change
+																item.quantity + change
 															)
 														)
 													}
@@ -224,7 +290,7 @@ export const ChatDialog = ({
 								}}
 								handleSendRequest={() => {
 									if (selectedItems.length > 0) {
-										setPendingRequests([...pendingRequests, ...selectedItems])
+										setTransactionItems([...transactionItems, ...selectedItems])
 										setSelectedItems([])
 										setCurrentRequestIndex(0)
 									}

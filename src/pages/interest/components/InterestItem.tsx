@@ -8,11 +8,15 @@ import { IItem, IUserInterest } from '@/models/interfaces'
 export const InterestItem = ({
 	postTitle,
 	items,
-	userInterest
+	userInterest,
+	postID,
+	authorID
 }: {
 	postTitle: string
 	items?: IItem[]
 	userInterest: IUserInterest
+	postID: number
+	authorID: number
 }) => {
 	const [showChat, setShowChat] = useState(false)
 
@@ -60,7 +64,10 @@ export const InterestItem = ({
 			<AnimatePresence>
 				{showChat && (
 					<ChatDialog
-						sender={{
+						authorID={authorID}
+						postID={postID}
+						interestID={userInterest.id}
+						receiver={{
 							id: userInterest.id,
 							name: userInterest.userName
 						}}

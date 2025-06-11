@@ -1,9 +1,9 @@
 // ChatDialog/ChatHeaderWithRequests.tsx
 import { Dialog } from '@headlessui/react'
+import clsx from 'clsx'
 import { motion } from 'framer-motion'
 import {
 	Check,
-	CheckCircle,
 	ChevronLeft,
 	ChevronRight,
 	Eye,
@@ -14,15 +14,19 @@ import {
 	X
 } from 'lucide-react'
 
-import { ISender, RequestItem } from '@/models/interfaces'
+import { getTransactionStatusConfig } from '@/models/constants'
+import { ETransactionStatus } from '@/models/enums'
+import { IReceiver, ITransactionItem } from '@/models/interfaces'
+
+import Loading from '../Loading'
 
 interface Props {
-	sender: ISender
+	receiver: IReceiver
 	postTitle: string
-	pendingRequests: RequestItem[]
+	transactionItems: ITransactionItem[]
 	currentRequestIndex: number
 	isRequestsVisible: boolean
-	isAllConfirmed: boolean
+	transactionStatus: ETransactionStatus
 	isAuthor: boolean
 	onClose: () => void
 	toggleRequestsVisibility: () => void
@@ -31,17 +35,18 @@ interface Props {
 	handleConfirmRequest: () => void
 	handleConfirmSingleRequest: (itemId: number) => void
 	handlePendingQuantityChange: (itemId: number, delta: number) => void
-	handleRemovePendingRequest: (itemId: number) => void
+	handleRemovePendingRequest: (itemId: number, index: number) => void
 	setCurrentRequestIndex: (index: number) => void
+	isCreateTransactionPending: boolean
 }
 
 export const ChatHeaderWithRequests = ({
-	sender,
+	receiver,
 	postTitle,
-	pendingRequests,
+	transactionItems,
 	currentRequestIndex,
 	isRequestsVisible,
-	isAllConfirmed,
+	transactionStatus,
 	isAuthor,
 	onClose,
 	toggleRequestsVisibility,
@@ -51,9 +56,15 @@ export const ChatHeaderWithRequests = ({
 	handleConfirmSingleRequest,
 	handlePendingQuantityChange,
 	handleRemovePendingRequest,
-	setCurrentRequestIndex
+	setCurrentRequestIndex,
+	isCreateTransactionPending
 }: Props) => {
-	const currentItem = pendingRequests[currentRequestIndex]
+	const currentItem = transactionItems[currentRequestIndex]
+	const transactionStatusConfig = getTransactionStatusConfig(
+		isAuthor,
+		transactionStatus
+	)
+	const TransactionIconStatus = transactionStatusConfig.icon
 
 	return (
 		<div className='bg-primary text-primary-foreground px-6 py-4'>
@@ -68,7 +79,7 @@ export const ChatHeaderWithRequests = ({
 							as='h3'
 							className='font-manrope text-lg font-semibold'
 						>
-							{sender.name}
+							{receiver.name}
 						</Dialog.Title>
 						<p className='text-primary-foreground/90 text-sm'>{postTitle}</p>
 					</div>
@@ -81,20 +92,20 @@ export const ChatHeaderWithRequests = ({
 				</button>
 			</div>
 
-			{pendingRequests.length > 0 && (
+			{transactionItems.length > 0 && (
 				<div className='mt-4'>
 					<div className='flex items-center justify-between'>
 						<h4 className='text-primary-foreground flex items-center gap-2 font-semibold'>
 							<Package className='h-5 w-5' />
-							{isAuthor ? 'Yêu cầu trao đổi' : 'Yêu cầu đã gửi'}
+							{isAuthor ? 'Yêu cầu giao dịch' : 'Yêu cầu đã gửi'}
 							{!isRequestsVisible && (
 								<span className='bg-primary-foreground/20 text-primary-foreground rounded-full px-2 py-1 text-xs font-medium'>
-									{pendingRequests.length}
+									{transactionItems.length}
 								</span>
 							)}
 							{isRequestsVisible && currentItem && (
 								<span className='bg-primary-foreground/20 text-primary-foreground rounded-full px-2 py-1 text-xs font-medium'>
-									{currentRequestIndex + 1}/{pendingRequests.length}
+									{currentRequestIndex + 1}/{transactionItems.length}
 								</span>
 							)}
 						</h4>
@@ -113,28 +124,44 @@ export const ChatHeaderWithRequests = ({
 									</>
 								)}
 							</button>
-							{!isAuthor && !isAllConfirmed && (
-								<button
-									onClick={handleConfirmRequest}
-									className='flex items-center gap-2 rounded-lg bg-green-500 px-4 py-2 text-sm font-medium text-white shadow-lg hover:bg-green-600 hover:shadow-xl'
-								>
-									<Check className='h-4 w-4' /> Xác nhận
-								</button>
-							)}
-							{!isAuthor && isAllConfirmed && (
-								<button
-									disabled
-									className='flex cursor-not-allowed items-center gap-2 rounded-lg bg-green-500/50 px-4 py-2 text-sm font-medium text-white shadow-lg'
-								>
-									<CheckCircle className='h-4 w-4' /> Đã xác nhận
-								</button>
-							)}
+							{!isAuthor &&
+								transactionStatus === ETransactionStatus.DEFAULT && (
+									<button
+										disabled={isCreateTransactionPending}
+										onClick={handleConfirmRequest}
+										className={clsx(
+											'font-mediumshadow-lg flex items-center gap-2 rounded-lg px-4 py-2 text-sm hover:shadow-xl',
+											transactionStatusConfig.background,
+											transactionStatusConfig.textColor
+										)}
+									>
+										{isCreateTransactionPending ? (
+											<Loading size='sm' />
+										) : (
+											<TransactionIconStatus className='h-4 w-4' />
+										)}{' '}
+										{transactionStatusConfig.label}
+									</button>
+								)}
+							{!isAuthor &&
+								transactionStatus !== ETransactionStatus.DEFAULT && (
+									<div
+										className={clsx(
+											'flex cursor-not-allowed items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium shadow-lg',
+											transactionStatusConfig.background,
+											transactionStatusConfig.textColor
+										)}
+									>
+										<TransactionIconStatus className='h-4 w-4' />{' '}
+										{transactionStatusConfig.label}
+									</div>
+								)}
 						</div>
 					</div>
 
 					{isRequestsVisible && currentItem && (
 						<div className='bg-primary-foreground/10 relative mt-3 rounded-xl p-4 backdrop-blur-sm'>
-							{pendingRequests.length > 1 && (
+							{transactionItems.length > 1 && (
 								<>
 									<button
 										onClick={handlePrevRequest}
@@ -156,45 +183,54 @@ export const ChatHeaderWithRequests = ({
 								animate={{ opacity: 1, x: 0 }}
 								exit={{ opacity: 0, x: -20 }}
 								transition={{ duration: 0.3 }}
-								className={`bg-primary-foreground/20 hover:bg-primary-foreground/25 flex items-center gap-4 rounded-lg p-2 transition-all duration-200 ${currentItem.isConfirmed ? 'ring-2 ring-green-400' : ''}`}
+								className={clsx(
+									`bg-primary-foreground/20 hover:bg-primary-foreground/25 flex items-center gap-4 rounded-lg p-2 transition-all duration-200`,
+									transactionStatusConfig.border
+								)}
 							>
 								<div className='relative'>
 									<img
-										src={currentItem.image}
-										alt={currentItem.name}
+										src={currentItem.itemImage}
+										alt={currentItem.itemName}
 										className='h-16 w-16 rounded-md object-cover shadow-md'
 									/>
 									<div className='absolute -top-2 -right-2 rounded-full bg-blue-500 px-2 py-1 text-sm font-medium text-white shadow-lg'>
-										{currentItem.requestedQuantity}
+										{currentItem.quantity}
 									</div>
-									{currentItem.isConfirmed && (
-										<div className='absolute -bottom-1 -left-1 rounded-full bg-green-500 p-1'>
-											<CheckCircle className='h-3 w-3 text-white' />
+									{transactionStatus !== ETransactionStatus.DEFAULT && (
+										<div
+											className={clsx(
+												'absolute -bottom-1 -left-1 rounded-full p-1',
+												transactionStatusConfig.background
+											)}
+										>
+											<TransactionIconStatus className='h-3 w-3 text-white' />
 										</div>
 									)}
 								</div>
 								<div className='min-w-0 flex-1'>
 									<h5 className='text-primary-foreground mb-1 flex items-center gap-2 text-base font-semibold'>
-										{currentItem.name}
-										{currentItem.isConfirmed && (
-											<span className='rounded-full bg-green-500 px-2 py-1 text-xs font-medium text-white'>
-												Đã xác nhận
+										{currentItem.itemName}
+										{transactionStatus !== ETransactionStatus.DEFAULT && (
+											<span
+												className={clsx(
+													'rounded-full px-2 py-1 text-xs font-medium',
+													transactionStatusConfig.background,
+													transactionStatusConfig.textColor
+												)}
+											>
+												{transactionStatusConfig.label}
 											</span>
 										)}
 									</h5>
-									<p className='text-primary-foreground/80 mb-2 text-sm'>
-										{currentItem.description}
-									</p>
 									<p className='text-primary-foreground/70 text-xs'>
-										{currentItem.categoryName &&
-											`${currentItem.categoryName} • `}
-										Có sẵn: {currentItem.quantity || 0}
+										Có sẵn: {currentItem.currentQuantity || 0}
 									</p>
 								</div>
 								<div className='flex items-center gap-3'>
 									{isAuthor ? (
 										<div className='flex items-center gap-2'>
-											{!currentItem.isConfirmed && (
+											{transactionStatus === ETransactionStatus.PENDING && (
 												<button
 													onClick={() =>
 														handleConfirmSingleRequest(currentItem.itemID || 0)
@@ -205,7 +241,7 @@ export const ChatHeaderWithRequests = ({
 													<Check className='h-4 w-4' /> Xác nhận
 												</button>
 											)}
-											{!isAllConfirmed && (
+											{transactionStatus === ETransactionStatus.PENDING && (
 												<div className='bg-primary-foreground/30 flex items-center gap-2 rounded-lg p-2'>
 													<button
 														onClick={() =>
@@ -219,7 +255,7 @@ export const ChatHeaderWithRequests = ({
 														<Minus className='text-primary-foreground h-4 w-4' />
 													</button>
 													<span className='text-primary-foreground w-8 text-center text-sm font-semibold'>
-														{currentItem.requestedQuantity}
+														{currentItem.quantity}
 													</span>
 													<button
 														onClick={() =>
@@ -236,10 +272,13 @@ export const ChatHeaderWithRequests = ({
 											)}
 										</div>
 									) : (
-										!isAllConfirmed && (
+										transactionStatus === ETransactionStatus.DEFAULT && (
 											<button
 												onClick={() =>
-													handleRemovePendingRequest(currentItem.itemID || 0)
+													handleRemovePendingRequest(
+														currentItem.itemID || 0,
+														currentRequestIndex
+													)
 												}
 												className='group flex h-8 w-8 items-center justify-center rounded-md bg-red-500/80 hover:bg-red-500 hover:shadow-lg'
 												title='Xóa yêu cầu'
@@ -250,9 +289,9 @@ export const ChatHeaderWithRequests = ({
 									)}
 								</div>
 							</motion.div>
-							{pendingRequests.length > 1 && (
+							{transactionItems.length > 1 && (
 								<div className='mt-3 flex justify-center gap-2'>
-									{pendingRequests.map((_, index) => (
+									{transactionItems.map((_, index) => (
 										<button
 											key={index}
 											onClick={() => setCurrentRequestIndex(index)}

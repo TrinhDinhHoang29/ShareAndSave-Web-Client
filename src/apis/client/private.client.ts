@@ -6,8 +6,7 @@ import {
 	clearRefreshToken,
 	getAccessToken,
 	getRefreshToken,
-	setAccessToken,
-	setRefreshToken
+	setAccessToken
 } from '@/lib/token'
 import useAuthStore from '@/stores/authStore'
 
@@ -67,8 +66,8 @@ axiosPrivate.interceptors.response.use(
 
 				const response = await authApi.refreshToken({ refreshToken })
 				const jwt = response.data.jwt
+				console.log('new jwt', jwt)
 				setAccessToken(jwt)
-				setRefreshToken(jwt) // Giả sử API trả về refresh token mới trong jwt, nếu không thì bỏ dòng này
 
 				originalRequest.headers.Authorization = `Bearer ${jwt}`
 				return axiosPrivate(originalRequest)

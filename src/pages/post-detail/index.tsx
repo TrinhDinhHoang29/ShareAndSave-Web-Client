@@ -54,8 +54,7 @@ interface LostItemInfo {
 const PostDetail: React.FC = () => {
 	const [currentImageIndex, setCurrentImageIndex] = useState(0)
 	const [isImageModalOpen, setIsImageModalOpen] = useState(false)
-	const [isInterested, setIsInterested] = useState(false)
-	const [showAllInterests, setShowAllInterests] = useState(false)
+	const [interestID, setInterestID] = useState(0)
 	const [showAllItems, setShowAllItems] = useState(false)
 	const [isShowChatDialog, setIsShowChatDialog] = useState(false)
 	const queryClient = useQueryClient()
@@ -65,7 +64,6 @@ const PostDetail: React.FC = () => {
 
 	const params = useParams()
 	const slug = params.slug
-
 	const {
 		data: post,
 		isLoading,
@@ -77,7 +75,7 @@ const PostDetail: React.FC = () => {
 		isPending: isCreateInterestPending
 	} = useCreateInterestMutation({
 		onSuccess: (interestID: number) => {
-			setIsInterested(!isInterested)
+			setInterestID(interestID)
 			const newUserInterest: IUserInterest = {
 				id: interestID,
 				postID: post?.id || 0,
@@ -96,7 +94,7 @@ const PostDetail: React.FC = () => {
 		isPending: isDeleteInterestPending
 	} = useDeleteInterestMutation({
 		onSuccess: (interestID: number) => {
-			setIsInterested(!isInterested)
+			setInterestID(0)
 			if (post?.interests && post.interests.length > 0) {
 				post.interests = post?.interests.filter(i => i.id !== interestID)
 			}
@@ -106,8 +104,9 @@ const PostDetail: React.FC = () => {
 
 	useEffect(() => {
 		if (post?.interests && post.interests.length > 0) {
-			const isMeInterested = post.interests.some(i => i.userID === user?.id)
-			setIsInterested(isMeInterested)
+			const isMeInterested =
+				post.interests.find(i => i.userID === user?.id)?.id || 0
+			setInterestID(isMeInterested)
 		}
 	}, [post])
 
@@ -116,7 +115,7 @@ const PostDetail: React.FC = () => {
 	}, [post])
 
 	const handleChat = () => {
-		if (isInterested) {
+		if (interestID) {
 			setIsShowChatDialog(true)
 		} else {
 			showInfo({
@@ -159,31 +158,13 @@ const PostDetail: React.FC = () => {
 
 	const handleInterest = async () => {
 		if (isAuthenticated) {
-			if (!isInterested) {
+			if (!interestID) {
 				createInterestMutatation({ postID: post.id })
 			} else {
 				deleteInterestMutatation(post.id)
 			}
 		} else {
 			openDialog({})
-		}
-	}
-
-	const handleShare = async () => {
-		if (navigator.share) {
-			try {
-				await navigator.share({
-					title: post.title,
-					text: post.description,
-					url: window.location.href
-				})
-			} catch (err) {
-				console.log('Error sharing:', err)
-			}
-		} else {
-			// Fallback: copy to clipboard
-			navigator.clipboard.writeText(window.location.href)
-			alert('Đã sao chép link bài viết!')
 		}
 	}
 
@@ -584,7 +565,7 @@ const PostDetail: React.FC = () => {
 											<button
 												onClick={handleInterest}
 												className={`flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 font-medium transition-all ${
-													isInterested
+													interestID
 														? 'bg-primary text-primary-foreground hover:bg-primary/90'
 														: 'bg-accent text-accent-foreground hover:bg-accent/80'
 												}`}
@@ -594,9 +575,9 @@ const PostDetail: React.FC = () => {
 												) : (
 													<>
 														<Heart
-															className={`h-5 w-5 ${isInterested ? 'fill-current' : ''}`}
+															className={`h-5 w-5 ${interestID ? 'fill-current' : ''}`}
 														/>
-														{isInterested ? 'Đã quan tâm' : 'Quan tâm'}
+														{interestID ? 'Đã quan tâm' : 'Quan tâm'}
 													</>
 												)}
 											</button>
@@ -606,7 +587,7 @@ const PostDetail: React.FC = () => {
 												onClick={handleChat}
 												className={clsx(
 													'text-primary-foreground flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 font-medium transition-colors',
-													isInterested
+													interestID
 														? 'bg-chart-1/90 hover:bg-chart-1 cursor-pointer'
 														: 'bg-chart-1/20 hover:bg-chart-1/30 cursor-not-allowed'
 												)}
@@ -744,9 +725,12 @@ const PostDetail: React.FC = () => {
 			</div>
 			{isShowChatDialog && (
 				<ChatDialog
+					authorID={post.authorID}
+					postID={post.id}
+					interestID={interestID}
 					postTitle={post.title}
 					items={post.items}
-					sender={{
+					receiver={{
 						id: post.authorID,
 						name: post.authorName
 					}}

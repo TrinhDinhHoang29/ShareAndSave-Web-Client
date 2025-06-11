@@ -25,9 +25,9 @@ interface AuthState {
 
 const useAuthStore = create<AuthState>()(
 	persist(
-		set => ({
+		(set, get) => ({
 			user: null,
-			isAuthenticated: false, // Không dựa vào getAccessToken() ban đầu
+			isAuthenticated: false,
 			isAuthLoading: true,
 			login: data => {
 				setAccessToken(data.jwt)
@@ -54,17 +54,21 @@ const useAuthStore = create<AuthState>()(
 					set({ user: null, isAuthenticated: false })
 					return
 				}
-				try {
-					const response = await authApi.getMe() // Kiểm tra token bằng API
-					set({
-						user: response.data.user,
-						isAuthenticated: true
-					})
-				} catch (error) {
-					console.error('Sync auth failed:', error)
-					clearAccessToken()
-					clearRefreshToken()
-					set({ user: null, isAuthenticated: false })
+				// Chỉ gọi getMe nếu chưa có user hoặc token đã thay đổi
+				const currentUser = get().user
+				if (!currentUser) {
+					try {
+						const response = await authApi.getMe()
+						set({
+							user: response.data.user,
+							isAuthenticated: true
+						})
+					} catch (error) {
+						console.error('Sync auth failed:', error)
+						clearAccessToken()
+						clearRefreshToken()
+						set({ user: null, isAuthenticated: false })
+					}
 				}
 			}
 		}),

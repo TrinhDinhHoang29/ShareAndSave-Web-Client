@@ -22,7 +22,7 @@ const Loading: React.FC<LoadingProps> = ({
 }) => {
 	// Size configurations
 	const sizeClasses = {
-		sm: { container: 'w-6 h-6', text: 'text-sm' },
+		sm: { container: 'w-4 h-4', text: 'text-sm' },
 		md: { container: 'w-8 h-8', text: 'text-base' },
 		lg: { container: 'w-12 h-12', text: 'text-lg' },
 		xl: { container: 'w-16 h-16', text: 'text-xl' }

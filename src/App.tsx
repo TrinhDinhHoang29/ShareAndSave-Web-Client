@@ -1,34 +1,43 @@
-// App.tsx
 import { useEffect } from 'react'
 
 import AppRouter from '@/routes/index.route'
 
+import { getAccessToken } from './lib/token'
 import useAuthStore from './stores/authStore'
 
 function App() {
-	const {
-		isAuthenticated,
-		user,
-		login,
-		logout,
-		setAuthLoading,
-		syncAuthState
-	} = useAuthStore()
+	const { login, logout, setAuthLoading, syncAuthState } = useAuthStore()
 
 	useEffect(() => {
+		let isMounted = true // Flag để tránh setState sau khi unmount
+
 		const initializeAuth = async () => {
 			setAuthLoading(true)
 			try {
-				await syncAuthState() // Đồng bộ trạng thái auth với token
+				// Chỉ gọi syncAuthState nếu có token
+				const accessToken = getAccessToken() // Giả sử token được lưu trong localStorage
+				if (accessToken) {
+					await syncAuthState()
+				} else {
+					console.log('chay vao day')
+					useAuthStore.setState({ user: null, isAuthenticated: false }) // Sử dụng setState từ store
+				}
 			} catch (error) {
 				console.error('Auth initialization failed:', error)
 				logout() // Đăng xuất nếu đồng bộ thất bại
 			} finally {
-				setAuthLoading(false)
+				if (isMounted) {
+					setAuthLoading(false)
+				}
 			}
 		}
 
 		initializeAuth()
+
+		// Cleanup
+		return () => {
+			isMounted = false
+		}
 	}, [login, logout, setAuthLoading, syncAuthState])
 
 	return <AppRouter />

@@ -5,7 +5,7 @@ import React from 'react'
 
 interface Message {
 	id: number
-	sender: string
+	receiver: string
 	text: string
 	time: string
 }
@@ -37,11 +37,11 @@ export const ChatMessagesPanel = ({
 							animate={{ opacity: 1, y: 0 }}
 							exit={{ opacity: 0, y: -10 }}
 							transition={{ duration: 0.2 }}
-							className={`mb-4 flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+							className={`mb-4 flex ${msg.receiver === 'user' ? 'justify-end' : 'justify-start'}`}
 						>
 							<div
 								className={`max-w-[80%] rounded-2xl p-4 shadow-sm ${
-									msg.sender === 'user'
+									msg.receiver === 'user'
 										? `bg-primary text-primary-foreground rounded-br-md`
 										: 'border-border bg-card text-foreground rounded-bl-md border'
 								}`}
@@ -49,7 +49,7 @@ export const ChatMessagesPanel = ({
 								<p className='text-sm leading-relaxed'>{msg.text}</p>
 								<p
 									className={`mt-2 text-xs ${
-										msg.sender === 'user'
+										msg.receiver === 'user'
 											? 'text-primary-foreground/70'
 											: 'text-muted-foreground'
 									}`}

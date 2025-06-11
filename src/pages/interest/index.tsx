@@ -9,7 +9,7 @@ import { useDeleteInterestMutation } from '@/hooks/mutations/use-interest.mutati
 import useListPostInterestQuery from '@/hooks/queries/use-interest.query'
 import useDebounce from '@/hooks/use-debounce'
 import { EInterestType, ESortOrder } from '@/models/enums'
-import { IListPostInterestParams } from '@/models/interfaces'
+import { IListTypeParams } from '@/models/interfaces'
 
 import { PostItem } from './components/FollowedByPost'
 import { InterestedPost } from './components/InterestedPost'
@@ -22,7 +22,7 @@ const Interest = () => {
 
 	const debouncedSearch = useDebounce(search, 500) // Debounce search 500ms
 
-	const params: IListPostInterestParams = useMemo(
+	const params: IListTypeParams<EInterestType> = useMemo(
 		() => ({
 			type: activeTab,
 			page: currentPage,

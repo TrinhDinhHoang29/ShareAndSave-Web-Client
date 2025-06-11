@@ -37,3 +37,10 @@ export enum EInterestType {
 	INTERESTED = 1,
 	FOLLWED_BY = 2
 }
+
+export enum ETransactionStatus {
+	DEFAULT = '0',
+	PENDING = '1',
+	SUCCESS = '2',
+	CANCELLED = '3'
+}

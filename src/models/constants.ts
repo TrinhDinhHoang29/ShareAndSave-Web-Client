@@ -1,4 +1,6 @@
-import { EPostType } from './enums'
+import { Check, CheckCircle, Clock, XCircleIcon } from 'lucide-react'
+
+import { EPostType, ETransactionStatus } from './enums'
 
 export const getTypeInfo = (type: EPostType) => {
 	switch (type) {
@@ -38,4 +40,50 @@ export const getTypeInfo = (type: EPostType) => {
 				icon: '📝'
 			}
 	}
+}
+
+export const getTransactionStatusConfig = (
+	isAuthor: boolean,
+	status: ETransactionStatus
+) => {
+	const configs: Record<
+		ETransactionStatus,
+		{
+			label: string
+			icon: React.ComponentType<{ className?: string }>
+			background: string
+			border: string
+			textColor: string
+		}
+	> = {
+		[ETransactionStatus.DEFAULT]: {
+			label: 'Xác nhận',
+			icon: Check,
+			background: 'bg-chart-1/90 hover:bg-chart-1',
+			textColor: 'text-white',
+			border: ''
+		},
+		[ETransactionStatus.PENDING]: {
+			label: isAuthor ? 'Chưa xử lý' : 'Chờ phản hồi',
+			icon: Clock,
+			background: 'bg-chart-2/90 hover:bg-chart-2',
+			textColor: 'text-white',
+			border: 'border-chart-2 border-solid border-2'
+		},
+		[ETransactionStatus.SUCCESS]: {
+			label: 'Hoàn tất',
+			icon: CheckCircle,
+			background: 'bg-chart-1/90 hover:bg-chart-1',
+			textColor: 'text-white',
+			border: 'border-chart-1 border-solid border-2'
+		},
+		[ETransactionStatus.CANCELLED]: {
+			label: isAuthor ? 'Đã từ chối' : 'Đã bị từ chối',
+			icon: XCircleIcon,
+			background: 'bg-chart-3/90 hover:bg-chart-3',
+			textColor: 'text-white',
+			border: 'border-chart-3 border-solid border-2'
+		}
+	}
+	return configs[status]
 }

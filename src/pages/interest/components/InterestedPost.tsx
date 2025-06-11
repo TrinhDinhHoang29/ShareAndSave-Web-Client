@@ -88,7 +88,10 @@ export const InterestedPost = ({
 			<AnimatePresence>
 				{showChat && (
 					<ChatDialog
-						sender={{
+						interestID={post.interests[0].id}
+						postID={post.id}
+						authorID={post.authorID}
+						receiver={{
 							id: post.authorID,
 							name: post.authorName
 						}}

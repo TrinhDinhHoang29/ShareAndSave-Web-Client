@@ -6,7 +6,8 @@ import {
 	EPostType,
 	ERequestStatus,
 	ERequestType,
-	ESortOrder
+	ESortOrder,
+	ETransactionStatus
 } from './enums'
 import { PersonalInfo, PostInfo, PostType } from './types'
 
@@ -61,6 +62,7 @@ export interface IItem {
 	itemID?: number
 	categoryName?: string
 	quantity?: number
+	currentQuantity?: number
 }
 
 export interface INewItem {
@@ -255,12 +257,41 @@ export interface IPostInterestResponse {
 	totalPage: number
 }
 
-export interface ISender {
+export interface IReceiver {
 	id: number
 	name: string
 }
 
-export interface RequestItem extends IItem {
-	requestedQuantity: number
-	isConfirmed?: boolean // Thêm trạng thái xác nhận
+export interface ITransactionItem {
+	itemID: number
+	itemName: string
+	itemImage: string
+	postItemID: number
+	quantity: number
+	currentQuantity: number
+}
+
+export interface IDetailTransactionParams {
+	postID: number
+	searchBy: 'interestID'
+	searchValue: string
+}
+
+export interface ITransaction {
+	id: number
+	interestID: number
+	senderID: number
+	receiverID: number
+	senderName: string
+	receiverName: string
+	status: ETransactionStatus
+	items: ITransactionItem[]
+}
+
+export interface ITransactionRequest {
+	interestID: number
+	items: {
+		postItemID: number
+		quantity: number
+	}[]
 }

@@ -1,6 +1,7 @@
+import { EInterestType } from '@/models/enums'
 import {
 	IApiResponse,
-	IListPostInterestParams,
+	IListTypeParams,
 	IPostInterestResponse
 } from '@/models/interfaces'
 
@@ -12,7 +13,7 @@ const interestEndpoints = {
 
 const interestApi = {
 	async list(
-		params: IListPostInterestParams
+		params: IListTypeParams<EInterestType>
 	): Promise<IApiResponse<IPostInterestResponse>> {
 		return axiosPrivate.get(interestEndpoints.common, {
 			params
