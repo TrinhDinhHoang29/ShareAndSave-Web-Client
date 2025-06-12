@@ -104,7 +104,7 @@ export const ChatDialog = ({
 				transactionData.items.map(item => ({
 					...item,
 					currentQuantity:
-						items.find(i => i.id === item.postItemID)?.currentQuantity || 0
+						items.find(i => i.itemID === item.itemID)?.currentQuantity || 0
 				}))
 			)
 			setTransactionStatus(transactionData.status)

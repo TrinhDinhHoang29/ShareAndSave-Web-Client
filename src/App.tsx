@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import AppRouter from '@/routes/index.route'
 
@@ -7,6 +8,7 @@ import useAuthStore from './stores/authStore'
 
 function App() {
 	const { login, logout, setAuthLoading, syncAuthState } = useAuthStore()
+	const navigate = useNavigate()
 
 	useEffect(() => {
 		let isMounted = true // Flag để tránh setState sau khi unmount
@@ -25,6 +27,7 @@ function App() {
 			} catch (error) {
 				console.error('Auth initialization failed:', error)
 				logout() // Đăng xuất nếu đồng bộ thất bại
+				navigate('/')
 			} finally {
 				if (isMounted) {
 					setAuthLoading(false)

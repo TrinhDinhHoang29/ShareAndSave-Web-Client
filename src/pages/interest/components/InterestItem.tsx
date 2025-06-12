@@ -1,24 +1,27 @@
-import { AnimatePresence } from 'framer-motion'
 import { Calendar, MessageCircle, User } from 'lucide-react'
-import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
-import { ChatDialog } from '@/components/common/ChatDialog'
-import { IItem, IUserInterest } from '@/models/interfaces'
+import { IUserInterest } from '@/models/interfaces'
 
 export const InterestItem = ({
-	postTitle,
-	items,
 	userInterest,
-	postID,
-	authorID
+	postID
 }: {
-	postTitle: string
-	items?: IItem[]
 	userInterest: IUserInterest
 	postID: number
-	authorID: number
 }) => {
-	const [showChat, setShowChat] = useState(false)
+	const navigate = useNavigate()
+
+	const handleOpenChat = () => {
+		const receiver = {
+			id: userInterest.userID,
+			name: userInterest.userName
+		}
+
+		navigate(`/chat/${postID}/${userInterest.id}`, {
+			state: { receiver }
+		})
+	}
 
 	return (
 		<div className='relative'>
@@ -54,29 +57,12 @@ export const InterestItem = ({
 
 				<button
 					className={`text-primary-foreground bg-primary rounded-xl p-3 shadow-lg transition-all duration-200 hover:shadow-xl`}
-					onClick={() => setShowChat(!showChat)}
+					onClick={handleOpenChat}
 					aria-label='Chat'
 				>
 					<MessageCircle className='h-5 w-5' />
 				</button>
 			</div>
-
-			<AnimatePresence>
-				{showChat && (
-					<ChatDialog
-						authorID={authorID}
-						postID={postID}
-						interestID={userInterest.id}
-						receiver={{
-							id: userInterest.id,
-							name: userInterest.userName
-						}}
-						postTitle={postTitle}
-						onClose={() => setShowChat(false)}
-						items={items}
-					/>
-				)}
-			</AnimatePresence>
 		</div>
 	)
 }

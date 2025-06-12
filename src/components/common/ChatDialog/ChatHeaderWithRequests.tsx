@@ -3,14 +3,11 @@ import { Dialog } from '@headlessui/react'
 import clsx from 'clsx'
 import { motion } from 'framer-motion'
 import {
-	Check,
 	ChevronLeft,
 	ChevronRight,
 	Eye,
 	EyeOff,
-	Minus,
 	Package,
-	Plus,
 	X
 } from 'lucide-react'
 
@@ -65,6 +62,7 @@ export const ChatHeaderWithRequests = ({
 		transactionStatus
 	)
 	const TransactionIconStatus = transactionStatusConfig.icon
+	transactionStatus = transactionStatus.toString() as ETransactionStatus
 
 	return (
 		<div className='bg-primary text-primary-foreground px-6 py-4'>
@@ -143,19 +141,19 @@ export const ChatHeaderWithRequests = ({
 										{transactionStatusConfig.label}
 									</button>
 								)}
-							{!isAuthor &&
-								transactionStatus !== ETransactionStatus.DEFAULT && (
-									<div
-										className={clsx(
-											'flex cursor-not-allowed items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium shadow-lg',
-											transactionStatusConfig.background,
-											transactionStatusConfig.textColor
-										)}
-									>
-										<TransactionIconStatus className='h-4 w-4' />{' '}
-										{transactionStatusConfig.label}
-									</div>
-								)}
+							{(isAuthor ||
+								transactionStatus !== ETransactionStatus.DEFAULT) && (
+								<div
+									className={clsx(
+										'flex cursor-not-allowed items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium shadow-lg',
+										transactionStatusConfig.background,
+										transactionStatusConfig.textColor
+									)}
+								>
+									<TransactionIconStatus className='h-4 w-4' />{' '}
+									{transactionStatusConfig.label}
+								</div>
+							)}
 						</div>
 					</div>
 
@@ -228,64 +226,20 @@ export const ChatHeaderWithRequests = ({
 									</p>
 								</div>
 								<div className='flex items-center gap-3'>
-									{isAuthor ? (
-										<div className='flex items-center gap-2'>
-											{transactionStatus === ETransactionStatus.PENDING && (
-												<button
-													onClick={() =>
-														handleConfirmSingleRequest(currentItem.itemID || 0)
-													}
-													className='flex items-center gap-1 rounded-lg bg-green-500 px-3 py-2 text-sm font-medium text-white shadow-lg hover:bg-green-600'
-													title='Xác nhận yêu cầu này'
-												>
-													<Check className='h-4 w-4' /> Xác nhận
-												</button>
-											)}
-											{transactionStatus === ETransactionStatus.PENDING && (
-												<div className='bg-primary-foreground/30 flex items-center gap-2 rounded-lg p-2'>
-													<button
-														onClick={() =>
-															handlePendingQuantityChange(
-																currentItem.itemID || 0,
-																-1
-															)
-														}
-														className='bg-primary-foreground/40 hover:bg-primary-foreground/60 flex h-8 w-8 items-center justify-center rounded-md'
-													>
-														<Minus className='text-primary-foreground h-4 w-4' />
-													</button>
-													<span className='text-primary-foreground w-8 text-center text-sm font-semibold'>
-														{currentItem.quantity}
-													</span>
-													<button
-														onClick={() =>
-															handlePendingQuantityChange(
-																currentItem.itemID || 0,
-																1
-															)
-														}
-														className='bg-primary-foreground/40 hover:bg-primary-foreground/60 flex h-8 w-8 items-center justify-center rounded-md'
-													>
-														<Plus className='text-primary-foreground h-4 w-4' />
-													</button>
-												</div>
-											)}
-										</div>
-									) : (
-										transactionStatus === ETransactionStatus.DEFAULT && (
-											<button
-												onClick={() =>
-													handleRemovePendingRequest(
-														currentItem.itemID || 0,
-														currentRequestIndex
-													)
-												}
-												className='group flex h-8 w-8 items-center justify-center rounded-md bg-red-500/80 hover:bg-red-500 hover:shadow-lg'
-												title='Xóa yêu cầu'
-											>
-												<X className='h-5 w-5 text-white transition-transform group-hover:scale-110' />
-											</button>
-										)
+									{(transactionStatus === ETransactionStatus.DEFAULT ||
+										isAuthor) && (
+										<button
+											onClick={() =>
+												handleRemovePendingRequest(
+													currentItem.itemID || 0,
+													currentRequestIndex
+												)
+											}
+											className='group flex h-8 w-8 items-center justify-center rounded-md bg-red-500/80 hover:bg-red-500 hover:shadow-lg'
+											title='Xóa yêu cầu'
+										>
+											<X className='h-5 w-5 text-white transition-transform group-hover:scale-110' />
+										</button>
 									)}
 								</div>
 							</motion.div>

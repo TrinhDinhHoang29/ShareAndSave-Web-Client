@@ -30,7 +30,7 @@ export const useSendItemMutation = ({
 		},
 		onMutate: () => {
 			showLoading({
-				loadingMessage: 'Đang gửi yêu cầu...',
+				loadingMessage: 'Đang gửi bài đăng...',
 				showCancel: true,
 				onCancel: () => {
 					abortControllerRef.current?.abort()
@@ -44,10 +44,10 @@ export const useSendItemMutation = ({
 				onSuccess?.(res.data)
 			} else {
 				showError({
-					errorTitle: 'Lỗi gửi yêu cầu',
+					errorTitle: 'Lỗi gửi bài đăng',
 					errorMessage:
 						res.message ||
-						'Đã xảy ra lỗi khi gửi yêu cầu. Vui lòng thử lại sau.',
+						'Đã xảy ra lỗi khi gửi bài đăng. Vui lòng thử lại sau.',
 					errorButtonText: 'Thử lại'
 				})
 			}
@@ -57,10 +57,10 @@ export const useSendItemMutation = ({
 				return // Skip error modal for user cancellation
 			}
 			showError({
-				errorTitle: 'Lỗi gửi yêu cầu',
+				errorTitle: 'Lỗi gửi bài đăng',
 				errorMessage:
 					(error as IApiErrorResponse).message ||
-					'Đã xảy ra lỗi khi gửi yêu cầu. Vui lòng thử lại sau.',
+					'Đã xảy ra lỗi khi gửi bài đăng. Vui lòng thử lại sau.',
 				errorButtonText: 'Thử lại'
 			})
 			onError?.()

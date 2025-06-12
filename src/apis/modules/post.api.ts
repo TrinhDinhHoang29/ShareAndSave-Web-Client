@@ -45,6 +45,14 @@ const postApi = {
 		} catch (error) {
 			throw error
 		}
+	},
+	async detailByID(id: number): Promise<IApiResponse<{ post: IPostDetail }>> {
+		// eslint-disable-next-line no-useless-catch
+		try {
+			return await axiosPublic.get(postEndpoints.post + '/' + id)
+		} catch (error) {
+			throw error
+		}
 	}
 	//   async add(data: { ten: string }): Promise<IApiResponse> {
 	//     // eslint-disable-next-line no-useless-catch

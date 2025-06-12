@@ -50,7 +50,10 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
 		{
 			label: 'Đăng xuất',
 			icon: <LogOut className='h-4 w-4' />,
-			onClick: () => logout(),
+			onClick: () => {
+				logout()
+				navigate('/')
+			},
 			divider: true
 		}
 	]

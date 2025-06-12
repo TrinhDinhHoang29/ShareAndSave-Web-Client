@@ -1,9 +1,6 @@
-import { AnimatePresence } from 'framer-motion'
 import { FileText, Heart, MessageCircle } from 'lucide-react'
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { ChatDialog } from '@/components/common/ChatDialog'
 import { getTypeInfo } from '@/models/constants'
 import { EPostType } from '@/models/enums'
 import { IPostInterest } from '@/models/interfaces'
@@ -15,9 +12,18 @@ export const InterestedPost = ({
 	post: IPostInterest
 	onDeleteInterest: (postID: number) => void
 }) => {
-	const [showChat, setShowChat] = useState(false)
 	const typeInfo = getTypeInfo(post.type.toString() as EPostType)
 	const navigate = useNavigate()
+	const handleOpenChat = () => {
+		const receiver = {
+			id: post.authorID,
+			name: post.authorName
+		}
+
+		navigate(`/chat/${post.id}/${post.interests[0].id}`, {
+			state: { receiver }
+		})
+	}
 
 	return (
 		<div className='border-border bg-card/80 overflow-hidden rounded-2xl border shadow-lg backdrop-blur-sm transition-shadow duration-200 hover:shadow-xl'>
@@ -70,7 +76,7 @@ export const InterestedPost = ({
 
 						<button
 							className={`text-primary-foreground bg-chart-1 rounded-xl p-3 shadow-lg transition-all duration-200 hover:shadow-xl`}
-							onClick={() => setShowChat(true)}
+							onClick={handleOpenChat}
 							aria-label='Chat với tác giả'
 							title='Chat với tác giả'
 						>
@@ -83,26 +89,6 @@ export const InterestedPost = ({
 					{post.description}
 				</p>
 			</div>
-
-			{/* Chat Dialog */}
-			<AnimatePresence>
-				{showChat && (
-					<ChatDialog
-						interestID={post.interests[0].id}
-						postID={post.id}
-						authorID={post.authorID}
-						receiver={{
-							id: post.authorID,
-							name: post.authorName
-						}}
-						postTitle={post.title}
-						onClose={() => {
-							setShowChat(false)
-						}}
-						items={post.items}
-					/>
-				)}
-			</AnimatePresence>
 		</div>
 	)
 }

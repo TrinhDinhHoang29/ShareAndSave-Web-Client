@@ -14,6 +14,7 @@ const PostDetail = lazy(() => import('@/pages/post-detail'))
 const Post = lazy(() => import('@/pages/post'))
 const LoginSession = lazy(() => import('@/pages/LoginSession'))
 const Dowload = lazy(() => import('@/pages/dowload'))
+const Chat = lazy(() => import('@/pages/chat'))
 
 // Error Boundary Component
 const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
@@ -96,6 +97,14 @@ function AppRouter() {
 					element: (
 						<ErrorBoundary>
 							<Dowload />
+						</ErrorBoundary>
+					)
+				},
+				{
+					path: '/chat/:postID/:interestID',
+					element: (
+						<ErrorBoundary>
+							<Chat />
 						</ErrorBoundary>
 					)
 				},

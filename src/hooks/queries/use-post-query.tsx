@@ -33,3 +33,16 @@ export const useDetailPostQuery = (slug: string) => {
 		gcTime: 10 * 60 * 1000 // Cache trong 10 phút
 	})
 }
+
+export const useDetailPostQueryByID = (id: number) => {
+	return useQuery<IPostDetail | null>({
+		queryKey: ['posts', id], // Key để cache, dựa trên id
+		queryFn: async () => {
+			const res = await postApi.detailByID(id)
+			return res.data.post.id === 0 ? null : res.data.post // Trả về null nếu post không tồn tại
+		},
+		enabled: !!id && id > 0, // Chỉ chạy query khi id tồn tại và lớn hơn 0
+		staleTime: 5 * 60 * 1000, // Dữ liệu tươi trong 5 phút
+		gcTime: 10 * 60 * 1000 // Cache trong 10 phút
+	})
+}

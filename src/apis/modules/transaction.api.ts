@@ -1,7 +1,7 @@
 import {
 	IApiResponse,
-	IDetailTransactionParams,
 	ITransaction,
+	ITransactionParams,
 	ITransactionRequest
 } from '@/models/interfaces'
 
@@ -12,16 +12,9 @@ const transactionEndpoints = {
 }
 
 const transactionApi = {
-	// async list(
-	// 	params: IListTypeParams<EtransactionType>
-	// ): Promise<IApiResponse<IPosttransactionResponse>> {
-	// 	return axiosPrivate.get(transactionEndpoints.common, {
-	// 		params
-	// 	})
-	// },
 	async create(
 		data: ITransactionRequest
-	): Promise<IApiResponse<{ transition: ITransaction }>> {
+	): Promise<IApiResponse<{ transaction: ITransaction }>> {
 		return axiosPrivate.post(transactionEndpoints.common, data)
 	},
 	async delete(
@@ -29,12 +22,25 @@ const transactionApi = {
 	): Promise<IApiResponse<{ transactionID: number }>> {
 		return axiosPrivate.delete(transactionEndpoints.common + '/' + postID)
 	},
-	async detail(
-		params: IDetailTransactionParams
+	async list(
+		params: ITransactionParams
 	): Promise<IApiResponse<{ transactions: ITransaction[] }>> {
 		return axiosPrivate.get(transactionEndpoints.common, {
 			params
 		})
+	},
+	async update(
+		transactionID: number,
+		data: ITransactionRequest,
+		signal?: AbortSignal
+	): Promise<IApiResponse<{ transaction: ITransaction }>> {
+		return axiosPrivate.patch(
+			transactionEndpoints.common + '/' + transactionID,
+			data,
+			{
+				signal
+			}
+		)
 	}
 }
 

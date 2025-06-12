@@ -1,7 +1,6 @@
 import { LucideIcon } from 'lucide-react'
 
 import {
-	EInterestType,
 	EPostSTatus,
 	EPostType,
 	ERequestStatus,
@@ -271,7 +270,7 @@ export interface ITransactionItem {
 	currentQuantity: number
 }
 
-export interface IDetailTransactionParams {
+export interface ITransactionParams {
 	postID: number
 	searchBy: 'interestID'
 	searchValue: string
@@ -286,12 +285,15 @@ export interface ITransaction {
 	receiverName: string
 	status: ETransactionStatus
 	items: ITransactionItem[]
+	createdAt: string
+	updatedAt: string
 }
 
 export interface ITransactionRequest {
-	interestID: number
-	items: {
+	interestID?: number
+	items?: {
 		postItemID: number
 		quantity: number
 	}[]
+	status?: number
 }

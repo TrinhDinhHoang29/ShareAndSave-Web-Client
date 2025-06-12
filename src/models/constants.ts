@@ -64,7 +64,7 @@ export const getTransactionStatusConfig = (
 			border: ''
 		},
 		[ETransactionStatus.PENDING]: {
-			label: isAuthor ? 'Chưa xử lý' : 'Chờ phản hồi',
+			label: 'Đang trong giao dịch',
 			icon: Clock,
 			background: 'bg-chart-2/90 hover:bg-chart-2',
 			textColor: 'text-white',
