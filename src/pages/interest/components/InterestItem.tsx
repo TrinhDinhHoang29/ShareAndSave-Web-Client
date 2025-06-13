@@ -1,6 +1,7 @@
 import clsx from 'clsx'
 import {
 	Calendar,
+	Clock,
 	MessageCircle,
 	MessageCircleWarning,
 	User
@@ -9,6 +10,7 @@ import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { useListTransactionQuery } from '@/hooks/queries/use-transaction.query'
+import { formatNearlyDateTimeVN } from '@/lib/utils'
 import { ETransactionStatus } from '@/models/enums'
 import { ITransactionParams, IUserInterest } from '@/models/interfaces'
 
@@ -69,10 +71,8 @@ export const InterestItem = ({
 							{userInterest.userName}
 						</p>
 						<div className='text-muted-foreground mt-1 flex items-center space-x-2 text-sm'>
-							<Calendar className='h-4 w-4' />
-							<span>
-								{new Date(userInterest.createdAt).toLocaleDateString('vi-VN')}
-							</span>
+							<Clock className='h-4 w-4' />
+							<span>{formatNearlyDateTimeVN(userInterest.createdAt)}</span>
 							{/* <div className='ml-2 flex items-center space-x-1'>
 								<CheckCircle className='text-chart-1 h-4 w-4' />
 								<span className='text-chart-1 font-medium'>Hoàn thành</span>

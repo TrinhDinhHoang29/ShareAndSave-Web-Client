@@ -2,9 +2,11 @@ import clsx from 'clsx'
 import { motion } from 'framer-motion'
 import {
 	ArrowLeft,
+	ArrowLeftRight,
 	Check,
 	ChevronLeft,
 	ChevronRight,
+	CircleHelp,
 	Eye,
 	EyeOff,
 	Minus,
@@ -20,6 +22,7 @@ import { ETransactionStatus } from '@/models/enums'
 import { IReceiver, ITransaction, ITransactionItem } from '@/models/interfaces'
 
 import { TransactionsDialog } from './TransactionDialog'
+import { TutorialTransactionDialog } from './TutorialTransactionDialog'
 
 interface Props {
 	receiver: IReceiver
@@ -72,6 +75,8 @@ export const ChatHeaderWithRequests = ({
 	)
 	const TransactionIconStatus = transactionStatusConfig.icon
 	const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false)
+	const [isTutorialTransactionDialogOpen, setIsTutorialTransactionDialogOpen] =
+		useState(false)
 
 	const handleTransactionSelect = (index: number) => {
 		const status = transactions[index]?.status.toString() as ETransactionStatus
@@ -101,16 +106,25 @@ export const ChatHeaderWithRequests = ({
 							<p className='text-primary-foreground/90 text-sm'>{postTitle}</p>
 						</div>
 					</div>
-					<div className='relative'>
+					<div className='flex items-center gap-2'>
 						<button
-							title='Giao dịch của tôi'
-							onClick={() => setIsTransactionDialogOpen(true)}
+							title='Hướng dẫn giao dịch'
+							onClick={() => setIsTutorialTransactionDialogOpen(true)}
 							className='bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200'
 						>
-							<Package className='h-6 w-6' />
+							<CircleHelp className='h-6 w-6' />
 						</button>
-						<div className='bg-background/80 text-foreground absolute -top-2 -right-2 rounded-full px-2 py-1 text-sm font-medium shadow-lg'>
-							{transactions.length}
+						<div className='relative'>
+							<button
+								title='Giao dịch của tôi'
+								onClick={() => setIsTransactionDialogOpen(true)}
+								className='bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200'
+							>
+								<ArrowLeftRight className='h-6 w-6' />
+							</button>
+							<div className='bg-background/80 text-foreground absolute -top-2 -right-2 rounded-full px-2 py-1 text-sm font-medium shadow-lg'>
+								{transactions.length}
+							</div>
 						</div>
 					</div>
 				</div>
@@ -314,6 +328,10 @@ export const ChatHeaderWithRequests = ({
 				transactions={transactions}
 				isAuthor={isAuthor}
 				handleTransactionSelect={handleTransactionSelect}
+			/>
+			<TutorialTransactionDialog
+				isOpen={isTutorialTransactionDialogOpen}
+				onClose={() => setIsTutorialTransactionDialogOpen(false)}
 			/>
 		</>
 	)

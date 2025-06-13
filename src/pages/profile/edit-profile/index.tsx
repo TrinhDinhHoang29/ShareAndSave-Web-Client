@@ -1,57 +1,42 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { motion } from 'framer-motion'
 import { Camera, MapPin, Phone, Save, User } from 'lucide-react'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { z } from 'zod'
 
 import InputText from '@/components/common/InputText'
+import PrimaryButton from '@/components/common/PrimaryButton'
 import Selection from '@/components/common/Selection'
+import { useUpdateUserMutation } from '@/hooks/mutations/use-auth.mutation'
+import { IMajor, IUser } from '@/models/interfaces'
+import { userProfileSchema } from '@/models/schema'
+import { UserProfileFormData } from '@/models/types'
 import useAuthStore from '@/stores/authStore'
 
 // Zod Schema
-const studentSchema = z.object({
-	fullName: z
-		.string()
-		.min(1, 'Họ và tên không được để trống')
-		.min(2, 'Họ và tên phải có ít nhất 2 ký tự')
-		.max(50, 'Họ và tên không được quá 50 ký tự'),
-	majorID: z.number().min(1, 'Vui lòng chọn chuyên ngành'),
-	phoneNumber: z
-		.string()
-		.min(1, 'Số điện thoại không được để trống')
-		.regex(/^[0-9]{10,11}$/, 'Số điện thoại phải có 10-11 chữ số'),
-	address: z
-		.string()
-		.min(1, 'Địa chỉ không được để trống')
-		.min(5, 'Địa chỉ phải có ít nhất 5 ký tự')
-		.max(200, 'Địa chỉ không được quá 200 ký tự'),
-	avatar: z.string().optional()
-})
-
-type StudentFormData = z.infer<typeof studentSchema>
 
 const EditProfile = () => {
 	const [avatar, setAvatar] = useState('')
-	const majors = [
-		{ id: 1, name: 'Công nghệ Kỹ thuật Điện, Điện tử' },
+
+	const majors: IMajor[] = [
+		{ id: 1, name: 'Công nghệ Kỹ thuật Điện' },
 		{ id: 2, name: 'Công nghệ Kỹ thuật Điện tử - Viễn thông' },
 		{ id: 3, name: 'Công nghệ Kỹ thuật Cơ khí' },
 		{ id: 4, name: 'Công nghệ Kỹ thuật Ô tô' },
-		{ id: 5, name: 'Công nghệ Kỹ thuật Thời trang' },
+		{ id: 5, name: 'Công nghệ Thông tin' },
 		{ id: 6, name: 'Công nghệ Kỹ thuật Nhiệt' },
-		{ id: 7, name: 'Công nghệ Kỹ thuật Điện khí' },
+		{ id: 7, name: 'Công nghệ Kỹ thuật Điều khiển và Tự động hóa' },
 		{ id: 8, name: 'Công nghệ Kỹ thuật Cơ điện tử' },
-		{ id: 9, name: 'Kỹ thuật tin học' },
-		{ id: 10, name: 'Công nghệ kỹ thuật' },
-		{ id: 11, name: 'Sử dụng công nghệ' },
+		{ id: 9, name: 'Kế toán tin học' },
+		{ id: 10, name: 'Cơ khí chế tạo' },
+		{ id: 11, name: 'Sửa chữa cơ khí' },
 		{ id: 12, name: 'Hàn' },
 		{ id: 13, name: 'Kỹ thuật máy lạnh và điều hòa không khí' },
 		{ id: 14, name: 'Bảo trì, sửa chữa Ô tô' },
 		{ id: 15, name: 'Điện công nghiệp' },
 		{ id: 16, name: 'Điện tử công nghiệp' },
-		{ id: 17, name: 'Quan trị mạng máy tính' },
-		{ id: 18, name: 'Kỹ thuật xây dựng, lắp ráp máy tính' }
+		{ id: 17, name: 'Quản trị mạng máy tính' },
+		{ id: 18, name: 'Kỹ thuật sửa chữa, lắp ráp máy tính' }
 	]
 
 	const { user } = useAuthStore()
@@ -61,37 +46,48 @@ const EditProfile = () => {
 		register,
 		handleSubmit,
 		formState: { errors },
-		setValue,
-		reset
-	} = useForm<StudentFormData>({
-		resolver: zodResolver(studentSchema),
+		setValue
+	} = useForm<UserProfileFormData>({
+		resolver: zodResolver(userProfileSchema),
 		defaultValues: {
-			fullName: user?.fullName,
+			fullName: user?.fullName || '',
 			majorID: majors.some(i => i.name === user?.major)
-				? majors.find(i => i.name === user?.major)?.id || 0
-				: 0,
-			phoneNumber: user?.phoneNumber,
-			address: user?.address,
-			avatar: user?.avatar
+				? majors.find(i => i.name === user?.major)?.id
+				: undefined,
+			phoneNumber: user?.phoneNumber || '',
+			address: user?.address || '',
+			avatar: user?.avatar || '',
+			goodPoint: user?.goodPoint,
+			status: user?.status
 		}
 	})
 
-	const onSubmit = async (data: StudentFormData) => {
+	const { mutate: updateUserMutation } = useUpdateUserMutation({
+		onSuccess: (userData: IUser) => {
+			userData = {
+				...userData,
+				email: user?.email
+			}
+			useAuthStore.setState({ user: userData })
+		}
+	})
+
+	// Set initial avatar when component mounts
+	useEffect(() => {
+		if (user?.avatar) {
+			setAvatar(user.avatar)
+			setValue('avatar', user.avatar)
+		}
+	}, [user?.avatar, setValue])
+
+	const onSubmit = async (data: UserProfileFormData) => {
 		try {
-			// // Add avatar to form data
-			// const formDataWithAvatar = {
-			//   ...data,
-			//   avatar: avatar
-			// };
-
-			// // Simulate API call
-			// await new Promise(resolve => setTimeout(resolve, 2000));
-
-			// console.log('Profile updated:', formDataWithAvatar);
-
-			// // Success notification could go here
-			// alert('Thông tin đã được cập nhật thành công!');
-			console.log(data)
+			const { majorID, ...rest } = data
+			const userDataRequest: IUser = {
+				...rest,
+				major: majors.find(i => i.id === majorID)?.name
+			}
+			updateUserMutation({ clientID: user?.id || 0, data: userDataRequest })
 		} catch (error) {
 			console.error('Error updating profile:', error)
 			alert('Có lỗi xảy ra khi cập nhật thông tin!')
@@ -101,18 +97,14 @@ const EditProfile = () => {
 	const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0]
 		if (file) {
-			// Validate file size (max 5MB)
 			if (file.size > 5 * 1024 * 1024) {
 				alert('Kích thước file không được vượt quá 5MB')
 				return
 			}
-
-			// Validate file type
 			if (!file.type.startsWith('image/')) {
 				alert('Vui lòng chọn file hình ảnh')
 				return
 			}
-
 			const reader = new FileReader()
 			reader.onload = e => {
 				const result = e.target?.result as string
@@ -121,11 +113,6 @@ const EditProfile = () => {
 			}
 			reader.readAsDataURL(file)
 		}
-	}
-
-	const handleCancel = () => {
-		reset()
-		setAvatar(user?.avatar || '')
 	}
 
 	return (
@@ -165,7 +152,7 @@ const EditProfile = () => {
 						className='mb-8 flex justify-center'
 					>
 						<div className='relative'>
-							<div className='from-primary to-primary-foreground flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br'>
+							<div className='from-primary to-primary-foreground flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br shadow-md'>
 								{avatar ? (
 									<img
 										src={avatar}
@@ -180,7 +167,7 @@ const EditProfile = () => {
 								<Camera className='h-4 w-4' />
 								<input
 									type='file'
-									accept='image/*'
+									accept='image/jpeg,image/jpg,image/png,image/gif'
 									onChange={handleAvatarChange}
 									className='hidden'
 								/>
@@ -201,18 +188,6 @@ const EditProfile = () => {
 							autocompleted='off'
 						/>
 
-						<Selection
-							defaulTextOption='chuyên ngành'
-							name='major'
-							label='Chuyên Ngành'
-							options={majors}
-							register={register}
-							error={errors.majorID}
-							animationDelay={0.5}
-							isLoading={false}
-							disabled={false}
-						/>
-
 						<InputText
 							name='phoneNumber'
 							label='Số Điện Thoại'
@@ -221,38 +196,45 @@ const EditProfile = () => {
 							register={register}
 							error={errors.phoneNumber}
 							icon={Phone}
-							animationDelay={0.6}
+							animationDelay={0.5}
 							autocompleted='off'
 						/>
 
 						<InputText
 							name='address'
 							label='Địa Chỉ'
-							type='textarea'
+							type='text'
 							placeholder='Nhập địa chỉ của bạn'
 							register={register}
 							error={errors.address}
 							icon={MapPin}
-							animationDelay={0.7}
+							animationDelay={0.6}
 							rows={4}
 							autocompleted='off'
 						/>
 
+						<Selection
+							name='majorID'
+							label='Chuyên Ngành'
+							options={majors}
+							register={register}
+							error={errors.majorID}
+							animationDelay={0.7}
+							defaulTextOption='chuyên ngành'
+							isLoading={false}
+							disabled={false}
+						/>
+
 						{/* Action Buttons */}
-						<motion.div
-							initial={{ opacity: 0, y: 20 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ delay: 0.8, duration: 0.5 }}
-							className='flex gap-4 pt-6'
-						>
-							<button
-								onClick={handleSubmit(onSubmit)}
-								className='from-primary to-primary-foreground hover:from-primary/90 hover:to-primary-foreground flex flex-1 transform items-center justify-center gap-2 rounded-lg bg-gradient-to-r px-6 py-3 font-semibold text-white transition-all duration-200 hover:scale-105 disabled:transform-none disabled:cursor-not-allowed disabled:opacity-50'
+						<div className='flex gap-4 pt-4'>
+							<PrimaryButton
+								onClick={handleSubmit(onSubmit, errors => console.log(errors))}
+								icon={<Save className='h-5 w-5' />}
+								className='flex w-full items-center justify-center gap-2 py-2'
 							>
-								<Save className='h-5 w-5' />
 								Lưu Thay Đổi
-							</button>
-						</motion.div>
+							</PrimaryButton>
+						</div>
 					</div>
 				</motion.div>
 			</div>

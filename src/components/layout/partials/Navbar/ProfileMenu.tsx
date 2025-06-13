@@ -68,7 +68,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
 	return (
 		<div className='w-64 overflow-hidden'>
 			{/* Profile Header */}
-			<div className='bg-background rounded-t-md border-b border-gray-100 px-4 py-4'>
+			<div className='bg-background border-accent-foreground/50 rounded-t-md border-b px-4 py-4'>
 				<div className='flex items-center gap-3'>
 					<div className='relative'>
 						<div className='flex h-12 w-12 items-center justify-center rounded-full bg-gray-200'>
@@ -96,11 +96,11 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
 			</div>
 
 			{/* Menu Items */}
-			<div className='pb-2'>
+			<div className='bg-background/70 rounded-b-md pb-2'>
 				{profileMenuItems.map((item: MenuItem, index: number) => (
 					<div key={index}>
 						{item.divider && (
-							<div className='border-background mx-3 my-1 border-t'></div>
+							<div className='border-accent-foreground/50 mb-2 border-t'></div>
 						)}
 						<button
 							onClick={() => handleClick(item)}

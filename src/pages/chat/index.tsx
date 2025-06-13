@@ -91,7 +91,7 @@ const Chat = () => {
 	const [isRequestsVisible, setIsRequestsVisible] = useState(true)
 	const [transactionStatus, setTransactionStatus] =
 		useState<ETransactionStatus>(ETransactionStatus.DEFAULT)
-	console.log(transactionData)
+
 	console.log(transactionParams)
 	const transactionID = useMemo(() => {
 		if (transactionData) {
@@ -115,6 +115,7 @@ const Chat = () => {
 			setSelectedItems([])
 			transactionData?.unshift({
 				...transaction,
+				updatedAt: new Date().toISOString(),
 				items: transactionItems
 			})
 		}
@@ -244,7 +245,7 @@ const Chat = () => {
 
 	return (
 		<div className='bg-background min-h-full'>
-			<div className='bg-card flex w-full overflow-hidden rounded-2xl shadow-2xl'>
+			<div className='bg-card flex w-full overflow-hidden rounded-2xl shadow-md'>
 				<div className='flex w-full flex-1 flex-col'>
 					<ChatHeaderWithRequests
 						receiver={receiver}

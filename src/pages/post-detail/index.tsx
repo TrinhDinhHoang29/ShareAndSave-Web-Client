@@ -29,7 +29,7 @@ import {
 	useDeleteInterestMutation
 } from '@/hooks/mutations/use-interest.mutation'
 import { useDetailPostQuery } from '@/hooks/queries/use-post-query'
-import { formatDateVN } from '@/lib/utils'
+import { formatDateTimeVN } from '@/lib/utils'
 import { getTypeInfo } from '@/models/constants'
 import { EPostType } from '@/models/enums'
 import { IUserInterest } from '@/models/interfaces'
@@ -109,13 +109,18 @@ const PostDetail: React.FC = () => {
 				post.interests.find(i => i.userID === user?.id)?.id || 0
 			setInterestID(isMeInterested)
 		}
+		setCurrentImageIndex(0)
 	}, [post])
 
-	const sumItems = useMemo(() => {
+	const sumCurrentQuantityItems = useMemo(() => {
 		return (
 			post?.items?.reduce((acc, cur) => acc + (cur.currentQuantity || 0), 0) ||
 			0
 		)
+	}, [post])
+
+	const sumQuantityItems = useMemo(() => {
+		return post?.items?.reduce((acc, cur) => acc + (cur.quantity || 0), 0) || 0
 	}, [post])
 
 	const handleChat = () => {
@@ -226,15 +231,9 @@ const PostDetail: React.FC = () => {
 								</div>
 
 								<div className='flex items-center gap-2'>
-									<Calendar className='h-4 w-4' />
-									<span>{formatDateVN(post.createdAt)}</span>
+									<Clock className='h-4 w-4' />
+									<span>{formatDateTimeVN(post.createdAt)}</span>
 								</div>
-								{post.items.length > 0 && (
-									<div className='flex items-center gap-2'>
-										<Package className='h-4 w-4' />
-										<span>Còn {sumItems}</span>
-									</div>
-								)}
 							</motion.div>
 
 							<div className='gap-8 space-y-6'>
@@ -352,7 +351,7 @@ const PostDetail: React.FC = () => {
 																	Ngày tìm thấy:
 																</span>
 																<span className='text-muted-foreground text-sm'>
-																	{formatDateVN(
+																	{formatDateTimeVN(
 																		(parsedInfo as FoundItemInfo).foundDate
 																	)}
 																</span>
@@ -379,7 +378,7 @@ const PostDetail: React.FC = () => {
 																Ngày mất:
 															</span>
 															<span className='text-muted-foreground text-sm'>
-																{formatDateVN(
+																{formatDateTimeVN(
 																	(parsedInfo as LostItemInfo).lostDate
 																)}
 															</span>
@@ -475,9 +474,15 @@ const PostDetail: React.FC = () => {
 																<span className='bg-primary/10 text-primary rounded-full px-2 py-1 text-xs font-medium'>
 																	SL: {item.quantity}
 																</span>
-																<span className='bg-primary/10 text-primary rounded-full px-2 py-1 text-xs font-medium'>
-																	Hiện còn: {item.currentQuantity}
-																</span>
+																{item.currentQuantity || 0 > 0 ? (
+																	<span className='bg-primary/10 text-primary rounded-full px-2 py-1 text-xs font-medium'>
+																		Hiện còn: {item.currentQuantity}
+																	</span>
+																) : (
+																	<span className='rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-700'>
+																		Hết hàng
+																	</span>
+																)}
 															</div>
 														</div>
 													</div>
@@ -666,10 +671,30 @@ const PostDetail: React.FC = () => {
 											{post.items.length > 0 && (
 												<div className='flex items-center justify-between'>
 													<span className='text-muted-foreground text-sm'>
-														Số vật phẩm:
+														Số món đồ:
 													</span>
 													<span className='text-foreground text-sm font-medium'>
 														{post.items.length}
+													</span>
+												</div>
+											)}
+											{sumQuantityItems > 0 && (
+												<div className='flex items-center justify-between'>
+													<span className='text-muted-foreground text-sm'>
+														Số lượng món đồ:
+													</span>
+													<span className='text-foreground text-sm font-medium'>
+														{sumQuantityItems}
+													</span>
+												</div>
+											)}
+											{sumCurrentQuantityItems > 0 && (
+												<div className='flex items-center justify-between'>
+													<span className='text-muted-foreground text-sm'>
+														Số lượng món đồ hiện còn:
+													</span>
+													<span className='text-foreground text-sm font-medium'>
+														{sumCurrentQuantityItems}
 													</span>
 												</div>
 											)}

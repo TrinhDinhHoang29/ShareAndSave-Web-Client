@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion'
-import { Calendar, Heart, Package, User } from 'lucide-react'
+import { Calendar, Clock, Heart, Package, User } from 'lucide-react'
 import React from 'react'
 
-import { formatDateVN } from '@/lib/utils'
+import { formatNearlyDateTimeVN } from '@/lib/utils'
 import { getTypeInfo } from '@/models/constants'
 import { EPostType } from '@/models/enums'
 import { IPost } from '@/models/interfaces'
@@ -70,18 +70,18 @@ const PostItem: React.FC<PostItemProps> = ({ post, onPostClick }) => {
 				{/* Author & Date */}
 				<div className='mb-4 flex items-center justify-between'>
 					<div className='text-muted-foreground flex items-center gap-2 text-sm'>
-						<Calendar className='h-4 w-4' />
-						<span>{formatDateVN(post.createdAt)}</span>
+						<Clock className='h-4 w-4' />
+						<span>{formatNearlyDateTimeVN(post.createdAt)}</span>
 					</div>
-					<div className='text-muted-foreground flex items-center gap-4 text-sm'>
+					<div className='text-muted-foreground flex items-center gap-2 text-sm'>
 						<div className='flex items-center gap-1'>
 							<Heart className='text-destructive h-4 w-4' />
 							<span>{post.interestCount}</span>
 						</div>
-						{post.itemCount > 0 && (
+						{post.currentItemCount > 0 && (
 							<div className='flex items-center gap-1'>
 								<Package className='text-primary h-4 w-4' />
-								<span>{post.itemCount}</span>
+								<span>{post.currentItemCount}</span>
 							</div>
 						)}
 					</div>

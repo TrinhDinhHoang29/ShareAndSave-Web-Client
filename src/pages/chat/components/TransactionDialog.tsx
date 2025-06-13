@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, X } from 'lucide-react'
 import { Fragment, useState } from 'react'
 
+import { formatNearlyDateTimeVN } from '@/lib/utils'
 import { getTransactionStatusConfig } from '@/models/constants'
 import { ETransactionStatus } from '@/models/enums'
 import { ITransaction } from '@/models/interfaces'
@@ -43,17 +44,6 @@ const TransactionItem = ({
 		}
 	}
 
-	const formatDate = (dateString: string) => {
-		const date = new Date(dateString)
-		return date.toLocaleString('vi-VN', {
-			year: 'numeric',
-			month: '2-digit',
-			day: '2-digit',
-			hour: '2-digit',
-			minute: '2-digit'
-		})
-	}
-
 	return (
 		<div className='border-border overflow-hidden rounded-lg border shadow-sm'>
 			{/* Collapse Header */}
@@ -69,7 +59,7 @@ const TransactionItem = ({
 					<div className='min-w-0 flex-1'>
 						{/* Time */}
 						<div className='text-foreground mb-1 text-sm font-medium'>
-							{formatDate(transaction.updatedAt)}
+							{formatNearlyDateTimeVN(transaction.updatedAt)}
 						</div>
 
 						{/* Items count and Status */}

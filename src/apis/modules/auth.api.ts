@@ -12,7 +12,8 @@ const authEndpoints = {
 	login: 'client/login',
 	logout: 'client/logout',
 	refreshToken: 'refresh-token',
-	getMe: 'client/get-me'
+	getMe: 'client/get-me',
+	update: 'clients'
 }
 
 const authApi = {
@@ -46,6 +47,24 @@ const authApi = {
 		// eslint-disable-next-line no-useless-catch
 		try {
 			return await axiosPrivate.get(authEndpoints.getMe)
+		} catch (error) {
+			throw error
+		}
+	},
+	async update(
+		clientID: number,
+		data: IUser,
+		signal?: AbortSignal
+	): Promise<IApiResponse<{ client: IUser }>> {
+		// eslint-disable-next-line no-useless-catch
+		try {
+			return await axiosPrivate.patch(
+				authEndpoints.update + '/' + clientID,
+				data,
+				{
+					signal
+				}
+			)
 		} catch (error) {
 			throw error
 		}

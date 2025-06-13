@@ -44,11 +44,8 @@ const Selection: React.FC<SelectionProps> = ({
 						: ''
 				} ${disabled || isLoading ? 'bg-muted text-muted-foreground' : ''}`}
 			>
-				<option
-					value={0}
-					disabled
-				>
-					{isLoading ? 'Đang tải...' : `Chọn ${defaulTextOption}`}
+				<option value={0}>
+					{isLoading ? 'Đang tải...' : `Chọn ${defaulTextOption || 'option'}`}
 				</option>
 				{options.map(option => (
 					<option

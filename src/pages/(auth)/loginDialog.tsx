@@ -5,7 +5,7 @@ import React from 'react'
 import { useForm } from 'react-hook-form'
 
 import InputText from '@/components/common/InputText'
-import { useLoginMutaion } from '@/hooks/mutations/use-auth.mutaion'
+import { useLoginMutaion } from '@/hooks/mutations/use-auth.mutation'
 import { loginSchema } from '@/models/schema'
 import { LoginFormData } from '@/models/types'
 

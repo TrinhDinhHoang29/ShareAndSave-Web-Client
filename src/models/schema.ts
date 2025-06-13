@@ -26,7 +26,19 @@ export const postInfoSchema = z.object({
 				categoryID: z.number(),
 				name: z.string().min(1, 'Tên không được để trống'),
 				categoryName: z.string(),
-				image: z.string().optional(),
+				image: z
+					.string()
+					.optional()
+					.refine(
+						val => {
+							if (!val) return true
+							const isWebp = val.includes('image/webp') || val.endsWith('.webp')
+							return !isWebp
+						},
+						{
+							message: 'Không chấp nhận ảnh định dạng .webp'
+						}
+					),
 				alternativeImage: z.string().optional()
 			})
 		)
@@ -39,7 +51,19 @@ export const postInfoSchema = z.object({
 				categoryName: z.string(),
 				categoryID: z.number(),
 				name: z.string().min(1, 'Tên không được để trống'),
-				image: z.string().optional(),
+				image: z
+					.string()
+					.optional()
+					.refine(
+						val => {
+							if (!val) return true
+							const isWebp = val.includes('image/webp') || val.endsWith('.webp')
+							return !isWebp
+						},
+						{
+							message: 'Không chấp nhận ảnh định dạng .webp'
+						}
+					),
 				alternativeImage: z.string().optional()
 			})
 		)
@@ -98,4 +122,37 @@ export const loginSchema = z.object({
 		.string()
 		.min(8, 'Mật khẩu phải có ít nhất 8 ký tự')
 		.max(50, 'Mật khẩu không được quá 50 ký tự')
+})
+
+export const userProfileSchema = z.object({
+	fullName: z
+		.string()
+		.min(1, 'Họ và tên không được để trống')
+		.min(2, 'Họ và tên phải có ít nhất 2 ký tự')
+		.max(50, 'Họ và tên không được quá 50 ký tự'),
+	majorID: z.number().min(1, 'Vui lòng chọn chuyên ngành'), // Đảm bảo majorID phải >= 1
+	phoneNumber: z
+		.string()
+		.min(1, 'Số điện thoại không được để trống')
+		.regex(/^[0-9]{10,11}$/, 'Số điện thoại phải có 10-11 chữ số'),
+	address: z
+		.string()
+		.min(1, 'Địa chỉ không được để trống')
+		.min(5, 'Địa chỉ phải có ít nhất 5 ký tự')
+		.max(200, 'Địa chỉ không được quá 200 ký tự'),
+	avatar: z
+		.string()
+		.optional()
+		.refine(
+			val => {
+				if (!val) return true
+				const isWebp = val.includes('image/webp') || val.endsWith('.webp')
+				return !isWebp
+			},
+			{
+				message: 'Không chấp nhận ảnh định dạng .webp'
+			}
+		),
+	status: z.number(),
+	goodPoint: z.number()
 })

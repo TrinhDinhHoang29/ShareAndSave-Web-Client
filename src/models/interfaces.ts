@@ -111,17 +111,17 @@ export interface IPostAction {
 }
 
 export interface IUser {
-	address: string
-	avatar: string
-	email: string
+	address?: string
+	avatar?: string
+	email?: string
 	fullName: string
-	goodPoint: number
-	id: number
-	major: string
+	goodPoint?: number
+	id?: number
+	major?: string
 	phoneNumber: string
-	roleID: number // Consider defining an enum for roleID values
-	roleName: string
-	status: number // Consider defining an enum for status values
+	roleID?: number // Consider defining an enum for roleID values
+	roleName?: string
+	status?: number // Consider defining an enum for status values
 }
 
 export interface IPostActionResponse {
@@ -217,6 +217,7 @@ export interface IPost {
 	tags: string[]
 	title: string
 	type: number
+	currentItemCount: number
 }
 
 export interface IPostResponse {
@@ -296,4 +297,9 @@ export interface ITransactionRequest {
 		quantity: number
 	}[]
 	status?: number
+}
+
+export interface IMajor {
+	id: number
+	name: string
 }
