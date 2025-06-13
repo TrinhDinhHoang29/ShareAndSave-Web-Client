@@ -7,7 +7,7 @@ import {
 	useUpdateTransactionMutation
 } from '@/hooks/mutations/use-transaction.mutation'
 import { useDetailPostQueryByID } from '@/hooks/queries/use-post-query'
-import { useDetailTransactionQuery } from '@/hooks/queries/use-transaction.query'
+import { useListTransactionQuery } from '@/hooks/queries/use-transaction.query'
 import { ETransactionStatus } from '@/models/enums'
 import {
 	IReceiver,
@@ -56,7 +56,7 @@ const Chat = () => {
 		}
 	}, [parsedPostID, parsedInterestID, receiver, navigate])
 
-	const detailTransactionParams: ITransactionParams = useMemo(
+	const transactionParams: ITransactionParams = useMemo(
 		() => ({
 			postID: parsedPostID,
 			searchBy: 'interestID',
@@ -65,7 +65,7 @@ const Chat = () => {
 		[parsedInterestID, parsedPostID]
 	)
 	const { data: transactionData, refetch: transactionDataRefetch } =
-		useDetailTransactionQuery(detailTransactionParams)
+		useListTransactionQuery(transactionParams)
 	const { data: postDetailData, refetch: postDetailDataRefetch } =
 		useDetailPostQueryByID(parsedPostID)
 	const [message, setMessage] = useState('')
@@ -91,14 +91,19 @@ const Chat = () => {
 	const [isRequestsVisible, setIsRequestsVisible] = useState(true)
 	const [transactionStatus, setTransactionStatus] =
 		useState<ETransactionStatus>(ETransactionStatus.DEFAULT)
+	console.log(transactionData)
+	console.log(transactionParams)
 	const transactionID = useMemo(() => {
-		return (
-			transactionData?.find(
-				transaction =>
-					(transaction.status.toString() as ETransactionStatus) ===
-					ETransactionStatus.PENDING
-			)?.id || 0
-		)
+		if (transactionData) {
+			return (
+				transactionData.find(
+					transaction =>
+						(transaction.status.toString() as ETransactionStatus) ===
+						ETransactionStatus.PENDING
+				)?.id || 0
+			)
+		}
+		return 0
 	}, [transactionData])
 
 	const {

@@ -7,14 +7,15 @@ import LayoutDefault from '@/components/layout'
 import PrivateRoute from './private.route'
 // Lazy load các components
 const Home = lazy(() => import('@/pages/home'))
-const PostAction = lazy(() => import('@/pages/postAction'))
+const PostAction = lazy(() => import('@/pages/post-action'))
 const SendRequest = lazy(() => import('@/pages/profile/send-request/send'))
 const Interest = lazy(() => import('@/pages/interest'))
 const PostDetail = lazy(() => import('@/pages/post-detail'))
 const Post = lazy(() => import('@/pages/post'))
-const LoginSession = lazy(() => import('@/pages/LoginSession'))
+const LoginSession = lazy(() => import('@/pages/login-session'))
 const Dowload = lazy(() => import('@/pages/dowload'))
 const Chat = lazy(() => import('@/pages/chat'))
+const EditProfile = lazy(() => import('@/pages/profile/edit-profile'))
 
 // Error Boundary Component
 const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
@@ -113,7 +114,11 @@ function AppRouter() {
 					children: [
 						{
 							path: 'chinh-sua-thong-tin',
-							element: <div>Thông tin cá nhân</div>
+							element: (
+								<ErrorBoundary>
+									<EditProfile />
+								</ErrorBoundary>
+							)
 						},
 						{
 							path: 'doi-mat-khau',

@@ -18,7 +18,7 @@ import {
 	X
 } from 'lucide-react'
 import React, { useEffect, useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import { ChatDialog } from '@/components/common/ChatDialog'
 import Loading from '@/components/common/Loading'
@@ -61,6 +61,7 @@ const PostDetail: React.FC = () => {
 	const { showInfo } = useAlertModalContext()
 	const { user, isAuthenticated } = useAuthStore()
 	const { openDialog } = useAuthDialog()
+	const navigate = useNavigate()
 
 	const params = useParams()
 	const slug = params.slug
@@ -111,12 +112,22 @@ const PostDetail: React.FC = () => {
 	}, [post])
 
 	const sumItems = useMemo(() => {
-		return post?.items?.reduce((acc, cur) => acc + (cur.quantity || 0), 0) || 0
+		return (
+			post?.items?.reduce((acc, cur) => acc + (cur.currentQuantity || 0), 0) ||
+			0
+		)
 	}, [post])
 
 	const handleChat = () => {
 		if (interestID) {
-			setIsShowChatDialog(true)
+			const receiver = {
+				id: post?.authorID,
+				name: post?.authorName
+			}
+
+			navigate(`/chat/${post?.id}/${interestID}`, {
+				state: { receiver }
+			})
 		} else {
 			showInfo({
 				infoTitle: 'Thông tin hỗ trợ',
@@ -463,6 +474,9 @@ const PostDetail: React.FC = () => {
 															<div className='mt-1 flex items-center gap-2'>
 																<span className='bg-primary/10 text-primary rounded-full px-2 py-1 text-xs font-medium'>
 																	SL: {item.quantity}
+																</span>
+																<span className='bg-primary/10 text-primary rounded-full px-2 py-1 text-xs font-medium'>
+																	Hiện còn: {item.currentQuantity}
 																</span>
 															</div>
 														</div>

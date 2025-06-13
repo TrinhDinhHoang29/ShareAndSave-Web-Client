@@ -3,7 +3,7 @@ import { Dialog, Transition } from '@headlessui/react'
 import { Fragment, useEffect, useMemo, useState } from 'react'
 
 import { useCreateTransactionMutation } from '@/hooks/mutations/use-transaction.mutation'
-import { useDetailTransactionQuery } from '@/hooks/queries/use-transaction.query'
+import { useListTransactionQuery } from '@/hooks/queries/use-transaction.query'
 import { ETransactionStatus } from '@/models/enums'
 import {
 	IDetailTransactionParams,
@@ -45,7 +45,7 @@ export const ChatDialog = ({
 		}),
 		[interestID, postID]
 	)
-	const { data: transactionData } = useDetailTransactionQuery(
+	const { data: transactionData } = useListTransactionQuery(
 		detailTransactionParams
 	)
 	const [message, setMessage] = useState('')

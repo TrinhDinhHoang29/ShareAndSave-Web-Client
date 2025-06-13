@@ -220,6 +220,7 @@ const ItemDialog: React.FC<ItemDialogProps> = ({
 										error={errors.categoryID}
 										disabled={!!selectedItemId}
 										animationDelay={0.2}
+										defaulTextOption='danh mục'
 									/>
 									<InputNumber
 										name='quantity'

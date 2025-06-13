@@ -1,7 +1,16 @@
-import { Calendar, MessageCircle, User } from 'lucide-react'
+import clsx from 'clsx'
+import {
+	Calendar,
+	MessageCircle,
+	MessageCircleWarning,
+	User
+} from 'lucide-react'
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { IUserInterest } from '@/models/interfaces'
+import { useListTransactionQuery } from '@/hooks/queries/use-transaction.query'
+import { ETransactionStatus } from '@/models/enums'
+import { ITransactionParams, IUserInterest } from '@/models/interfaces'
 
 export const InterestItem = ({
 	userInterest,
@@ -22,6 +31,23 @@ export const InterestItem = ({
 			state: { receiver }
 		})
 	}
+	const params: ITransactionParams = useMemo(
+		() => ({
+			postID,
+			searchBy: 'interestID',
+			searchValue: userInterest.id.toString()
+		}),
+		[postID, userInterest]
+	)
+
+	const { data: transactions } = useListTransactionQuery(params)
+	const isPendingTransaction = useMemo(() => {
+		if (transactions && transactions.length > 0) {
+			const status = transactions[0].status.toString() as ETransactionStatus
+			return status === ETransactionStatus.PENDING
+		}
+		return false
+	}, [transactions])
 
 	return (
 		<div className='relative'>
@@ -56,11 +82,18 @@ export const InterestItem = ({
 				</div>
 
 				<button
-					className={`text-primary-foreground bg-primary rounded-xl p-3 shadow-lg transition-all duration-200 hover:shadow-xl`}
+					className={clsx(
+						`text-primary-foreground rounded-xl p-3 shadow-lg transition-all duration-200 hover:shadow-xl`,
+						isPendingTransaction ? 'bg-chart-2' : 'bg-primary'
+					)}
 					onClick={handleOpenChat}
 					aria-label='Chat'
 				>
-					<MessageCircle className='h-5 w-5' />
+					{isPendingTransaction ? (
+						<MessageCircleWarning className='h-5 w-5' />
+					) : (
+						<MessageCircle className='h-5 w-5' />
+					)}
 				</button>
 			</div>
 		</div>

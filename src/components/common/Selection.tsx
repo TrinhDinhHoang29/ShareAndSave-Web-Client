@@ -10,6 +10,7 @@ interface SelectionProps {
 	error?: FieldError
 	disabled?: boolean
 	animationDelay?: number
+	defaulTextOption?: string
 }
 
 const Selection: React.FC<SelectionProps> = ({
@@ -20,7 +21,8 @@ const Selection: React.FC<SelectionProps> = ({
 	register,
 	error,
 	disabled,
-	animationDelay
+	animationDelay,
+	defaulTextOption
 }) => {
 	return (
 		<div
@@ -46,7 +48,7 @@ const Selection: React.FC<SelectionProps> = ({
 					value={0}
 					disabled
 				>
-					{isLoading ? 'Đang tải...' : 'Chọn danh mục'}
+					{isLoading ? 'Đang tải...' : `Chọn ${defaulTextOption}`}
 				</option>
 				{options.map(option => (
 					<option
