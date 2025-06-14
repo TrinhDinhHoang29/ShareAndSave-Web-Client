@@ -1,16 +1,65 @@
-import { useQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 
 import transactionApi from '@/apis/modules/transaction.api'
-import { ITransaction, ITransactionParams } from '@/models/interfaces'
+import {
+	ITransaction,
+	ITransactionParams,
+	ITransactionResponse
+} from '@/models/interfaces'
 
 export const useListTransactionQuery = (params: ITransactionParams) => {
-	return useQuery<ITransaction[], Error>({
-		queryKey: ['postInterests', params], // Key để cache, dựa trên params
+	return useInfiniteQuery<ITransactionResponse, Error>({
+		queryKey: ['transactions', params],
+		queryFn: async ({ pageParam = 1 }) => {
+			const queryParams = { ...params, page: Number(pageParam) }
+			const res = await transactionApi.list(queryParams)
+			console.log('API Response:', res.data) // Debug log
+			console.log(
+				'Current page:',
+				pageParam,
+				'Total pages:',
+				res.data?.totalPage
+			) // Debug log
+
+			if (!res.data || !res.data.transactions) {
+				throw new Error('Dữ liệu giao dịch không hợp lệ')
+			}
+			return res.data
+		},
+		getNextPageParam: (lastPage, allPages) => {
+			const currentPage = allPages.length
+			const totalPages = lastPage.totalPage || 0
+
+			console.log(
+				'getNextPageParam - Current page:',
+				currentPage,
+				'Total pages:',
+				totalPages
+			) // Debug log
+
+			// If current page is less than total pages, return next page number
+			if (currentPage < totalPages) {
+				return currentPage + 1
+			}
+
+			// No more pages
+			return undefined
+		},
+		initialPageParam: 1,
+		enabled: !!params.postID && !!params.searchValue,
+		staleTime: 5 * 60 * 1000,
+		gcTime: 10 * 60 * 1000
+	})
+}
+
+export const useDetailTransactionQuery = (params: ITransactionParams) => {
+	return useQuery<ITransaction | null>({
+		queryKey: ['transaction', 'detail', params], // Key để cache, dựa trên id
 		queryFn: async () => {
 			const res = await transactionApi.list(params)
-			return res.data.transactions.sort((a, b) => b.id - a.id) || []
+			return res.data.transactions[0] // Trả về null nếu post không tồn tại
 		},
-		enabled: !!params.postID && !!params.searchValue, // Chỉ chạy query khi type và search được cung cấp
+		enabled: !!params.postID && !!params.searchValue, // Chỉ chạy query khi id tồn tại và lớn hơn 0
 		staleTime: 5 * 60 * 1000, // Dữ liệu tươi trong 5 phút
 		gcTime: 10 * 60 * 1000 // Cache trong 10 phút
 	})

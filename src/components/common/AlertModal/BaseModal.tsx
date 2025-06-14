@@ -24,7 +24,7 @@ const BaseModal: React.FC<BaseModalProps> = ({
 		<div
 			className={clsx(
 				'fixed inset-0 bg-gradient-to-br from-black/40 via-gray-900/50 to-black/60',
-				'modal-backdrop z-[1000] flex items-center justify-center p-4'
+				'z-[1000] flex items-center justify-center p-4 backdrop-blur-sm'
 			)}
 			onClick={e => {
 				if (e.target === e.currentTarget && backdropClose) {
@@ -39,13 +39,13 @@ const BaseModal: React.FC<BaseModalProps> = ({
 				)}
 			>
 				<div className='gradient-shift absolute inset-0 rounded-3xl bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 opacity-20' />
-				<div className='relative rounded-3xl bg-white/90 backdrop-blur-sm'>
+				<div className='bg-background/90 relative rounded-3xl backdrop-blur-sm'>
 					{showCloseButton && (
 						<div className='flex justify-end p-4 pb-0'>
 							<button
 								onClick={onClose}
 								className={clsx(
-									'rounded-full p-2 text-gray-400 hover:bg-white/50 hover:text-gray-600',
+									'text-foreground/80 hover:bg-background/50 hover:text-foreground rounded-full p-2',
 									'backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:rotate-90'
 								)}
 							>

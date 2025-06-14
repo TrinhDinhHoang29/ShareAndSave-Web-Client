@@ -1,3 +1,5 @@
+// ChatHeaderWithRequests.tsx - Updated interface and component
+
 import clsx from 'clsx'
 import { motion } from 'framer-motion'
 import {
@@ -32,7 +34,7 @@ interface Props {
 	isRequestsVisible: boolean
 	transactionStatus: ETransactionStatus
 	isAuthor: boolean
-	onClose: () => void // Giữ onClose nhưng thay bằng logic quay lại
+	onClose: () => void
 	toggleRequestsVisibility: () => void
 	handlePrevRequest: () => void
 	handleNextRequest: () => void
@@ -41,9 +43,12 @@ interface Props {
 	handleQuantityChange: (itemId: number, change: number) => void
 	setCurrentRequestIndex: (index: number) => void
 	isCreateTransactionPending: boolean
-	isUpdateTransactionPending: boolean
 	transactions: ITransaction[]
 	handleApplyItemTransactions: (index: number) => void
+	transactionID: number
+	hasNextPage?: boolean
+	isFetchingNextPage?: boolean
+	onTransactionScroll?: (e: React.UIEvent<HTMLDivElement>) => void
 }
 
 export const ChatHeaderWithRequests = ({
@@ -60,12 +65,15 @@ export const ChatHeaderWithRequests = ({
 	handleNextRequest,
 	handleConfirmRequest,
 	handleRemovePendingRequest,
-	handleQuantityChange, // Sử dụng prop mới
+	handleQuantityChange,
 	setCurrentRequestIndex,
 	isCreateTransactionPending,
-	isUpdateTransactionPending,
 	transactions,
-	handleApplyItemTransactions
+	handleApplyItemTransactions,
+	transactionID,
+	hasNextPage = false,
+	isFetchingNextPage = false,
+	onTransactionScroll
 }: Props) => {
 	transactionStatus = transactionStatus.toString() as ETransactionStatus
 	const currentItem = transactionItems[currentRequestIndex]
@@ -89,6 +97,7 @@ export const ChatHeaderWithRequests = ({
 
 	return (
 		<>
+			{/* ... existing JSX remains the same until TransactionsDialog */}
 			<div className='bg-primary text-primary-foreground px-6 py-4'>
 				{/* Header với nút quay lại */}
 				<div className='flex items-center justify-between'>
@@ -122,13 +131,16 @@ export const ChatHeaderWithRequests = ({
 							>
 								<ArrowLeftRight className='h-6 w-6' />
 							</button>
-							<div className='bg-background/80 text-foreground absolute -top-2 -right-2 rounded-full px-2 py-1 text-sm font-medium shadow-lg'>
-								{transactions.length}
-							</div>
+							{transactionID ? (
+								<div className='bg-chart-2 text-primary-foreground absolute -top-2 -right-2 rounded-full px-2 py-1 text-sm font-medium shadow-lg'>
+									!
+								</div>
+							) : null}
 						</div>
 					</div>
 				</div>
 
+				{/* ... existing transaction items JSX remains the same */}
 				{transactionItems.length > 0 && (
 					<div className='mt-4'>
 						<div className='flex items-center justify-between'>
@@ -178,16 +190,13 @@ export const ChatHeaderWithRequests = ({
 									(isAuthor &&
 										transactionStatus === ETransactionStatus.PENDING)) && (
 									<button
-										disabled={
-											isCreateTransactionPending || isUpdateTransactionPending
-										}
+										disabled={isCreateTransactionPending}
 										onClick={handleConfirmRequest}
 										className={clsx(
 											'bg-chart-1/90 hover:bg-chart-1 flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white shadow-lg hover:shadow-xl'
 										)}
 									>
-										{isCreateTransactionPending ||
-										isUpdateTransactionPending ? (
+										{isCreateTransactionPending ? (
 											<Loading size='sm' />
 										) : (
 											<Check className='h-4 w-4' />
@@ -322,12 +331,17 @@ export const ChatHeaderWithRequests = ({
 					</div>
 				)}
 			</div>
+
 			<TransactionsDialog
 				isOpen={isTransactionDialogOpen}
 				onClose={() => setIsTransactionDialogOpen(false)}
 				transactions={transactions}
 				isAuthor={isAuthor}
 				handleTransactionSelect={handleTransactionSelect}
+				// Pass infinite scroll props to dialog
+				hasNextPage={hasNextPage}
+				isFetchingNextPage={isFetchingNextPage}
+				onScroll={onTransactionScroll}
 			/>
 			<TutorialTransactionDialog
 				isOpen={isTutorialTransactionDialogOpen}

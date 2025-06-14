@@ -275,6 +275,10 @@ export interface ITransactionParams {
 	postID: number
 	searchBy: 'interestID'
 	searchValue: string
+	sort?: 'createdAt'
+	order?: ESortOrder
+	limit?: number
+	page?: number
 }
 
 export interface ITransaction {
@@ -302,4 +306,14 @@ export interface ITransactionRequest {
 export interface IMajor {
 	id: number
 	name: string
+}
+
+export interface ITransactionResponse {
+	transactions: ITransaction[]
+	totalPage: number
+}
+
+export interface IIdChatInfoParams {
+	interestID: string
+	postID: number
 }

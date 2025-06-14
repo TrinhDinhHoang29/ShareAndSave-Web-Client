@@ -21,12 +21,12 @@
   --accent: #DBEAFE;
   --accent-foreground: #1A2238;
   --destructive: #EF4444;
-  --border: #334155;
+  --border: #CBD5E1;
   --input: #F1F5F9;
   --ring: #2563EB;
   --chart-1: #22C55E;
   --chart-accent-1: #86EFAC;
-  --chart-accent-foreground-1: #1A2238;
+  --chart-accent-foreground-1: #1A2238; /* Thêm foreground cho chart-accent-1 */
   --chart-2: #F59E0B;
   --chart-3: #EF4444;
   --chart-4: #3366FF;
@@ -57,12 +57,12 @@
   --accent: #1E40AF;
   --accent-foreground: #F1F5F9;
   --destructive: #F87171;
-  --border: #CBD5E1;
+  --border: #262b32;
   --input: #1E293B;
   --ring: #60A5FA;
   --chart-1: #22C55E;
   --chart-accent-1: #46ef84;
-  --chart-accent-foreground-1: #F1F5F9;
+  --chart-accent-foreground-1: #F1F5F9; /* Thêm foreground cho dark mode */
   --chart-2: #F59E0B;
   --chart-3: #F87171;
   --chart-4: #3B82F6;
@@ -105,7 +105,7 @@
   --color-ring: var(--ring);
   --color-chart-1: var(--chart-1);
   --color-chart-accent-1: var(--chart-accent-1);
-  --color-chart-accent-foreground-1: var(--chart-accent-foreground-1);
+  --color-chart-accent-foreground-1: var(--chart-accent-foreground-1); /* Thêm vào theme */
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
@@ -118,12 +118,6 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-
-  /* Mở rộng font size theme */
-  --font-size-2xs: 10px;
-  --font-size-3xs: 8px;
-  --font-size-4xs: 6px;
-  --font-size-5xs: 4px;
 }
 
 @layer base {
@@ -132,11 +126,9 @@
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
   }
-
   html {
     @apply overflow-x-hidden scroll-smooth;
   }
-
   body {
     @apply bg-background text-foreground min-h-svh w-full font-inter;
     -webkit-font-smoothing: antialiased;
@@ -155,7 +147,6 @@
   }
 
   @media screen and (max-width: 767px) {
-
     input,
     select,
     textarea {
@@ -163,12 +154,7 @@
     }
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
+  h1, h2, h3, h4, h5, h6 {
     @apply font-manrope font-semibold tracking-tight;
   }
 }
@@ -182,7 +168,6 @@
     &::-webkit-scrollbar {
       display: none;
     }
-
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
@@ -196,23 +181,23 @@
   }
 
   .neumorphic {
-    @apply bg-card shadow-[2px_2px_6px_rgba(0, 0, 0, 0.05), -2px_-2px_6px_rgba(255, 255, 255, 0.5)] dark:shadow-[2px_2px_6px_rgba(0, 0, 0, 0.2), -2px_-2px_6px_rgba(255, 255, 255, 0.05)];
+    @apply bg-card shadow-[2px_2px_6px_rgba(0,0,0,0.05),-2px_-2px_6px_rgba(255,255,255,0.5)] dark:shadow-[2px_2px_6px_rgba(0,0,0,0.2),-2px_-2px_6px_rgba(255,255,255,0.05)];
   }
 
   .modal-backdrop {
-    @apply animate-[modalBackdropFade_0.4s_cubic-bezier(0.4, 0, 0.2, 1)];
+    @apply animate-[modalBackdropFade_0.4s_cubic-bezier(0.4,0,0.2,1)];
   }
 
   .modal-enter {
-    @apply animate-[modalEnter_0.5s_cubic-bezier(0.34, 1.56, 0.64, 1)];
+    @apply animate-[modalEnter_0.5s_cubic-bezier(0.34,1.56,0.64,1)];
   }
 
   .modal-bounce {
-    @apply animate-[modalBounce_0.6s_cubic-bezier(0.68, -0.55, 0.265, 1.55)];
+    @apply animate-[modalBounce_0.6s_cubic-bezier(0.68,-0.55,0.265,1.55)];
   }
 
   .icon-glow {
-    @apply animate-[iconGlow_0.8s_cubic-bezier(0.68, -0.55, 0.265, 1.55)];
+    @apply animate-[iconGlow_0.8s_cubic-bezier(0.68,-0.55,0.265,1.55)];
   }
 
   .icon-pulse {
@@ -241,171 +226,65 @@
 
   .button-ripple::before {
     content: '';
-    @apply absolute top-1/2 left-1/2 w-0 h-0 rounded-full bg-white/50 transform -translate-x-1/2 -translate-y-1/2 transition-[width_0.6s, height_0.6s];
+    @apply absolute top-1/2 left-1/2 w-0 h-0 rounded-full bg-white/50 transform -translate-x-1/2 -translate-y-1/2 transition-[width_0.6s,height_0.6s];
   }
 
   .button-ripple:active::before {
     @apply w-[300px] h-[300px];
   }
-
-  /* Áp dụng font size từ theme */
-  .text-2xs {
-    font-size: var(--font-size-2xs);
-    line-height: 1.2;
-  }
-
-  .text-3xs {
-    font-size: var(--font-size-3xs);
-    line-height: 1.1;
-  }
-
-  .text-4xs {
-    font-size: var(--font-size-4xs);
-    line-height: 1;
-  }
-
-  .text-5xs {
-    font-size: var(--font-size-5xs);
-    line-height: 1;
-  }
 }
 
 @layer utilities {
   @keyframes modalBackdropFade {
-    from {
-      opacity: 0;
-      backdrop-filter: blur(0px);
-    }
-
-    to {
-      opacity: 1;
-      backdrop-filter: blur(12px);
-    }
+    from { opacity: 0; backdrop-filter: blur(0px); }
+    to { opacity: 1; backdrop-filter: blur(12px); }
   }
 
   @keyframes modalEnter {
-    from {
-      opacity: 0;
-      transform: scale(0.7) translateY(40px);
-      filter: blur(8px);
-    }
-
-    to {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-      filter: blur(0px);
-    }
+    from { opacity: 0; transform: scale(0.7) translateY(40px); filter: blur(8px); }
+    to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0px); }
   }
 
   @keyframes modalBounce {
-    from {
-      opacity: 0;
-      transform: scale(0.3) rotate(-10deg);
-    }
-
-    to {
-      opacity: 1;
-      transform: scale(1) rotate(0deg);
-    }
+    from { opacity: 0; transform: scale(0.3) rotate(-10deg); }
+    to { opacity: 1; transform: scale(1) rotate(0deg); }
   }
 
   @keyframes iconGlow {
-    0% {
-      transform: scale(0) rotate(-180deg);
-      filter: drop-shadow(0 0 0px currentColor);
-    }
-
-    50% {
-      transform: scale(1.2) rotate(-90deg);
-      filter: drop-shadow(0 0 20px currentColor);
-    }
-
-    100% {
-      transform: scale(1) rotate(0deg);
-      filter: drop-shadow(0 0 10px currentColor);
-    }
+    0% { transform: scale(0) rotate(-180deg); filter: drop-shadow(0 0 0px currentColor); }
+    50% { transform: scale(1.2) rotate(-90deg); filter: drop-shadow(0 0 20px currentColor); }
+    100% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 10px currentColor); }
   }
 
   @keyframes iconPulse {
-
-    0%,
-    100% {
-      transform: scale(1);
-      filter: drop-shadow(0 0 5px currentColor);
-    }
-
-    50% {
-      transform: scale(1.1);
-      filter: drop-shadow(0 0 15px currentColor);
-    }
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1);}
   }
 
   @keyframes iconShake {
-
-    0%,
-    100% {
-      transform: translateX(0) rotate(0deg);
-    }
-
-    10% {
-      transform: translateX(-5px) rotate(-5deg);
-    }
-
-    20% {
-      transform: translateX(5px) rotate(5deg);
-    }
-
-    30% {
-      transform: translateX(-5px) rotate(-3deg);
-    }
-
-    40% {
-      transform: translateX(5px) rotate(3deg);
-    }
-
-    50% {
-      transform: translateX(-3px) rotate(-2deg);
-    }
-
-    60% {
-      transform: translateX(3px) rotate(2deg);
-    }
+    0%, 100% { transform: translateX(0) rotate(0deg); }
+    10% { transform: translateX(-5px) rotate(-5deg); }
+    20% { transform: translateX(5px) rotate(5deg); }
+    30% { transform: translateX(-5px) rotate(-3deg); }
+    40% { transform: translateX(5px) rotate(3deg); }
+    50% { transform: translateX(-3px) rotate(-2deg); }
+    60% { transform: translateX(3px) rotate(2deg); }
   }
 
   @keyframes gradientShift {
-    0% {
-      background-position: 0% 50%;
-    }
-
-    50% {
-      background-position: 100% 50%;
-    }
-
-    100% {
-      background-position: 0% 50%;
-    }
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
   }
 
   @keyframes float {
-
-    0%,
-    100% {
-      transform: translateY(0px);
-    }
-
-    50% {
-      transform: translateY(-10px);
-    }
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
   }
 
   @keyframes loading {
-    0% {
-      transform: rotate(0deg);
-    }
-
-    100% {
-      transform: rotate(360deg);
-    }
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
 }
 
@@ -413,11 +292,9 @@
   .CollapsibleContent {
     @apply overflow-hidden;
   }
-
   .CollapsibleContent[data-state='open'] {
     animation: slideDown 250ms ease-in-out;
   }
-
   .CollapsibleContent[data-state='closed'] {
     animation: slideUp 250ms ease-in-out;
   }
@@ -428,7 +305,6 @@
     height: 0;
     opacity: 0;
   }
-
   to {
     height: var(--radix-collapsible-content-height);
     opacity: 1;
@@ -440,7 +316,6 @@
     height: var(--radix-collapsible-content-height);
     opacity: 1;
   }
-
   to {
     height: 0;
     opacity: 0;
@@ -448,25 +323,11 @@
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes pulse {
-
-  0%,
-  100% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0.5;
-  }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }

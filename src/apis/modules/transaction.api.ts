@@ -1,8 +1,10 @@
+import { ESortOrder } from '@/models/enums'
 import {
 	IApiResponse,
 	ITransaction,
 	ITransactionParams,
-	ITransactionRequest
+	ITransactionRequest,
+	ITransactionResponse
 } from '@/models/interfaces'
 
 import axiosPrivate from '../client/private.client'
@@ -13,9 +15,12 @@ const transactionEndpoints = {
 
 const transactionApi = {
 	async create(
-		data: ITransactionRequest
+		data: ITransactionRequest,
+		signal?: AbortSignal
 	): Promise<IApiResponse<{ transaction: ITransaction }>> {
-		return axiosPrivate.post(transactionEndpoints.common, data)
+		return axiosPrivate.post(transactionEndpoints.common, data, {
+			signal
+		})
 	},
 	async delete(
 		postID: number
@@ -24,7 +29,7 @@ const transactionApi = {
 	},
 	async list(
 		params: ITransactionParams
-	): Promise<IApiResponse<{ transactions: ITransaction[] }>> {
+	): Promise<IApiResponse<ITransactionResponse>> {
 		return axiosPrivate.get(transactionEndpoints.common, {
 			params
 		})

@@ -224,7 +224,7 @@ export const TutorialTransactionDialog = ({
 					initial={{ opacity: 0, scale: 0.95, y: 10 }}
 					animate={{ opacity: 1, scale: 1, y: 0 }}
 					exit={{ opacity: 0, scale: 0.95, y: 10 }}
-					className='bg-card relative z-10 mx-auto max-h-[90vh] w-full max-w-6xl overflow-hidden rounded-2xl shadow-xl'
+					className='bg-card relative z-10 mx-auto w-full max-w-6xl overflow-hidden rounded-2xl shadow-xl'
 					onClick={e => e.stopPropagation()}
 				>
 					{/* Header */}
@@ -260,12 +260,8 @@ export const TutorialTransactionDialog = ({
 					{/* Content */}
 					<div className='flex max-h-[70vh] overflow-hidden'>
 						{/* Left Sidebar - Tabs */}
-						<div className='border-border bg-muted/30 w-80 border-r p-6'>
+						<div className='border-border bg-muted/30 w-80 overflow-y-auto border-r p-6'>
 							<div className='space-y-4'>
-								<h2 className='text-foreground mb-4 text-lg font-semibold'>
-									Chọn vai trò
-								</h2>
-
 								<div className='space-y-2'>
 									<button
 										onClick={() => setActiveTab('trader')}

@@ -52,7 +52,6 @@ export const useAlertModal = (): AlertModalReturn => {
 	}
 
 	const showLoading = (loadingConfig: Partial<AlertModalConfig> = {}) => {
-		if (isOpen) return
 		debounceAction(() => {
 			setConfig(loadingConfig)
 			setModalState('loading')
@@ -62,66 +61,41 @@ export const useAlertModal = (): AlertModalReturn => {
 
 	const showSuccess = (successConfig: Partial<AlertModalConfig> = {}) => {
 		debounceAction(() => {
-			if (isOpen) {
-				setConfig(prev => ({ ...prev, ...successConfig }))
-				setModalState('success')
-			} else {
-				setConfig(successConfig)
-				setModalState('success')
-				setIsOpen(true)
-			}
+			setConfig(prev => ({ ...prev, ...successConfig }))
+			setModalState('success')
+			setIsOpen(true)
 		}, 100)
 	}
 
 	const showError = (errorConfig: Partial<AlertModalConfig> = {}) => {
 		debounceAction(() => {
-			if (isOpen) {
-				setConfig(prev => ({ ...prev, ...errorConfig }))
-				setModalState('error')
-			} else {
-				setConfig(errorConfig)
-				setModalState('error')
-				setIsOpen(true)
-			}
+			setConfig(prev => ({ ...prev, ...errorConfig }))
+			setModalState('error')
+			setIsOpen(true)
 		}, 100)
 	}
 
 	const showWarning = (warningConfig: Partial<AlertModalConfig> = {}) => {
 		debounceAction(() => {
-			if (isOpen) {
-				setConfig(prev => ({ ...prev, ...warningConfig }))
-				setModalState('warning')
-			} else {
-				setConfig(warningConfig)
-				setModalState('warning')
-				setIsOpen(true)
-			}
+			setConfig(prev => ({ ...prev, ...warningConfig }))
+			setModalState('warning')
+			setIsOpen(true)
 		}, 100)
 	}
 
 	const showInfo = (infoConfig: Partial<AlertModalConfig> = {}) => {
 		debounceAction(() => {
-			if (isOpen) {
-				setConfig(prev => ({ ...prev, ...infoConfig }))
-				setModalState('info')
-			} else {
-				setConfig(infoConfig)
-				setModalState('info')
-				setIsOpen(true)
-			}
+			setConfig(prev => ({ ...prev, ...infoConfig }))
+			setModalState('info')
+			setIsOpen(true)
 		}, 100)
 	}
 
 	const showConfirm = (confirmConfig: Partial<AlertModalConfig> = {}) => {
 		debounceAction(() => {
-			if (isOpen) {
-				setConfig(prev => ({ ...prev, ...confirmConfig }))
-				setModalState('confirm')
-			} else {
-				setConfig(confirmConfig)
-				setModalState('confirm')
-				setIsOpen(true)
-			}
+			setConfig(prev => ({ ...prev, ...confirmConfig }))
+			setModalState('confirm')
+			setIsOpen(true)
 		}, 100)
 	}
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 
 import { useAlertModalContext } from '@/context/alert-modal-context'
@@ -8,10 +8,9 @@ import {
 } from '@/hooks/mutations/use-transaction.mutation'
 import { useDetailPostQueryByID } from '@/hooks/queries/use-post-query'
 import { useListTransactionQuery } from '@/hooks/queries/use-transaction.query'
-import { ETransactionStatus } from '@/models/enums'
+import { ESortOrder, ETransactionStatus } from '@/models/enums'
 import {
 	IReceiver,
-	ITransaction,
 	ITransactionItem,
 	ITransactionParams,
 	ITransactionRequest
@@ -60,14 +59,49 @@ const Chat = () => {
 		() => ({
 			postID: parsedPostID,
 			searchBy: 'interestID',
-			searchValue: parsedInterestID.toString()
+			searchValue: parsedInterestID.toString(),
+			sort: 'createdAt',
+			page: 1,
+			order: ESortOrder.DESC
 		}),
 		[parsedInterestID, parsedPostID]
 	)
-	const { data: transactionData, refetch: transactionDataRefetch } =
-		useListTransactionQuery(transactionParams)
+
+	const {
+		data: transactionData,
+		fetchNextPage,
+		hasNextPage,
+		isFetchingNextPage,
+		refetch: transactionDataRefetch
+	} = useListTransactionQuery(transactionParams)
+
+	const transactions = useMemo(() => {
+		return transactionData?.pages.flatMap(page => page.transactions) || []
+	}, [transactionData])
+
+	const handleLoadMore = useCallback(() => {
+		if (hasNextPage && !isFetchingNextPage) {
+			fetchNextPage()
+		}
+	}, [hasNextPage, isFetchingNextPage, fetchNextPage])
+
+	const handleTransactionScroll = useCallback(
+		(e: React.UIEvent<HTMLDivElement>) => {
+			const { scrollTop, scrollHeight, clientHeight } = e.currentTarget
+
+			// Trigger load more when user scrolls to near bottom (within 100px)
+			const isNearBottom = scrollHeight - scrollTop <= clientHeight + 100
+
+			if (isNearBottom && hasNextPage && !isFetchingNextPage) {
+				handleLoadMore()
+			}
+		},
+		[hasNextPage, isFetchingNextPage, handleLoadMore]
+	)
+
 	const { data: postDetailData, refetch: postDetailDataRefetch } =
 		useDetailPostQueryByID(parsedPostID)
+
 	const [message, setMessage] = useState('')
 	const [messages, setMessages] = useState([
 		{
@@ -92,39 +126,28 @@ const Chat = () => {
 	const [transactionStatus, setTransactionStatus] =
 		useState<ETransactionStatus>(ETransactionStatus.DEFAULT)
 
-	console.log(transactionParams)
 	const transactionID = useMemo(() => {
 		if (transactionData) {
-			return (
-				transactionData.find(
-					transaction =>
-						(transaction.status.toString() as ETransactionStatus) ===
-						ETransactionStatus.PENDING
-				)?.id || 0
-			)
+			return (transactions[0].status.toString() as ETransactionStatus) ===
+				ETransactionStatus.PENDING
+				? transactions[0].id
+				: 0
 		}
 		return 0
-	}, [transactionData])
+	}, [transactions])
 
 	const {
 		mutate: createTransactionMutation,
 		isPending: isCreateTransactionPending
 	} = useCreateTransactionMutation({
-		onSuccess: (transaction: ITransaction) => {
+		onSuccess: () => {
 			setTransactionStatus(ETransactionStatus.PENDING)
 			setSelectedItems([])
-			transactionData?.unshift({
-				...transaction,
-				updatedAt: new Date().toISOString(),
-				items: transactionItems
-			})
+			transactionDataRefetch()
 		}
 	})
 
-	const {
-		mutate: updateTransactionMutation,
-		isPending: isUpdateTransactionPending
-	} = useUpdateTransactionMutation({
+	const { mutate: updateTransactionMutation } = useUpdateTransactionMutation({
 		onSuccess: (status: ETransactionStatus) => {
 			setTransactionStatus(status)
 			transactionDataRefetch()
@@ -134,7 +157,7 @@ const Chat = () => {
 		}
 	})
 
-	const handleConfirmRequest = () => {
+	const handleConfirmRequest = async () => {
 		if (transactionData && !isAuthor && transactionID) {
 			showInfo({
 				infoTitle: 'Bạn đang ở trong 1 giao dịch.',
@@ -163,6 +186,7 @@ const Chat = () => {
 					'Hành động này không thể hoàn tác và người đăng sẽ thấy được các món đồ bạn yêu cầu',
 				confirmTitle: 'Xác nhận tạo giao dịch?',
 				onConfirm: () => {
+					close()
 					const transactionRequest: ITransactionRequest = {
 						interestID: parsedInterestID,
 						items: transactionItems.map(item => ({
@@ -170,28 +194,32 @@ const Chat = () => {
 							quantity: item.quantity
 						}))
 					}
-					createTransactionMutation(transactionRequest)
-					close()
+					createTransactionMutation({ data: transactionRequest })
 				},
-				cancelButtonText: 'Đóng'
+				cancelButtonText: 'Hủy'
 			})
 		}
 	}
 
-	const handleConfirmTransaction = (status: ETransactionStatus) => {
-		const transactionRequest: ITransactionRequest = {
-			status: Number(status),
-			items:
-				status === ETransactionStatus.CANCELLED
-					? undefined
-					: transactionItems.map(item => ({
-							postItemID: item.postItemID,
-							quantity: item.quantity
-						}))
-		}
-		updateTransactionMutation({
-			transactionID,
-			data: transactionRequest
+	const handleConfirmTransaction = async (status: ETransactionStatus) => {
+		showConfirm({
+			confirmButtonText: 'Xác nhận',
+			confirmMessage:
+				'Hành động này không thể hoàn tác. Bạn cần cân nhắc trước khi xác nhận',
+			confirmTitle:
+				status === ETransactionStatus.SUCCESS
+					? 'Xác nhận hoàn tất giao dịch?'
+					: 'Xác nhận từ chối giao dịch?',
+			onConfirm: async () => {
+				const transactionRequest: ITransactionRequest = {
+					status: Number(status)
+				}
+				updateTransactionMutation({
+					transactionID,
+					data: transactionRequest
+				})
+			},
+			cancelButtonText: 'Hủy'
 		})
 	}
 
@@ -223,25 +251,12 @@ const Chat = () => {
 
 	const handleApplyItemTransactions = (index: number) => {
 		if (transactionData) {
-			const transactionItems = transactionData[index].items.map(item => ({
-				...item,
-				currentQuantity:
-					postDetailData?.items?.find(i => i.itemID === item.itemID)
-						?.currentQuantity || 1
-			}))
-			const status = transactionData[
-				index
-			].status.toString() as ETransactionStatus
+			const transactionItems = transactions[index].items
+			const status = transactions[index].status.toString() as ETransactionStatus
 			setTransactionItems(transactionItems)
 			setTransactionStatus(status)
 		}
 	}
-
-	useEffect(() => {
-		if (transactionItems.length === 0) {
-			setTransactionStatus(ETransactionStatus.DEFAULT)
-		}
-	}, [transactionItems])
 
 	return (
 		<div className='bg-background min-h-full'>
@@ -278,8 +293,7 @@ const Chat = () => {
 						}}
 						setCurrentRequestIndex={setCurrentRequestIndex}
 						isCreateTransactionPending={isCreateTransactionPending}
-						isUpdateTransactionPending={isUpdateTransactionPending}
-						transactions={transactionData || []} // Truyền transactionData
+						transactions={transactions}
 						handleApplyItemTransactions={handleApplyItemTransactions}
 						handleQuantityChange={(itemId, change) => {
 							setTransactionItems(prev =>
@@ -301,6 +315,10 @@ const Chat = () => {
 								)
 							)
 						}}
+						hasNextPage={hasNextPage}
+						isFetchingNextPage={isFetchingNextPage}
+						onTransactionScroll={handleTransactionScroll}
+						transactionID={transactionID}
 					/>
 					<ChatMessagesPanel
 						messages={messages}

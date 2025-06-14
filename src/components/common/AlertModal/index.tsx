@@ -73,39 +73,23 @@ const AlertModal: React.FC<AlertModalProps> = ({
 }) => {
 	const LoadingContent = () => (
 		<div className='p-8 text-center'>
-			<div
-				className={clsx(
-					'modal-enter mx-auto mb-6 flex h-20 w-20 items-center justify-center'
-				)}
-				style={{ animationDelay: '0.1s' }}
-			>
+			<div className='mx-auto mb-6 flex h-20 w-20 items-center justify-center'>
 				<div className='relative'>
-					<div className='h-16 w-16 rounded-full border-4 border-gray-200'></div>
-					<div className='border-r-primary loading absolute top-0 left-0 h-16 w-16 rounded-full border-4'></div>
+					<div className='border-muted h-16 w-16 rounded-full border-4'></div>
+					<div className='loading border-primary absolute top-0 left-0 h-16 w-16 rounded-full border-4 border-t-transparent'></div>
 				</div>
 			</div>
-			<h3
-				className={clsx('modal-enter mb-4 text-2xl font-bold text-gray-900')}
-				style={{ animationDelay: '0.2s' }}
-			>
-				Vui lòng đợi
-			</h3>
-			<p
-				className={clsx(
-					'modal-enter mb-8 text-lg leading-relaxed text-gray-600'
-				)}
-				style={{ animationDelay: '0.3s' }}
-			>
+			<h3 className='text-foreground mb-4 text-2xl font-bold'>Vui lòng đợi</h3>
+			<p className='text-muted-foreground mb-8 text-lg leading-relaxed'>
 				{loadingMessage}
 			</p>
 			{showCancel && onCancel && (
 				<button
 					onClick={onCancel}
 					className={clsx(
-						'rounded-2xl bg-gray-100 px-8 py-4 text-gray-700 hover:bg-gray-200',
-						'button-ripple modal-enter font-semibold transition-all duration-300 hover:scale-105 active:scale-95'
+						'bg-muted text-foreground hover:bg-muted/80 rounded-2xl px-8 py-4',
+						'font-semibold transition-all duration-200'
 					)}
-					style={{ animationDelay: '0.4s' }}
 				>
 					Hủy
 				</button>
@@ -115,17 +99,17 @@ const AlertModal: React.FC<AlertModalProps> = ({
 
 	const SuccessContent = () => (
 		<div className='relative p-8 text-center'>
+			{/* Tối ưu particles - giảm số lượng và đơn giản hóa animation */}
 			<div className='pointer-events-none absolute inset-0'>
-				{[...Array(6)].map((_, i) => (
+				{[...Array(3)].map((_, i) => (
 					<div
 						key={i}
-						className={clsx(
-							'float absolute h-3 w-3 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 opacity-60'
-						)}
+						className='bg-chart-1 absolute h-2 w-2 animate-pulse rounded-full opacity-30'
 						style={{
-							left: `${20 + i * 12}%`,
-							top: `${10 + (i % 2) * 20}%`,
-							animationDelay: `${i * 0.5}s`
+							left: `${25 + i * 20}%`,
+							top: `${15 + (i % 2) * 15}%`,
+							animationDelay: `${i * 0.5}s`,
+							animationDuration: '2s'
 						}}
 					/>
 				))}
@@ -133,34 +117,24 @@ const AlertModal: React.FC<AlertModalProps> = ({
 			<AnimatedIcon
 				className={clsx(
 					'mx-auto flex h-20 w-20 items-center justify-center rounded-full',
-					'mb-6 bg-gradient-to-br from-emerald-100 to-green-200 shadow-lg'
+					'bg-chart-1/10 border-chart-1/20 mb-6 border-2'
 				)}
 				type='pulse'
 			>
-				<CheckCircle className='h-10 w-10 text-emerald-600' />
+				<CheckCircle className='text-chart-1 h-10 w-10' />
 			</AnimatedIcon>
-			<h3
-				className={clsx('modal-enter mb-4 text-2xl font-bold text-gray-900')}
-				style={{ animationDelay: '0.2s' }}
-			>
+			<h3 className='text-foreground mb-4 text-2xl font-bold'>
 				{successTitle}
 			</h3>
-			<p
-				className={clsx(
-					'modal-enter mb-8 text-lg leading-relaxed text-gray-600'
-				)}
-				style={{ animationDelay: '0.3s' }}
-			>
+			<p className='text-muted-foreground mb-8 text-lg leading-relaxed'>
 				{successMessage}
 			</p>
 			<button
 				onClick={onClose}
 				className={clsx(
-					'w-full rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 px-6 py-4 text-white',
-					'font-semibold transition-all duration-300 hover:from-emerald-600 hover:to-green-700',
-					'button-ripple modal-enter shadow-lg hover:scale-105 hover:shadow-emerald-200 active:scale-95'
+					'bg-chart-1 w-full rounded-2xl px-6 py-4 text-white',
+					'hover:bg-chart-1/90 font-semibold transition-all duration-200'
 				)}
-				style={{ animationDelay: '0.4s' }}
 			>
 				{successButtonText}
 			</button>
@@ -172,34 +146,22 @@ const AlertModal: React.FC<AlertModalProps> = ({
 			<AnimatedIcon
 				className={clsx(
 					'mx-auto flex h-20 w-20 items-center justify-center rounded-full',
-					'mb-6 bg-gradient-to-br from-red-100 to-rose-200 shadow-lg'
+					'bg-destructive/10 border-destructive/20 mb-6 border-2'
 				)}
 				type='shake'
 			>
-				<XCircle className='h-10 w-10 text-rose-600' />
+				<XCircle className='text-destructive h-10 w-10' />
 			</AnimatedIcon>
-			<h3
-				className={clsx('modal-enter mb-4 text-2xl font-bold text-gray-900')}
-				style={{ animationDelay: '0.2s' }}
-			>
-				{errorTitle}
-			</h3>
-			<p
-				className={clsx(
-					'modal-enter mb-8 text-lg leading-relaxed text-gray-600'
-				)}
-				style={{ animationDelay: '0.3s' }}
-			>
+			<h3 className='text-foreground mb-4 text-2xl font-bold'>{errorTitle}</h3>
+			<p className='text-muted-foreground mb-8 text-lg leading-relaxed'>
 				{errorMessage}
 			</p>
 			<button
 				onClick={onClose}
 				className={clsx(
-					'w-full rounded-2xl bg-gradient-to-r from-rose-500 to-red-600 px-6 py-4 text-white',
-					'font-semibold transition-all duration-300 hover:from-rose-600 hover:to-red-700',
-					'button-ripple modal-enter shadow-lg hover:scale-105 hover:shadow-rose-200 active:scale-95'
+					'bg-destructive w-full rounded-2xl px-6 py-4 text-white',
+					'hover:bg-destructive/90 font-semibold transition-all duration-200'
 				)}
-				style={{ animationDelay: '0.4s' }}
 			>
 				{errorButtonText}
 			</button>
@@ -211,34 +173,24 @@ const AlertModal: React.FC<AlertModalProps> = ({
 			<AnimatedIcon
 				className={clsx(
 					'mx-auto flex h-20 w-20 items-center justify-center rounded-full',
-					'mb-6 bg-gradient-to-br from-amber-100 to-yellow-200 shadow-lg'
+					'mb-6 border-2 border-yellow-200 bg-yellow-100 dark:border-yellow-700/50 dark:bg-yellow-900/20'
 				)}
 				type='pulse'
 			>
-				<AlertCircle className='h-10 w-10 text-amber-600' />
+				<AlertCircle className='h-10 w-10 text-yellow-600 dark:text-yellow-400' />
 			</AnimatedIcon>
-			<h3
-				className={clsx('modal-enter mb-4 text-2xl font-bold text-gray-900')}
-				style={{ animationDelay: '0.2s' }}
-			>
+			<h3 className='text-foreground mb-4 text-2xl font-bold'>
 				{warningTitle}
 			</h3>
-			<p
-				className={clsx(
-					'modal-enter mb-8 text-lg leading-relaxed text-gray-600'
-				)}
-				style={{ animationDelay: '0.3s' }}
-			>
+			<p className='text-muted-foreground mb-8 text-lg leading-relaxed'>
 				{warningMessage}
 			</p>
 			<button
 				onClick={onClose}
 				className={clsx(
-					'w-full rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-600 px-6 py-4 text-white',
-					'font-semibold transition-all duration-300 hover:from-amber-600 hover:to-yellow-700',
-					'button-ripple modal-enter shadow-lg hover:scale-105 hover:shadow-amber-200 active:scale-95'
+					'w-full rounded-2xl bg-yellow-500 px-6 py-4 text-white hover:bg-yellow-600',
+					'font-semibold transition-all duration-200'
 				)}
-				style={{ animationDelay: '0.4s' }}
 			>
 				{warningButtonText}
 			</button>
@@ -247,16 +199,15 @@ const AlertModal: React.FC<AlertModalProps> = ({
 
 	const InfoContent = () => (
 		<div className='relative p-8 text-center'>
+			{/* Đơn giản hóa particles */}
 			<div className='pointer-events-none absolute inset-0'>
-				{[...Array(4)].map((_, i) => (
+				{[...Array(2)].map((_, i) => (
 					<div
 						key={i}
-						className={clsx(
-							'float absolute h-2 w-2 rounded-full bg-gradient-to-r from-blue-400 to-cyan-500 opacity-40'
-						)}
+						className='bg-primary absolute h-2 w-2 animate-pulse rounded-full opacity-20'
 						style={{
-							left: `${15 + i * 20}%`,
-							top: `${15 + (i % 2) * 15}%`,
+							left: `${20 + i * 30}%`,
+							top: `${20 + i * 20}%`,
 							animationDelay: `${i * 0.8}s`,
 							animationDuration: '3s'
 						}}
@@ -266,34 +217,22 @@ const AlertModal: React.FC<AlertModalProps> = ({
 			<AnimatedIcon
 				className={clsx(
 					'mx-auto flex h-20 w-20 items-center justify-center rounded-full',
-					'mb-6 bg-gradient-to-br from-blue-100 to-cyan-200 shadow-lg'
+					'bg-primary/10 border-primary/20 mb-6 border-2'
 				)}
-				type='pulse'
+				type='float'
 			>
-				<Info className='h-10 w-10 text-blue-600' />
+				<Info className='text-primary h-10 w-10' />
 			</AnimatedIcon>
-			<h3
-				className={clsx('modal-enter mb-4 text-2xl font-bold text-gray-900')}
-				style={{ animationDelay: '0.2s' }}
-			>
-				{infoTitle}
-			</h3>
-			<p
-				className={clsx(
-					'modal-enter mb-8 text-lg leading-relaxed text-gray-600'
-				)}
-				style={{ animationDelay: '0.3s' }}
-			>
+			<h3 className='text-foreground mb-4 text-2xl font-bold'>{infoTitle}</h3>
+			<p className='text-muted-foreground mb-8 text-lg leading-relaxed'>
 				{infoMessage}
 			</p>
 			<button
 				onClick={onClose}
 				className={clsx(
-					'w-full rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-600 px-6 py-4 text-white',
-					'font-semibold transition-all duration-300 hover:from-blue-600 hover:to-cyan-700',
-					'button-ripple modal-enter shadow-lg hover:scale-105 hover:shadow-blue-200 active:scale-95'
+					'bg-primary text-primary-foreground w-full rounded-2xl px-6 py-4',
+					'hover:bg-primary/90 font-semibold transition-all duration-200'
 				)}
-				style={{ animationDelay: '0.4s' }}
 			>
 				{infoButtonText}
 			</button>
@@ -302,16 +241,15 @@ const AlertModal: React.FC<AlertModalProps> = ({
 
 	const ConfirmContent = () => (
 		<div className='relative p-8 text-center'>
+			{/* Đơn giản hóa particles */}
 			<div className='pointer-events-none absolute inset-0'>
-				{[...Array(3)].map((_, i) => (
+				{[...Array(2)].map((_, i) => (
 					<div
 						key={i}
-						className={clsx(
-							'float absolute h-2 w-2 rounded-full bg-gradient-to-r from-indigo-400 to-purple-500 opacity-30'
-						)}
+						className='bg-primary absolute h-2 w-2 animate-pulse rounded-full opacity-15'
 						style={{
-							left: `${20 + i * 25}%`,
-							top: `${10 + (i % 2) * 25}%`,
+							left: `${25 + i * 30}%`,
+							top: `${15 + i * 25}%`,
 							animationDelay: `${i * 1}s`,
 							animationDuration: '4s'
 						}}
@@ -321,46 +259,34 @@ const AlertModal: React.FC<AlertModalProps> = ({
 			<AnimatedIcon
 				className={clsx(
 					'mx-auto flex h-20 w-20 items-center justify-center rounded-full',
-					'mb-6 bg-gradient-to-br from-indigo-100 to-purple-200 shadow-lg'
+					'bg-primary/10 border-primary/20 mb-6 border-2'
 				)}
 				type='pulse'
 			>
-				<HelpCircle className='h-10 w-10 text-indigo-600' />
+				<HelpCircle className='text-primary h-10 w-10' />
 			</AnimatedIcon>
-			<h3
-				className={clsx('modal-enter mb-4 text-2xl font-bold text-gray-900')}
-				style={{ animationDelay: '0.2s' }}
-			>
+			<h3 className='text-foreground mb-4 text-2xl font-bold'>
 				{confirmTitle}
 			</h3>
-			<p
-				className={clsx(
-					'modal-enter mb-8 text-lg leading-relaxed text-gray-600'
-				)}
-				style={{ animationDelay: '0.3s' }}
-			>
+			<p className='text-muted-foreground mb-8 text-lg leading-relaxed'>
 				{confirmMessage}
 			</p>
-			<div className={clsx('flex gap-4')}>
+			<div className='flex gap-4'>
 				<button
 					onClick={onClose}
 					className={clsx(
-						'flex-1 rounded-2xl bg-gray-100 px-6 py-4 text-gray-700',
-						'font-semibold transition-all duration-300 hover:bg-gray-200',
-						'button-ripple modal-enter hover:scale-105 active:scale-95'
+						'bg-muted text-foreground flex-1 rounded-2xl px-6 py-4',
+						'hover:bg-muted/80 font-semibold transition-all duration-200'
 					)}
-					style={{ animationDelay: '0.4s' }}
 				>
 					{cancelButtonText}
 				</button>
 				<button
 					onClick={onConfirm}
 					className={clsx(
-						'flex-1 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-4 text-white',
-						'font-semibold transition-all duration-300 hover:from-indigo-600 hover:to-purple-700',
-						'button-ripple modal-enter shadow-lg hover:scale-105 hover:shadow-indigo-200 active:scale-95'
+						'bg-primary text-primary-foreground flex-1 rounded-2xl px-6 py-4',
+						'hover:bg-primary/90 font-semibold transition-all duration-200'
 					)}
-					style={{ animationDelay: '0.5s' }}
 				>
 					{confirmButtonText}
 				</button>

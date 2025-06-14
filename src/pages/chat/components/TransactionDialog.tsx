@@ -1,6 +1,8 @@
+// TransactionDialog.tsx - Updated with infinite scroll support
+
 import { Dialog, Transition } from '@headlessui/react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronDown, X } from 'lucide-react'
+import { ChevronDown, Loader2, X } from 'lucide-react'
 import { Fragment, useState } from 'react'
 
 import { formatNearlyDateTimeVN } from '@/lib/utils'
@@ -14,6 +16,10 @@ interface TransactionsDialogProps {
 	transactions: ITransaction[]
 	isAuthor: boolean
 	handleTransactionSelect?: (index: number) => void
+	// New props for infinite scroll
+	hasNextPage?: boolean
+	isFetchingNextPage?: boolean
+	onScroll?: (e: React.UIEvent<HTMLDivElement>) => void
 }
 
 interface TransactionItemProps {
@@ -149,12 +155,23 @@ const TransactionItem = ({
 	)
 }
 
+// Loading spinner component for infinite scroll
+const LoadingSpinner = () => (
+	<div className='flex items-center justify-center py-4'>
+		<Loader2 className='text-muted-foreground h-6 w-6 animate-spin' />
+		<span className='text-muted-foreground ml-2 text-sm'>Đang tải thêm...</span>
+	</div>
+)
+
 export const TransactionsDialog = ({
 	isOpen,
 	onClose,
 	transactions,
 	isAuthor,
-	handleTransactionSelect
+	handleTransactionSelect,
+	hasNextPage = false,
+	isFetchingNextPage = false,
+	onScroll
 }: TransactionsDialogProps) => {
 	return (
 		<AnimatePresence>
@@ -204,7 +221,7 @@ export const TransactionsDialog = ({
 									initial={{ opacity: 0, scale: 0.95, y: 10 }}
 									animate={{ opacity: 1, scale: 1, y: 0 }}
 									exit={{ opacity: 0, scale: 0.95, y: 10 }}
-									className='bg-card mx-auto max-h-[90vh] w-full max-w-2xl overflow-hidden rounded-2xl shadow-xl'
+									className='bg-card mx-auto w-full max-w-2xl overflow-hidden rounded-2xl shadow-xl'
 								>
 									{/* Header */}
 									<div className='bg-card border-border border-b px-6 py-4'>
@@ -243,7 +260,10 @@ export const TransactionsDialog = ({
 									</div>
 
 									{/* Content */}
-									<div className='max-h-[70vh] overflow-y-auto'>
+									<div
+										className='max-h-[60vh] overflow-y-auto'
+										onScroll={onScroll} // Gắn sự kiện cuộn
+									>
 										<div className='p-6'>
 											{transactions.length > 0 ? (
 												<motion.div
@@ -271,6 +291,16 @@ export const TransactionsDialog = ({
 															/>
 														</motion.div>
 													))}
+													{/* Hiển thị spinner khi đang tải thêm */}
+													{isFetchingNextPage && <LoadingSpinner />}
+													{/* Hiển thị thông báo khi không còn dữ liệu */}
+													{!hasNextPage && transactions.length > 0 && (
+														<div className='py-4 text-center'>
+															<span className='text-muted-foreground text-sm'>
+																Đã hiển thị tất cả giao dịch
+															</span>
+														</div>
+													)}
 												</motion.div>
 											) : (
 												<motion.div

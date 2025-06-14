@@ -155,17 +155,16 @@ const Interest = () => {
 							transition={{ duration: 0.2 }}
 							className='space-y-4'
 						>
-							{isPending ||
-								(isDeleteInterestPending && (
-									<Loading
-										overlay={true}
-										position='in'
-										size='md'
-										variant='spinner'
-										color='primary'
-										text='Đang tải...'
-									/>
-								))}
+							{(isPending || isDeleteInterestPending) && (
+								<Loading
+									overlay={true}
+									position='in'
+									size='md'
+									variant='spinner'
+									color='primary'
+									text='Đang tải...'
+								/>
+							)}
 							{listPostInterest && listPostInterest.length > 0 ? (
 								listPostInterest.map(post =>
 									post.interests.length > 0 && activeTab === 1 ? (

@@ -1,17 +1,11 @@
 import clsx from 'clsx'
-import {
-	Calendar,
-	Clock,
-	MessageCircle,
-	MessageCircleWarning,
-	User
-} from 'lucide-react'
+import { Clock, MessageCircle, MessageCircleWarning, User } from 'lucide-react'
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { useListTransactionQuery } from '@/hooks/queries/use-transaction.query'
 import { formatNearlyDateTimeVN } from '@/lib/utils'
-import { ETransactionStatus } from '@/models/enums'
+import { ESortOrder, ETransactionStatus } from '@/models/enums'
 import { ITransactionParams, IUserInterest } from '@/models/interfaces'
 
 export const InterestItem = ({
@@ -33,16 +27,23 @@ export const InterestItem = ({
 			state: { receiver }
 		})
 	}
+
 	const params: ITransactionParams = useMemo(
 		() => ({
 			postID,
 			searchBy: 'interestID',
-			searchValue: userInterest.id.toString()
+			searchValue: userInterest.id.toString(),
+			sort: 'createdAt',
+			page: 1,
+			order: ESortOrder.DESC
 		}),
 		[postID, userInterest]
 	)
 
-	const { data: transactions } = useListTransactionQuery(params)
+	const { data: transactionData } = useListTransactionQuery(params)
+	const transactions = useMemo(() => {
+		return transactionData?.pages.flatMap(page => page.transactions) || []
+	}, [transactionData])
 	const isPendingTransaction = useMemo(() => {
 		if (transactions && transactions.length > 0) {
 			const status = transactions[0].status.toString() as ETransactionStatus
