@@ -1,5 +1,5 @@
 import { Gift } from 'lucide-react'
-import { FieldError, useFormContext } from 'react-hook-form'
+import { Controller, useFormContext } from 'react-hook-form'
 
 import ImageUpload from '@/components/common/ImageUpload'
 import InputText from '@/components/common/InputText'
@@ -13,8 +13,7 @@ const PostForm: React.FC<PostFormProps> = ({ isTransitioning }) => {
 	const {
 		register,
 		formState: { errors },
-		watch,
-		setValue
+		control
 	} = useFormContext<PostInfo>()
 
 	return (
@@ -58,13 +57,24 @@ const PostForm: React.FC<PostFormProps> = ({ isTransitioning }) => {
 						25/05'
 					</p>
 				</div>
-				<div>
-					<ImageUpload
+				<div className='space-y-2'>
+					<Controller
 						name='images'
-						label='Hình ảnh'
-						watch={watch}
-						setValue={setValue}
-						error={errors.images as FieldError}
+						control={control}
+						render={({ field }) => (
+							<ImageUpload
+								name='images'
+								label='Hình ảnh'
+								field={field}
+								error={
+									Array.isArray(errors.images)
+										? errors.images[0]
+										: errors.images
+								}
+								type='multiple'
+								animationDelay={0.4}
+							/>
+						)}
 					/>
 					<p className='text-muted-foreground mt-1 text-sm'>
 						Tải lên hình ảnh của món đồ (nếu có)
