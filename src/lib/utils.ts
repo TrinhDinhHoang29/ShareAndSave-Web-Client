@@ -62,6 +62,30 @@ export const formatDateTimeVN = (dateString: string) => {
 	}
 }
 
+export const formatHoverTime = (dateString: string): string => {
+	try {
+		const now = new Date()
+		const date = new Date(dateString)
+		const diffMs = now.getTime() - date.getTime()
+		const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+
+		if (diffHours < 24) {
+			return date.toLocaleTimeString('vi-VN', {
+				hour: '2-digit',
+				minute: '2-digit'
+			})
+		} else {
+			return date.toLocaleDateString('vi-VN', {
+				day: '2-digit',
+				month: '2-digit',
+				year: 'numeric'
+			})
+		}
+	} catch {
+		return dateString
+	}
+}
+
 export function getDeviceType() {
 	const ua = navigator.userAgent
 	if (/mobile/i.test(ua)) return 'mobile'

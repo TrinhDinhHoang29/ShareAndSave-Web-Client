@@ -79,12 +79,7 @@ axiosPrivate.interceptors.response.use(
 				setAuthLoading(false)
 			}
 		}
-
-		console.error(
-			'Response error:',
-			error.response?.data?.message || error.message
-		)
-		return Promise.reject(error)
+		return Promise.reject(error.response?.data || error)
 	}
 )
 

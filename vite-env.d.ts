@@ -2,7 +2,7 @@
 
 interface ImportMetaEnv {
 	readonly VITE_API_URL: string // Thêm tất cả biến môi trường bạn dùng
-	readonly VITE_SOCKET: string
+	readonly VITE_SOCKET_CHAT: string
 	// Thêm các biến khác nếu cần
 }
 

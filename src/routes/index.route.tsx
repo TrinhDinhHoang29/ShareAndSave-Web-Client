@@ -104,9 +104,11 @@ function AppRouter() {
 				{
 					path: '/chat/:postID/:interestID',
 					element: (
-						<ErrorBoundary>
-							<Chat />
-						</ErrorBoundary>
+						<PrivateRoute>
+							<ErrorBoundary>
+								<Chat />
+							</ErrorBoundary>
+						</PrivateRoute>
 					)
 				},
 				{

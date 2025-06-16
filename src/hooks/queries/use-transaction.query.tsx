@@ -13,14 +13,6 @@ export const useListTransactionQuery = (params: ITransactionParams) => {
 		queryFn: async ({ pageParam = 1 }) => {
 			const queryParams = { ...params, page: Number(pageParam) }
 			const res = await transactionApi.list(queryParams)
-			console.log('API Response:', res.data) // Debug log
-			console.log(
-				'Current page:',
-				pageParam,
-				'Total pages:',
-				res.data?.totalPage
-			) // Debug log
-
 			if (!res.data || !res.data.transactions) {
 				throw new Error('Dữ liệu giao dịch không hợp lệ')
 			}
@@ -29,13 +21,6 @@ export const useListTransactionQuery = (params: ITransactionParams) => {
 		getNextPageParam: (lastPage, allPages) => {
 			const currentPage = allPages.length
 			const totalPages = lastPage.totalPage || 0
-
-			console.log(
-				'getNextPageParam - Current page:',
-				currentPage,
-				'Total pages:',
-				totalPages
-			) // Debug log
 
 			// If current page is less than total pages, return next page number
 			if (currentPage < totalPages) {

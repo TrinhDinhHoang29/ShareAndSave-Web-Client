@@ -50,10 +50,6 @@ const Interest = () => {
 					)[0].slug
 					queryClient.invalidateQueries({ queryKey: ['posts', slug] })
 				}
-			},
-			onError: message => {
-				console.error('Error unfollowing:', message)
-				// Có thể hiển thị thông báo lỗi nếu cần
 			}
 		})
 

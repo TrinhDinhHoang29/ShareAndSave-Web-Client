@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { v4 as uuidv4 } from 'uuid'
 
 import { useAlertModalContext } from '@/context/alert-modal-context'
 import {
@@ -8,6 +9,7 @@ import {
 } from '@/hooks/mutations/use-transaction.mutation'
 import { useDetailPostQueryByID } from '@/hooks/queries/use-post-query'
 import { useListTransactionQuery } from '@/hooks/queries/use-transaction.query'
+import { getAccessToken } from '@/lib/token'
 import { ESortOrder, ETransactionStatus } from '@/models/enums'
 import {
 	IReceiver,
@@ -21,9 +23,24 @@ import { ChatHeaderWithRequests } from './components/ChatHeaderWithRequests'
 import { ChatMessagesPanel } from './components/ChatMessagesPanel'
 import { ItemSidebar } from './components/ItemSidebar'
 
-// Interface cho state trong location
 interface ChatState {
 	receiver: IReceiver
+}
+
+enum EMessageStatus {
+	SENDING = 'sending',
+	SENT = 'sent',
+	ERROR = 'error',
+	DELIVERED = 'delivered'
+}
+
+interface Message {
+	id: string
+	receiver: 'user' | 'other'
+	text: string
+	time: string
+	status: EMessageStatus
+	retry?: () => void
 }
 
 const Chat = () => {
@@ -54,6 +71,197 @@ const Chat = () => {
 			navigate('/', { replace: true })
 		}
 	}, [parsedPostID, parsedInterestID, receiver, navigate])
+
+	const { data: postDetailData, refetch: postDetailDataRefetch } =
+		useDetailPostQueryByID(parsedPostID)
+
+	// Quản lý WebSocket
+	const socketRef = useRef<WebSocket | null>(null)
+	const token = getAccessToken()
+
+	const { user } = useAuthStore()
+	const senderID = user?.id
+	const isAuthor = senderID === postDetailData?.authorID
+
+	const [message, setMessage] = useState('')
+	const [messages, setMessages] = useState<Message[]>([])
+
+	const handleSend = () => {
+		if (message.trim()) {
+			const newMessage: Message = {
+				id: uuidv4(),
+				receiver: 'user',
+				text: message,
+				time: new Date().toISOString(),
+				status: EMessageStatus.SENDING
+			}
+			setMessages(prev => [...prev, newMessage])
+
+			if (socketRef.current?.readyState === WebSocket.OPEN) {
+				const msgId = newMessage.id
+				socketRef.current.send(
+					JSON.stringify({
+						event: 'send_message',
+						data: {
+							isOwner: isAuthor,
+							interestID: parsedInterestID,
+							userID: senderID,
+							message: message
+						}
+					})
+				)
+
+				// Thêm logic retry
+				const retrySend = () => {
+					setMessages(prev =>
+						prev.map(m =>
+							m.id === msgId && m.status === EMessageStatus.ERROR
+								? { ...m, status: EMessageStatus.SENDING }
+								: m
+						)
+					)
+					socketRef.current?.send(
+						JSON.stringify({
+							event: 'send_message',
+							data: {
+								isOwner: isAuthor,
+								interestID: parsedInterestID,
+								userID: senderID,
+								message: message
+							}
+						})
+					)
+				}
+
+				setMessages(prev =>
+					prev.map(m =>
+						m.id === msgId
+							? { ...m, retry: retrySend, status: EMessageStatus.SENDING }
+							: m
+					)
+				)
+			}
+			setMessage('')
+		}
+	}
+
+	useEffect(() => {
+		if (
+			!socketRef.current ||
+			socketRef.current.readyState === WebSocket.CLOSED
+		) {
+			const wsUrl =
+				import.meta.env.VITE_SOCKET_CHAT || 'ws://34.142.168.171:8001/chat'
+			socketRef.current = new WebSocket(wsUrl, [token ?? ''])
+
+			socketRef.current.onopen = () => {
+				console.log(
+					'🔗 WebSocket Connected! ReadyState:',
+					socketRef.current?.readyState
+				)
+				if (interestID) {
+					const msg = {
+						event: 'join_room',
+						data: {
+							interestID: parsedInterestID
+						}
+					}
+					socketRef.current?.send(JSON.stringify(msg))
+					console.log('[🚪] Sent join_room')
+				}
+			}
+
+			socketRef.current.onmessage = event => {
+				console.log('📩 Received raw:', event.data)
+				try {
+					const data = JSON.parse(event.data)
+					console.log('📩 Parsed:', data)
+					if (data.event === 'send_message_response' && data.data.message) {
+						const { senderID: senderChatID, message, timestamp } = data.data
+						const isCurrentUser = senderID === senderChatID
+						const receiverType = isCurrentUser ? 'user' : 'other'
+
+						if (isCurrentUser) {
+							console.log('chay vao if', data.data)
+							setMessages((prev: Message[]) => {
+								return prev.map(m =>
+									m.status === EMessageStatus.SENDING
+										? { ...m, status: EMessageStatus.SENT }
+										: m
+								)
+							})
+						} else {
+							console.log('chay vao else', data.data)
+							setMessages((prev: Message[]) => {
+								const updatedMessages: Message[] = [
+									...prev,
+									{
+										id: uuidv4(),
+										receiver: receiverType,
+										text: message,
+										time: timestamp,
+										status: EMessageStatus.DELIVERED
+									}
+								]
+
+								// Ẩn "Đã gửi" từ tin nhắn cũ khi có tin nhắn mới từ đối phương
+								return updatedMessages.map(m =>
+									m.status === EMessageStatus.SENT
+										? { ...m, status: EMessageStatus.DELIVERED }
+										: m
+								)
+							})
+						}
+					} else if (
+						data.event === 'send_message_response' &&
+						data.status === 'error'
+					) {
+						setMessages((prev: Message[]) =>
+							prev.map(m =>
+								m.status === EMessageStatus.SENDING
+									? {
+											...m,
+											status: EMessageStatus.ERROR,
+											retry: () => handleSend()
+										}
+									: m
+							)
+						)
+					}
+				} catch (error) {
+					console.error('❌ Parse error:', error)
+				}
+			}
+
+			socketRef.current.onerror = error => {
+				console.error('❌ WebSocket Error:', error)
+				setMessages((prev: Message[]) =>
+					prev.map(m =>
+						m.status === EMessageStatus.SENDING
+							? {
+									...m,
+									status: EMessageStatus.ERROR,
+									retry: () => handleSend()
+								}
+							: m
+					)
+				)
+			}
+
+			socketRef.current.onclose = event => {
+				console.warn(
+					`⚠️ WebSocket closed. Code: ${event.code}, Reason: ${event.reason}, ReadyState: ${socketRef.current?.readyState}`
+				)
+			}
+		}
+
+		return () => {
+			if (socketRef.current?.readyState === WebSocket.OPEN) {
+				socketRef.current.close()
+				console.log('🔚 WebSocket closed manually')
+			}
+		}
+	}, [token, interestID])
 
 	const transactionParams: ITransactionParams = useMemo(
 		() => ({
@@ -88,10 +296,7 @@ const Chat = () => {
 	const handleTransactionScroll = useCallback(
 		(e: React.UIEvent<HTMLDivElement>) => {
 			const { scrollTop, scrollHeight, clientHeight } = e.currentTarget
-
-			// Trigger load more when user scrolls to near bottom (within 100px)
 			const isNearBottom = scrollHeight - scrollTop <= clientHeight + 100
-
 			if (isNearBottom && hasNextPage && !isFetchingNextPage) {
 				handleLoadMore()
 			}
@@ -99,24 +304,6 @@ const Chat = () => {
 		[hasNextPage, isFetchingNextPage, handleLoadMore]
 	)
 
-	const { data: postDetailData, refetch: postDetailDataRefetch } =
-		useDetailPostQueryByID(parsedPostID)
-
-	const [message, setMessage] = useState('')
-	const [messages, setMessages] = useState([
-		{
-			id: 1,
-			receiver: 'other',
-			text: 'Xin chào, tôi quan tâm đến bài đăng của bạn.',
-			time: '10:30'
-		},
-		{
-			id: 2,
-			receiver: 'user',
-			text: 'Chào bạn! Cảm ơn bạn đã quan tâm. Bạn cần thêm thông tin gì không?',
-			time: '10:32'
-		}
-	])
 	const [selectedItems, setSelectedItems] = useState<ITransactionItem[]>([])
 	const [transactionItems, setTransactionItems] = useState<ITransactionItem[]>(
 		[]
@@ -128,7 +315,7 @@ const Chat = () => {
 
 	const transactionID = useMemo(() => {
 		if (transactionData) {
-			return (transactions[0].status.toString() as ETransactionStatus) ===
+			return (transactions[0]?.status.toString() as ETransactionStatus) ===
 				ETransactionStatus.PENDING
 				? transactions[0].id
 				: 0
@@ -221,28 +408,6 @@ const Chat = () => {
 			},
 			cancelButtonText: 'Hủy'
 		})
-	}
-
-	const { user } = useAuthStore()
-	const senderID = user?.id
-	const isAuthor = senderID === postDetailData?.authorID
-
-	const handleSend = () => {
-		if (message.trim()) {
-			setMessages([
-				...messages,
-				{
-					id: messages.length + 1,
-					receiver: 'user',
-					text: message,
-					time: new Date().toLocaleTimeString([], {
-						hour: '2-digit',
-						minute: '2-digit'
-					})
-				}
-			])
-			setMessage('')
-		}
 	}
 
 	const handleBack = () => {

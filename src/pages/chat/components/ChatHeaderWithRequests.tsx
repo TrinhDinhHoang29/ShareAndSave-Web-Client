@@ -98,7 +98,7 @@ export const ChatHeaderWithRequests = ({
 	return (
 		<>
 			{/* ... existing JSX remains the same until TransactionsDialog */}
-			<div className='bg-primary text-primary-foreground px-6 py-4'>
+			<div className='bg-primary text-primary-foreground border-b px-6 py-4'>
 				{/* Header với nút quay lại */}
 				<div className='flex items-center justify-between'>
 					<div className='flex items-center space-x-3'>
