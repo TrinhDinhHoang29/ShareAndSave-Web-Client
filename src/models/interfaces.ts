@@ -175,6 +175,7 @@ export interface IUserInterest {
 	userID: number
 	userName: string
 	createdAt: string
+	unreadMessageCount: number
 }
 
 export interface IPostInterest {

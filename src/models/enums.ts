@@ -51,3 +51,8 @@ export enum EMessageStatus {
 	ERROR = 'error',
 	DELIVERED = 'delivered'
 }
+
+export enum ETypeNotification {
+	FOLLWED_BY = 'followedBy',
+	FOLLOWING = 'following'
+}

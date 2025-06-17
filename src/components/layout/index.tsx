@@ -7,7 +7,8 @@ import Navbar from './partials/Navbar'
 import Sidebar from './partials/Sidebar'
 
 function LayoutDefault() {
-	const { joinNotiRoom, notifications } = useChatNotification()
+	const { followedByNotifications, followingNotifications } =
+		useChatNotification()
 
 	useEffect(() => {
 		// joinNotiRoom(); // Tham gia room khi component mount
@@ -21,10 +22,11 @@ function LayoutDefault() {
 			//       console.log(`[🔔] Joined room ${noti.data.roomID}`);
 			//     }
 			//   });
-			console.log(notifications)
+			console.log('followedByNotifications', followedByNotifications)
+			console.log('followingNotifications', followingNotifications)
 		}
 		handleNotifications()
-	}, [notifications, joinNotiRoom])
+	}, [followedByNotifications, followingNotifications])
 	return (
 		<div className='relative min-h-screen'>
 			{/* Navbar luôn trên cùng, phủ toàn bộ chiều ngang */}

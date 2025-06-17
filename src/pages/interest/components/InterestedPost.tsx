@@ -90,7 +90,7 @@ export const InterestedPost = ({
 						>
 							<MessageCircle className='h-5 w-5' />
 							{post.unreadMessageCount > 0 && (
-								<span className='absolute -top-1 -right-1 rounded-full bg-red-100 px-1 py-0.5 text-xs font-medium text-red-700'>
+								<span className='absolute -top-2 -right-2 rounded-full bg-red-100 px-1 py-0.5 text-xs font-medium text-red-700'>
 									{post.unreadMessageCount <= 10
 										? post.unreadMessageCount
 										: 10 + '+'}

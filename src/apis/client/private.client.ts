@@ -43,7 +43,7 @@ axiosPrivate.interceptors.response.use(
 	async error => {
 		const originalRequest = error.config
 		const { setAuthLoading, logout } = useAuthStore.getState()
-
+		console.log(error.response?.data)
 		if (error.response?.status === 401 && !originalRequest._retry) {
 			const isDuplicate =
 				error.response.data.message ===
@@ -66,13 +66,11 @@ axiosPrivate.interceptors.response.use(
 
 				const response = await authApi.refreshToken({ refreshToken })
 				const jwt = response.data.jwt
-				console.log('new jwt', jwt)
 				setAccessToken(jwt)
 
 				originalRequest.headers.Authorization = `Bearer ${jwt}`
 				return axiosPrivate(originalRequest)
 			} catch (refreshError) {
-				console.error('Refresh token failed:', refreshError)
 				logout() // Cập nhật trạng thái auth khi refresh thất bại
 				return Promise.reject(refreshError)
 			} finally {

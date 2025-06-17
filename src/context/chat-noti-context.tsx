@@ -8,27 +8,26 @@ import React, {
 } from 'react'
 
 import { getAccessToken } from '@/lib/token'
+import { ETypeNotification } from '@/models/enums'
 
+interface ChatNoti {
+	interestID?: number
+	type?: ETypeNotification // "following" || "followedBy"
+	userID?: number
+	timestamp?: string
+}
 // Định nghĩa kiểu dữ liệu cho response
 interface ChatNotificationResponse {
 	event: string
 	status: string
-	data: {
-		interestID?: number
-		type?: string // "following" || "followedBy"
-		userID?: number
-		timestamp?: string
-		roomID?: string
-	}
+	data: ChatNoti
 	error?: string
 }
 
 // Định nghĩa kiểu dữ liệu cho Context
 interface ChatNotificationContextType {
-	socket: WebSocket | null
-	connectNoti: (token: string) => void
-	joinNotiRoom: () => void
-	notifications: ChatNotificationResponse[]
+	followedByNotifications: ChatNoti[]
+	followingNotifications: ChatNoti[]
 }
 
 // Tạo Context với giá trị mặc định
@@ -41,8 +40,11 @@ export const ChatNotificationProvider: React.FC<{
 	children: React.ReactNode
 }> = ({ children }) => {
 	const socketRef = useRef<WebSocket | null>(null)
-	const [notifications, setChatNotifications] = useState<
-		ChatNotificationResponse[]
+	const [followedByNotifications, setFollowedByNotifications] = useState<
+		ChatNoti[]
+	>([])
+	const [followingNotifications, setFollwingNotifications] = useState<
+		ChatNoti[]
 	>([])
 	const token = getAccessToken()
 
@@ -69,8 +71,14 @@ export const ChatNotificationProvider: React.FC<{
 		newSocket.onmessage = event => {
 			try {
 				const data = JSON.parse(event.data) as ChatNotificationResponse
-				console.log('[📨] Received: ', data)
-				setChatNotifications(prev => [...prev, data])
+				if (data.event === 'send_message_response') {
+					const type = data.data.type as ETypeNotification
+					if (type === ETypeNotification.FOLLOWING) {
+						setFollwingNotifications(prev => [...prev, data.data])
+					} else {
+						setFollowedByNotifications(prev => [...prev, data.data])
+					}
+				}
 			} catch (error) {
 				console.log('[⚠️] Error parsing message: ', error)
 			}
@@ -91,24 +99,6 @@ export const ChatNotificationProvider: React.FC<{
 		}
 
 		socketRef.current = newSocket
-	}
-
-	// Tham gia room noti
-	const joinNotiRoom = () => {
-		if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-			socketRef.current.send(
-				JSON.stringify({
-					event: 'join_noti_room',
-					data: {}
-				})
-			)
-			console.log('[📤] Sent join_noti_room request')
-		} else {
-			console.log(
-				'[⚠️] Socket not open, cannot join room. ReadyState:',
-				socketRef.current?.readyState
-			)
-		}
 	}
 
 	// Tự động kết nối khi token thay đổi
@@ -132,10 +122,8 @@ export const ChatNotificationProvider: React.FC<{
 
 	// Cung cấp socket từ ref trong context
 	const contextValue = {
-		socket: socketRef.current,
-		connectNoti,
-		joinNotiRoom,
-		notifications
+		followedByNotifications,
+		followingNotifications
 	}
 
 	return (
