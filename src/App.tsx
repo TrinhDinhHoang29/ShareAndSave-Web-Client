@@ -17,11 +17,10 @@ function App() {
 			setAuthLoading(true)
 			try {
 				// Chỉ gọi syncAuthState nếu có token
-				const accessToken = getAccessToken() // Giả sử token được lưu trong localStorage
+				const accessToken = getAccessToken()
 				if (accessToken) {
 					await syncAuthState()
 				} else {
-					console.log('chay vao day')
 					useAuthStore.setState({ user: null, isAuthenticated: false }) // Sử dụng setState từ store
 				}
 			} catch (error) {

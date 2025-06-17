@@ -1,10 +1,9 @@
-// TransactionDialog.tsx - Updated with infinite scroll support
-
 import { Dialog, Transition } from '@headlessui/react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, Loader2, X } from 'lucide-react'
 import { Fragment, useState } from 'react'
 
+import Loading from '@/components/common/Loading'
 import { formatNearlyDateTimeVN } from '@/lib/utils'
 import { getTransactionStatusConfig } from '@/models/constants'
 import { ETransactionStatus } from '@/models/enums'
@@ -16,10 +15,9 @@ interface TransactionsDialogProps {
 	transactions: ITransaction[]
 	isAuthor: boolean
 	handleTransactionSelect?: (index: number) => void
-	// New props for infinite scroll
 	hasNextPage?: boolean
 	isFetchingNextPage?: boolean
-	onScroll?: (e: React.UIEvent<HTMLDivElement>) => void
+	sentinelRef?: (node: HTMLElement | null) => void // Thêm ref cho sentinel
 }
 
 interface TransactionItemProps {
@@ -87,7 +85,9 @@ const TransactionItem = ({
 						{((isAuthor && status !== ETransactionStatus.PENDING) ||
 							!isAuthor) && (
 							<ChevronDown
-								className={`text-muted-foreground h-5 w-5 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+								className={`text-muted-foreground h-5 w-5 transition-transform duration-200 ${
+									isExpanded ? 'rotate-180' : ''
+								}`}
 							/>
 						)}
 					</div>
@@ -127,7 +127,7 @@ const TransactionItem = ({
 												onError={e => {
 													const target = e.target as HTMLImageElement
 													target.src =
-														'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMCAyOEMyNC40MTgzIDI4IDI4IDI0LjQxODMgMjggMjBDMjggMTUuNTgxNyAyNC40MTgzIDEyIDIwIDEyQzE1LjU4MTcgMTIgMTIgMTUuNTgxNyAxMiAyMEMxMiAyNC40MTgzIDE1LjU4MTcgMjggMjAgMjhaIiBmaWxsPSIjOUNBM0FGIi8+Cjwvc3ZnPgo='
+														'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGggND0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNGRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMCAyOEMyNC40MTgzIDI4IDI4IDI0LjQxODMgMjggMjBDMjggMTUuNTgxNyAyNC40MTgzIDEyIDIwIDEyQzE1LjU4MTcgMTIgMTIgMTUuNTgxNyAxMiAyMEMxMiAyNC40MTgzIDE1LjU4MTcgMjggMjAgMjhaIiBmaWxsPSIjOUNBM0FGIi8+Cjwvc3ZnPgo='
 												}}
 											/>
 										</div>
@@ -171,7 +171,7 @@ export const TransactionsDialog = ({
 	handleTransactionSelect,
 	hasNextPage = false,
 	isFetchingNextPage = false,
-	onScroll
+	sentinelRef // Nhận ref từ ChatHeaderWithRequests
 }: TransactionsDialogProps) => {
 	return (
 		<AnimatePresence>
@@ -260,10 +260,7 @@ export const TransactionsDialog = ({
 									</div>
 
 									{/* Content */}
-									<div
-										className='max-h-[60vh] overflow-y-auto'
-										onScroll={onScroll} // Gắn sự kiện cuộn
-									>
+									<div className='max-h-[60vh] overflow-y-auto'>
 										<div className='p-6'>
 											{transactions.length > 0 ? (
 												<motion.div
@@ -292,7 +289,19 @@ export const TransactionsDialog = ({
 														</motion.div>
 													))}
 													{/* Hiển thị spinner khi đang tải thêm */}
-													{isFetchingNextPage && <LoadingSpinner />}
+													{isFetchingNextPage && (
+														<Loading
+															size='sm'
+															color='secondary'
+														/>
+													)}
+													{/* Sentinel cho infinite scroll */}
+													{hasNextPage && (
+														<div
+															ref={sentinelRef}
+															style={{ height: '1px' }}
+														/>
+													)}
 													{/* Hiển thị thông báo khi không còn dữ liệu */}
 													{!hasNextPage && transactions.length > 0 && (
 														<div className='py-4 text-center'>

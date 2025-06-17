@@ -1,17 +1,23 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useInView } from 'react-intersection-observer'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
-import { v4 as uuidv4 } from 'uuid'
 
+import Loading from '@/components/common/Loading'
 import { useAlertModalContext } from '@/context/alert-modal-context'
 import {
 	useCreateTransactionMutation,
 	useUpdateTransactionMutation
 } from '@/hooks/mutations/use-transaction.mutation'
+import { useListMessageQuery } from '@/hooks/queries/use-chat.query'
 import { useDetailPostQueryByID } from '@/hooks/queries/use-post-query'
 import { useListTransactionQuery } from '@/hooks/queries/use-transaction.query'
 import { getAccessToken } from '@/lib/token'
-import { ESortOrder, ETransactionStatus } from '@/models/enums'
+import { generateRandomId } from '@/lib/utils'
+import { LIMIT_MESSAGE } from '@/models/constants'
+import { EMessageStatus, ESortOrder, ETransactionStatus } from '@/models/enums'
 import {
+	IMessage,
+	IMessageResponse,
 	IReceiver,
 	ITransactionItem,
 	ITransactionParams,
@@ -20,27 +26,11 @@ import {
 import useAuthStore from '@/stores/authStore'
 
 import { ChatHeaderWithRequests } from './components/ChatHeaderWithRequests'
-import { ChatMessagesPanel } from './components/ChatMessagesPanel'
+import ChatMessagesPanel from './components/ChatMessagesPanel'
 import { ItemSidebar } from './components/ItemSidebar'
 
 interface ChatState {
 	receiver: IReceiver
-}
-
-enum EMessageStatus {
-	SENDING = 'sending',
-	SENT = 'sent',
-	ERROR = 'error',
-	DELIVERED = 'delivered'
-}
-
-interface Message {
-	id: string
-	receiver: 'user' | 'other'
-	text: string
-	time: string
-	status: EMessageStatus
-	retry?: () => void
 }
 
 const Chat = () => {
@@ -52,11 +42,9 @@ const Chat = () => {
 	const navigate = useNavigate()
 	const { showInfo, showConfirm, close } = useAlertModalContext()
 
-	// Parse params
 	const parsedPostID = Number(postID)
 	const parsedInterestID = Number(interestID)
 
-	// Lấy dữ liệu từ state hoặc fallback
 	const initialState = state || {
 		receiver: { id: 0, name: 'Unknown' },
 		postTitle: 'No Title',
@@ -65,17 +53,52 @@ const Chat = () => {
 	}
 	const { receiver } = initialState
 
-	// Kiểm tra dữ liệu hợp lệ
 	useEffect(() => {
 		if (isNaN(parsedPostID) || isNaN(parsedInterestID) || !receiver) {
 			navigate('/', { replace: true })
 		}
 	}, [parsedPostID, parsedInterestID, receiver, navigate])
 
-	const { data: postDetailData, refetch: postDetailDataRefetch } =
-		useDetailPostQueryByID(parsedPostID)
+	const {
+		data: postDetailData,
+		isPending: isPostDetailDataPending,
+		refetch: postDetailDataRefetch
+	} = useDetailPostQueryByID(parsedPostID)
 
-	// Quản lý WebSocket
+	// Sử dụng useListMessageQuery để lấy lịch sử tin nhắn
+	const {
+		data: messagesData,
+		fetchNextPage: messageFetchNextPage,
+		hasNextPage: messageHasNextPage,
+		isFetchingNextPage: isMessageFetchingNextPage,
+		refetch: messageRefetch
+	} = useListMessageQuery({
+		interestID: parsedInterestID,
+		limit: LIMIT_MESSAGE
+	})
+	const [isMoreThanLimitMessage, setIsMoreThanLimitMessage] = useState(false)
+	const pageMessages: IMessageResponse[] = useMemo(() => {
+		return messagesData?.pages.flatMap(page => page) || []
+	}, [messagesData])
+
+	// Sử dụng useInView để theo dõi đầu danh sách (infinite scroll khi cuộn lên)
+	const { ref: messageRef, inView: messageInView } = useInView({
+		threshold: 0.5,
+		rootMargin: '100px' // Tải sớm hơn 100px khi cuộn lên
+	})
+
+	// Tải thêm khi cuộn lên và sentinel ở đầu vào vùng hiển thị
+	useEffect(() => {
+		if (messageInView && messageHasNextPage && !isMessageFetchingNextPage) {
+			messageFetchNextPage()
+		}
+	}, [
+		messageInView,
+		messageHasNextPage,
+		isMessageFetchingNextPage,
+		messageFetchNextPage
+	])
+
 	const socketRef = useRef<WebSocket | null>(null)
 	const token = getAccessToken()
 
@@ -84,18 +107,24 @@ const Chat = () => {
 	const isAuthor = senderID === postDetailData?.authorID
 
 	const [message, setMessage] = useState('')
-	const [messages, setMessages] = useState<Message[]>([])
+	const [messages, setMessages] = useState<IMessage[]>([])
+
+	// Thêm state để track việc scroll
+	const [shouldScrollToBottom, setShouldScrollToBottom] = useState(true)
+	const [isInitialLoad, setIsInitialLoad] = useState(true)
+	const messagesContainerRef = useRef<HTMLDivElement>(null)
 
 	const handleSend = () => {
 		if (message.trim()) {
-			const newMessage: Message = {
-				id: uuidv4(),
+			const newMessage: IMessage = {
+				id: generateRandomId(),
 				receiver: 'user',
-				text: message,
+				message,
 				time: new Date().toISOString(),
 				status: EMessageStatus.SENDING
 			}
 			setMessages(prev => [...prev, newMessage])
+			setShouldScrollToBottom(true) // Đánh dấu cần scroll xuống
 
 			if (socketRef.current?.readyState === WebSocket.OPEN) {
 				const msgId = newMessage.id
@@ -105,13 +134,12 @@ const Chat = () => {
 						data: {
 							isOwner: isAuthor,
 							interestID: parsedInterestID,
-							userID: senderID,
+							userID: receiver.id,
 							message: message
 						}
 					})
 				)
 
-				// Thêm logic retry
 				const retrySend = () => {
 					setMessages(prev =>
 						prev.map(m =>
@@ -126,7 +154,7 @@ const Chat = () => {
 							data: {
 								isOwner: isAuthor,
 								interestID: parsedInterestID,
-								userID: senderID,
+								userID: receiver.id,
 								message: message
 							}
 						})
@@ -155,10 +183,6 @@ const Chat = () => {
 			socketRef.current = new WebSocket(wsUrl, [token ?? ''])
 
 			socketRef.current.onopen = () => {
-				console.log(
-					'🔗 WebSocket Connected! ReadyState:',
-					socketRef.current?.readyState
-				)
 				if (interestID) {
 					const msg = {
 						event: 'join_room',
@@ -167,56 +191,63 @@ const Chat = () => {
 						}
 					}
 					socketRef.current?.send(JSON.stringify(msg))
-					console.log('[🚪] Sent join_room')
 				}
 			}
 
 			socketRef.current.onmessage = event => {
-				console.log('📩 Received raw:', event.data)
 				try {
 					const data = JSON.parse(event.data)
-					console.log('📩 Parsed:', data)
 					if (data.event === 'send_message_response' && data.data.message) {
 						const { senderID: senderChatID, message, timestamp } = data.data
 						const isCurrentUser = senderID === senderChatID
 						const receiverType = isCurrentUser ? 'user' : 'other'
 
 						if (isCurrentUser) {
-							console.log('chay vao if', data.data)
-							setMessages((prev: Message[]) => {
-								return prev.map(m =>
-									m.status === EMessageStatus.SENDING
-										? { ...m, status: EMessageStatus.SENT }
-										: m
-								)
+							setMessages((prev: IMessage[]) => {
+								return prev.map(m => {
+									if (
+										m.status === EMessageStatus.SENDING ||
+										m.status === EMessageStatus.SENT
+									) {
+										const status =
+											m.status === EMessageStatus.SENDING
+												? EMessageStatus.SENT
+												: m.status === EMessageStatus.SENT
+													? EMessageStatus.DELIVERED
+													: m.status
+										return { ...m, status }
+									} else {
+										return m
+									}
+								})
 							})
 						} else {
-							console.log('chay vao else', data.data)
-							setMessages((prev: Message[]) => {
-								const updatedMessages: Message[] = [
+							setMessages((prev: IMessage[]) => {
+								const updatedMessages: IMessage[] = [
 									...prev,
 									{
-										id: uuidv4(),
+										id: generateRandomId(),
 										receiver: receiverType,
-										text: message,
+										message,
 										time: timestamp,
 										status: EMessageStatus.DELIVERED
 									}
 								]
 
-								// Ẩn "Đã gửi" từ tin nhắn cũ khi có tin nhắn mới từ đối phương
 								return updatedMessages.map(m =>
 									m.status === EMessageStatus.SENT
 										? { ...m, status: EMessageStatus.DELIVERED }
 										: m
 								)
 							})
+							// Scroll xuống khi nhận tin nhắn mới từ người khác
+							setShouldScrollToBottom(true)
 						}
 					} else if (
 						data.event === 'send_message_response' &&
 						data.status === 'error'
 					) {
-						setMessages((prev: Message[]) =>
+						setMessages((prev: IMessage[]) =>
 							prev.map(m =>
 								m.status === EMessageStatus.SENDING
 									? {
@@ -234,8 +265,8 @@ const Chat = () => {
 			}
 
 			socketRef.current.onerror = error => {
-				console.error('❌ WebSocket Error:', error)
-				setMessages((prev: Message[]) =>
+				console.log(error)
+				setMessages((prev: IMessage[]) =>
 					prev.map(m =>
 						m.status === EMessageStatus.SENDING
 							? {
@@ -257,12 +288,87 @@ const Chat = () => {
 
 		return () => {
 			if (socketRef.current?.readyState === WebSocket.OPEN) {
+				if (interestID) {
+					const msg = {
+						event: 'left_room',
+						data: {
+							interestID: parsedInterestID
+						}
+					}
+					socketRef.current?.send(JSON.stringify(msg))
+				}
 				socketRef.current.close()
-				console.log('🔚 WebSocket closed manually')
+				if (pageMessages.length !== messages.length) {
+					messageRefetch()
+				}
 			}
 		}
 	}, [token, interestID])
 
+	// Cập nhật useEffect xử lý messagesData
+	useEffect(() => {
+		if (pageMessages.length !== messages.length) {
+			const convertedMessages: IMessage[] = pageMessages.map(m => {
+				const isCurrentUser = senderID === m.senderID
+				const receiverType = isCurrentUser ? 'user' : 'other'
+				return {
+					id: m.id,
+					receiver: receiverType,
+					message: m.message,
+					time: m.createdAt,
+					status: EMessageStatus.DELIVERED
+				}
+			})
+
+			// Kiểm tra xem đây có phải là lần load đầu tiên không
+			const isFirstLoad = messages.length === 0
+
+			setMessages(prev => {
+				// Nếu là lần load đầu tiên, thay thế toàn bộ và đánh dấu scroll xuống bottom
+				if (isFirstLoad) {
+					setShouldScrollToBottom(true)
+					setIsMoreThanLimitMessage(pageMessages.length > LIMIT_MESSAGE)
+					return convertedMessages
+				}
+				// Nếu load thêm messages cũ (infinite scroll), thêm vào đầu
+				return [...convertedMessages, ...prev]
+			})
+		}
+	}, [pageMessages, senderID])
+	// Logic auto scroll cải tiến
+	useEffect(() => {
+		if (messagesContainerRef.current) {
+			const container = messagesContainerRef.current
+
+			// Nếu là lần load đầu tiên hoặc được đánh dấu cần scroll xuống bottom
+			if (shouldScrollToBottom || isInitialLoad) {
+				setTimeout(() => {
+					container.scrollTop = container.scrollHeight
+					setShouldScrollToBottom(false)
+					setIsInitialLoad(false)
+				}, 0)
+				return
+			}
+
+			// Chỉ auto scroll khi user ở gần cuối danh sách (cho tin nhắn mới)
+			const isAtBottom =
+				container.scrollHeight - container.scrollTop - container.clientHeight <
+				100
+			if (isAtBottom && messages.length > 0) {
+				const lastMessage = messages[messages.length - 1]
+				if (
+					lastMessage &&
+					(lastMessage.receiver === 'user' || shouldScrollToBottom)
+				) {
+					setTimeout(() => {
+						container.scrollTop = container.scrollHeight
+					}, 0)
+				}
+			}
+		}
+	}, [messages, shouldScrollToBottom, isInitialLoad])
+
+	//Handle Transactions
 	const transactionParams: ITransactionParams = useMemo(
 		() => ({
 			postID: parsedPostID,
@@ -274,12 +380,11 @@ const Chat = () => {
 		}),
 		[parsedInterestID, parsedPostID]
 	)
-
 	const {
 		data: transactionData,
-		fetchNextPage,
-		hasNextPage,
-		isFetchingNextPage,
+		fetchNextPage: transactionFetchNextPage,
+		hasNextPage: transactionHasNextPage,
+		isFetchingNextPage: isTransactionFetchingNextPage,
 		refetch: transactionDataRefetch
 	} = useListTransactionQuery(transactionParams)
 
@@ -287,22 +392,20 @@ const Chat = () => {
 		return transactionData?.pages.flatMap(page => page.transactions) || []
 	}, [transactionData])
 
-	const handleLoadMore = useCallback(() => {
-		if (hasNextPage && !isFetchingNextPage) {
-			fetchNextPage()
-		}
-	}, [hasNextPage, isFetchingNextPage, fetchNextPage])
+	const { ref: transactionRef, inView: transactionInView } = useInView({
+		threshold: 0.5,
+		rootMargin: '100px'
+	})
 
-	const handleTransactionScroll = useCallback(
-		(e: React.UIEvent<HTMLDivElement>) => {
-			const { scrollTop, scrollHeight, clientHeight } = e.currentTarget
-			const isNearBottom = scrollHeight - scrollTop <= clientHeight + 100
-			if (isNearBottom && hasNextPage && !isFetchingNextPage) {
-				handleLoadMore()
-			}
-		},
-		[hasNextPage, isFetchingNextPage, handleLoadMore]
-	)
+	useEffect(() => {
+		if (
+			transactionInView &&
+			transactionHasNextPage &&
+			!isTransactionFetchingNextPage
+		) {
+			transactionFetchNextPage()
+		}
+	}, [transactionInView, transactionHasNextPage, isTransactionFetchingNextPage])
 
 	const [selectedItems, setSelectedItems] = useState<ITransactionItem[]>([])
 	const [transactionItems, setTransactionItems] = useState<ITransactionItem[]>(
@@ -424,145 +527,162 @@ const Chat = () => {
 	}
 
 	return (
-		<div className='bg-background min-h-full'>
-			<div className='bg-card flex w-full overflow-hidden rounded-2xl shadow-md'>
-				<div className='flex w-full flex-1 flex-col'>
-					<ChatHeaderWithRequests
-						receiver={receiver}
-						postTitle={postDetailData?.title || ''}
-						transactionItems={transactionItems}
-						currentRequestIndex={currentRequestIndex}
-						isRequestsVisible={isRequestsVisible}
-						transactionStatus={transactionStatus}
-						isAuthor={isAuthor}
-						onClose={handleBack}
-						toggleRequestsVisibility={() =>
-							setIsRequestsVisible(!isRequestsVisible)
-						}
-						handlePrevRequest={() =>
-							setCurrentRequestIndex(prev =>
-								prev > 0 ? prev - 1 : transactionItems.length - 1
-							)
-						}
-						handleNextRequest={() =>
-							setCurrentRequestIndex(prev =>
-								prev < transactionItems.length - 1 ? prev + 1 : 0
-							)
-						}
-						handleConfirmRequest={handleConfirmRequest}
-						handleRemovePendingRequest={(itemId, index) => {
-							setTransactionItems(prev =>
-								prev.filter(item => item.itemID !== itemId)
-							)
-							setCurrentRequestIndex(index > 0 ? index - 1 : index)
-						}}
-						setCurrentRequestIndex={setCurrentRequestIndex}
-						isCreateTransactionPending={isCreateTransactionPending}
-						transactions={transactions}
-						handleApplyItemTransactions={handleApplyItemTransactions}
-						handleQuantityChange={(itemId, change) => {
-							setTransactionItems(prev =>
-								prev.map(item =>
-									item.itemID === itemId
-										? {
-												...item,
-												quantity: Math.max(
-													1,
-													Math.min(
-														postDetailData?.items?.find(
-															i => i.itemID === itemId
-														)?.quantity || 1,
-														item.quantity + change
-													)
-												)
-											}
-										: item
-								)
-							)
-						}}
-						hasNextPage={hasNextPage}
-						isFetchingNextPage={isFetchingNextPage}
-						onTransactionScroll={handleTransactionScroll}
-						transactionID={transactionID}
-					/>
-					<ChatMessagesPanel
-						messages={messages}
-						message={message}
-						setMessage={setMessage}
-						handleSend={handleSend}
-						handleKeyPress={e => {
-							if (e.key === 'Enter' && !e.shiftKey) {
-								e.preventDefault()
-								handleSend()
-							}
-						}}
-					/>
-				</div>
-
-				<ItemSidebar
-					handleConfirmTransaction={handleConfirmTransaction}
-					items={postDetailData?.items || []}
-					selectedItems={selectedItems}
-					isAuthor={isAuthor}
-					transactionStatus={transactionStatus}
-					handleItemSelect={item => {
-						const isInPending = transactionItems.some(
-							i => i.itemID === item.itemID
-						)
-						const exists = selectedItems.find(i => i.itemID === item.itemID)
-						if (!isInPending) {
-							setSelectedItems(prev =>
-								exists
-									? prev.filter(i => i.itemID !== item.itemID)
-									: [
-											...prev,
-											{
-												itemID: item.itemID || 0,
-												itemName: item.name,
-												itemImage: item.image,
-												postItemID: item.id,
-												quantity: 1,
-												currentQuantity: item.quantity || 1
-											}
-										]
-							)
-						}
-					}}
-					handleQuantityChange={(itemId, change) => {
-						setSelectedItems(prev =>
-							prev.map(item =>
-								item.itemID === itemId
-									? {
-											...item,
-											quantity: Math.max(
-												1,
-												Math.min(
-													postDetailData?.items?.find(i => i.itemID === itemId)
-														?.quantity || 1,
-													item.quantity + change
-												)
-											)
-										}
-									: item
-							)
-						)
-					}}
-					handleRemoveSelectedItem={itemId => {
-						setSelectedItems(prev =>
-							prev.filter(item => item.itemID !== itemId)
-						)
-					}}
-					handleSendRequest={() => {
-						if (selectedItems.length > 0) {
-							setTransactionItems([...transactionItems, ...selectedItems])
-							setSelectedItems([])
-							setCurrentRequestIndex(0)
-						}
-					}}
-					setSelectedItems={setSelectedItems}
+		<>
+			{isPostDetailDataPending ? (
+				<Loading
+					position='in'
+					size='lg'
+					color='primary'
+					text='Đang tải...'
 				/>
-			</div>
-		</div>
+			) : (
+				<div className='bg-background min-h-full'>
+					<div className='bg-card flex w-full overflow-hidden rounded-2xl shadow-md'>
+						<div className='flex w-full flex-1 flex-col'>
+							<ChatHeaderWithRequests
+								receiver={receiver}
+								postTitle={postDetailData?.title || ''}
+								transactionItems={transactionItems}
+								currentRequestIndex={currentRequestIndex}
+								isRequestsVisible={isRequestsVisible}
+								transactionStatus={transactionStatus}
+								isAuthor={isAuthor}
+								onClose={handleBack}
+								toggleRequestsVisibility={() =>
+									setIsRequestsVisible(!isRequestsVisible)
+								}
+								handlePrevRequest={() =>
+									setCurrentRequestIndex(prev =>
+										prev > 0 ? prev - 1 : transactionItems.length - 1
+									)
+								}
+								handleNextRequest={() =>
+									setCurrentRequestIndex(prev =>
+										prev < transactionItems.length - 1 ? prev + 1 : 0
+									)
+								}
+								handleConfirmRequest={handleConfirmRequest}
+								handleRemovePendingRequest={(itemId, index) => {
+									setTransactionItems(prev =>
+										prev.filter(item => item.itemID !== itemId)
+									)
+									setCurrentRequestIndex(index > 0 ? index - 1 : index)
+								}}
+								setCurrentRequestIndex={setCurrentRequestIndex}
+								isCreateTransactionPending={isCreateTransactionPending}
+								transactions={transactions}
+								handleApplyItemTransactions={handleApplyItemTransactions}
+								handleQuantityChange={(itemId, change) => {
+									setTransactionItems(prev =>
+										prev.map(item =>
+											item.itemID === itemId
+												? {
+														...item,
+														quantity: Math.max(
+															1,
+															Math.min(
+																postDetailData?.items?.find(
+																	i => i.itemID === itemId
+																)?.quantity || 1,
+																item.quantity + change
+															)
+														)
+													}
+												: item
+										)
+									)
+								}}
+								hasNextPage={transactionHasNextPage}
+								isFetchingNextPage={isTransactionFetchingNextPage}
+								sentinelRef={transactionRef}
+								transactionID={transactionID}
+							/>
+							<ChatMessagesPanel
+								isMoreThanLimitMessage={isMoreThanLimitMessage}
+								ref={messagesContainerRef}
+								sentinelRef={messageRef}
+								hasNextPage={messageHasNextPage}
+								isFetchingNextPage={isMessageFetchingNextPage}
+								messages={messages}
+								message={message}
+								setMessage={setMessage}
+								handleSend={handleSend}
+								handleKeyPress={e => {
+									if (e.key === 'Enter' && !e.shiftKey) {
+										e.preventDefault()
+										handleSend()
+									}
+								}}
+							/>
+						</div>
+
+						<ItemSidebar
+							handleConfirmTransaction={handleConfirmTransaction}
+							items={postDetailData?.items || []}
+							selectedItems={selectedItems}
+							isAuthor={isAuthor}
+							transactionStatus={transactionStatus}
+							handleItemSelect={item => {
+								const isInPending = transactionItems.some(
+									i => i.itemID === item.itemID
+								)
+								const exists = selectedItems.find(i => i.itemID === item.itemID)
+								if (!isInPending) {
+									setSelectedItems(prev =>
+										exists
+											? prev.filter(i => i.itemID !== item.itemID)
+											: [
+													...prev,
+													{
+														itemID: item.itemID || 0,
+														itemName: item.name,
+														itemImage: item.image,
+														postItemID: item.id,
+														quantity: 1,
+														currentQuantity: item.quantity || 1
+													}
+												]
+									)
+								}
+							}}
+							handleQuantityChange={(itemId, change) => {
+								setSelectedItems(prev =>
+									prev.map(item =>
+										item.itemID === itemId
+											? {
+													...item,
+													quantity: Math.max(
+														1,
+														Math.min(
+															postDetailData?.items?.find(
+																i => i.itemID === itemId
+															)?.quantity || 1,
+															item.quantity + change
+														)
+													)
+												}
+											: item
+									)
+								)
+							}}
+							handleRemoveSelectedItem={itemId => {
+								setSelectedItems(prev =>
+									prev.filter(item => item.itemID !== itemId)
+								)
+							}}
+							handleSendRequest={() => {
+								if (selectedItems.length > 0) {
+									setTransactionItems([...transactionItems, ...selectedItems])
+									setSelectedItems([])
+									setCurrentRequestIndex(0)
+								}
+							}}
+							setSelectedItems={setSelectedItems}
+						/>
+					</div>
+				</div>
+			)}
+		</>
 	)
 }
 

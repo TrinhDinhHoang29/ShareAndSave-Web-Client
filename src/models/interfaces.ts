@@ -1,6 +1,7 @@
 import { LucideIcon } from 'lucide-react'
 
 import {
+	EMessageStatus,
 	EPostSTatus,
 	EPostType,
 	ERequestStatus,
@@ -185,8 +186,10 @@ export interface IPostInterest {
 	slug: string
 	type: EPostType
 	updatedAt: string
+	createdAt: string
 	interests: IUserInterest[]
 	items: IItem[]
+	unreadMessageCount: number
 }
 
 export interface ILoginRequest {
@@ -255,6 +258,7 @@ export interface IListTypeParams<T> {
 export interface IPostInterestResponse {
 	interests: IPostInterest[]
 	totalPage: number
+	unreadMessageCount: number
 }
 
 export interface IReceiver {
@@ -316,4 +320,30 @@ export interface ITransactionResponse {
 export interface IIdChatInfoParams {
 	interestID: string
 	postID: number
+}
+
+export interface IMessage {
+	id: number
+	receiver: 'user' | 'other'
+	message: string
+	time: string
+	status: EMessageStatus
+	retry?: () => void
+}
+
+export interface IMessageResponse {
+	createdAt: string
+	id: number
+	interestID: number
+	isRead: number
+	message: string
+	receiverID: number
+	senderID: number
+}
+
+export interface IListMessageParams {
+	interestID: number
+	page?: number
+	limit?: number
+	search?: string
 }

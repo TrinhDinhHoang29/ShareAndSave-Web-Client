@@ -629,8 +629,16 @@ const PostDetail: React.FC = () => {
 										</h3>
 										<div className='space-y-3'>
 											<div className='flex items-center gap-3'>
-												<div className='bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full'>
-													<User className='text-primary h-6 w-6' />
+												<div className='flex h-12 w-12 items-center justify-center rounded-full bg-gray-200'>
+													{user?.avatar ? (
+														<img
+															src={user.avatar}
+															alt={`${user?.fullName} avatar`}
+															className='h-full w-full rounded-full object-cover'
+														/>
+													) : (
+														<User className='text-secondary h-5 w-5' /> // Placeholder nếu không có avatar
+													)}
 												</div>
 												<div>
 													<p className='text-foreground font-medium'>

@@ -8,7 +8,6 @@ import {
 	Search,
 	Share,
 	User,
-	Users,
 	Warehouse
 } from 'lucide-react'
 

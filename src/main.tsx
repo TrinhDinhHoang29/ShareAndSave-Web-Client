@@ -12,6 +12,7 @@ import { ThemeProvider } from '@/context/theme-context'
 
 import { AlertModalProvider } from './context/alert-modal-context'
 import { AuthDialogProvider } from './context/auth-dialog-context'
+import { ChatNotificationProvider } from './context/chat-noti-context'
 
 const queryClient = new QueryClient({
 	defaultOptions: {
@@ -32,9 +33,11 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 				<FontProvider>
 					<AuthDialogProvider>
 						<AlertModalProvider>
-							<BrowserRouter>
-								<App />
-							</BrowserRouter>
+							<ChatNotificationProvider>
+								<BrowserRouter>
+									<App />
+								</BrowserRouter>
+							</ChatNotificationProvider>
 						</AlertModalProvider>
 					</AuthDialogProvider>
 				</FontProvider>

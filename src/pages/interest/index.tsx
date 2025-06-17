@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { CheckCircle, Eye, Frown, Smile } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
+import CustomSelect from '@/components/common/CustomSelect'
 import Loading from '@/components/common/Loading'
 import Pagination from '@/components/common/Pagination'
 import { useDeleteInterestMutation } from '@/hooks/mutations/use-interest.mutation'
@@ -10,6 +11,7 @@ import useListPostInterestQuery from '@/hooks/queries/use-interest.query'
 import useDebounce from '@/hooks/use-debounce'
 import { EInterestType, ESortOrder } from '@/models/enums'
 import { IListTypeParams } from '@/models/interfaces'
+import { sortOptions } from '@/models/options'
 
 import { PostItem } from './components/FollowedByPost'
 import { InterestedPost } from './components/InterestedPost'
@@ -80,16 +82,14 @@ const Interest = () => {
 						value={search}
 						onChange={e => setSearch(e.target.value)}
 						placeholder='Tìm kiếm bài đăng, người dùng...'
-						className='bg-card text-foreground focus:ring-primary h-full w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:outline-none'
+						className='bg-card text-foreground focus:ring-primary h-full w-4/5 rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:outline-none'
 					/>
-					<select
+					<CustomSelect
 						value={order}
-						onChange={e => setOrder(e.target.value as ESortOrder)}
-						className='bg-card text-foreground focus:ring-primary rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:outline-none'
-					>
-						<option value='DESC'>Mới nhất</option>
-						<option value='ASC'>Cũ nhất</option>
-					</select>
+						onChange={value => setOrder(value as ESortOrder)}
+						options={sortOptions}
+						className='w-full flex-1'
+					/>
 				</div>
 
 				{/* Tabs */}
@@ -156,7 +156,6 @@ const Interest = () => {
 									overlay={true}
 									position='in'
 									size='md'
-									variant='spinner'
 									color='primary'
 									text='Đang tải...'
 								/>

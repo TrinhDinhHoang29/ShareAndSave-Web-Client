@@ -1,6 +1,7 @@
-import { FileText, Heart, MessageCircle } from 'lucide-react'
+import { Clock, FileText, Heart, MessageCircle, User } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
+import { formatNearlyDateTimeVN } from '@/lib/utils'
 import { getTypeInfo } from '@/models/constants'
 import { EPostType } from '@/models/enums'
 import { IPostInterest } from '@/models/interfaces'
@@ -48,9 +49,16 @@ export const InterestedPost = ({
 								<h3 className='text-foreground font-manrope truncate text-xl font-semibold'>
 									{post.title}
 								</h3>
-								<p className='text-muted-foreground text-sm'>
-									Đăng bởi {post.authorName}
-								</p>
+								<div className='text-muted-foreground flex items-center gap-4 text-sm'>
+									<span className='flex items-center gap-1'>
+										<User className='h-4 w-4' />
+										{post.authorName}
+									</span>
+									<span className='flex items-center gap-1'>
+										<Clock className='h-4 w-4' />
+										{formatNearlyDateTimeVN(post.createdAt)}
+									</span>
+								</div>
 							</div>
 						</div>
 					</div>

@@ -48,7 +48,7 @@ interface Props {
 	transactionID: number
 	hasNextPage?: boolean
 	isFetchingNextPage?: boolean
-	onTransactionScroll?: (e: React.UIEvent<HTMLDivElement>) => void
+	sentinelRef?: (node: HTMLElement | null) => void
 }
 
 export const ChatHeaderWithRequests = ({
@@ -73,7 +73,7 @@ export const ChatHeaderWithRequests = ({
 	transactionID,
 	hasNextPage = false,
 	isFetchingNextPage = false,
-	onTransactionScroll
+	sentinelRef
 }: Props) => {
 	transactionStatus = transactionStatus.toString() as ETransactionStatus
 	const currentItem = transactionItems[currentRequestIndex]
@@ -338,10 +338,9 @@ export const ChatHeaderWithRequests = ({
 				transactions={transactions}
 				isAuthor={isAuthor}
 				handleTransactionSelect={handleTransactionSelect}
-				// Pass infinite scroll props to dialog
 				hasNextPage={hasNextPage}
 				isFetchingNextPage={isFetchingNextPage}
-				onScroll={onTransactionScroll}
+				sentinelRef={sentinelRef} // Truyền ref cho TransactionsDialog
 			/>
 			<TutorialTransactionDialog
 				isOpen={isTutorialTransactionDialogOpen}

@@ -87,3 +87,5 @@ export const getTransactionStatusConfig = (
 	}
 	return configs[status]
 }
+
+export const LIMIT_MESSAGE = 20

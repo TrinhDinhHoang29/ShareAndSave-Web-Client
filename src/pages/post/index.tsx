@@ -3,11 +3,13 @@ import { Frown } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import CustomSelect from '@/components/common/CustomSelect'
 import Pagination from '@/components/common/Pagination'
 import { useListPostQuery } from '@/hooks/queries/use-post-query'
 import useDebounce from '@/hooks/use-debounce'
 import { EPostType, ESortOrder } from '@/models/enums'
 import { IListTypeParams } from '@/models/interfaces'
+import { sortOptions, typeOptions } from '@/models/options'
 
 import PostItem from './components/PostItem'
 
@@ -50,33 +52,26 @@ const Post = () => {
 		<div className='bg-background min-h-screen'>
 			<div className='bg-card border-border rounded-xl border p-8 shadow-lg'>
 				{/* Search, Sort và Selection */}
-				<div className='mb-6 flex items-center justify-between gap-4'>
+				<div className='mb-6 flex items-center justify-between gap-2'>
 					<input
 						type='text'
 						value={search}
 						onChange={e => setSearch(e.target.value)}
 						placeholder='Tìm kiếm bài đăng, tiêu đề...'
-						className='bg-card text-foreground focus:ring-primary w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:outline-none'
+						className='bg-card text-foreground focus:ring-primary w-2/3 rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:outline-none'
 					/>
-					<select
+					<CustomSelect
 						value={order}
-						onChange={e => setOrder(e.target.value as ESortOrder)}
-						className='bg-card text-foreground focus:ring-primary rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:outline-none'
-					>
-						<option value={ESortOrder.DESC}>Mới nhất</option>
-						<option value={ESortOrder.ASC}>Cũ nhất</option>
-					</select>
-					<select
+						onChange={value => setOrder(value as ESortOrder)}
+						options={sortOptions}
+						className='flex-1'
+					/>
+					<CustomSelect
 						value={selectedType}
-						onChange={e => setSelectedType(e.target.value as PostTypeSelection)}
-						className='bg-card text-foreground focus:ring-primary rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:outline-none'
-					>
-						<option value=''>Tất cả</option>
-						<option value={EPostType.GIVE_AWAY_OLD_ITEM}>Cho tặng đồ cũ</option>
-						<option value={EPostType.FOUND_ITEM}>Tìm thấy đồ</option>
-						<option value={EPostType.SEEK_LOSE_ITEM}>Tìm đồ bị mất</option>
-						<option value={EPostType.OTHER}>Khác</option>
-					</select>
+						onChange={value => setSelectedType(value as PostTypeSelection)}
+						options={typeOptions}
+						className='flex-1'
+					/>
 				</div>
 
 				<div className='relative space-y-6'>

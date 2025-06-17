@@ -68,13 +68,34 @@ export const formatHoverTime = (dateString: string): string => {
 		const date = new Date(dateString)
 		const diffMs = now.getTime() - date.getTime()
 		const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+		const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
 
-		if (diffHours < 24) {
+		// Same day: show hour:minute (e.g., 14:30)
+		if (diffHours < 24 && diffDays === 0) {
 			return date.toLocaleTimeString('vi-VN', {
 				hour: '2-digit',
 				minute: '2-digit'
 			})
-		} else {
+		}
+		// Same week: show day of week and time (e.g., Thứ Hai, 14:30)
+		else if (diffDays < 7) {
+			return date.toLocaleString('vi-VN', {
+				weekday: 'long',
+				hour: '2-digit',
+				minute: '2-digit'
+			})
+		}
+		// Same year: show day, month, and time (e.g., 15/06, 14:30)
+		else if (date.getFullYear() === now.getFullYear()) {
+			return date.toLocaleString('vi-VN', {
+				day: '2-digit',
+				month: '2-digit',
+				hour: '2-digit',
+				minute: '2-digit'
+			})
+		}
+		// Older: show full date (e.g., 15/06/2024)
+		else {
 			return date.toLocaleDateString('vi-VN', {
 				day: '2-digit',
 				month: '2-digit',
@@ -109,4 +130,8 @@ export const getInitials = (name: string) => {
 		.join('')
 		.toUpperCase()
 		.slice(0, 2)
+}
+
+export function generateRandomId(min = 100000, max = 999999) {
+	return Math.floor(Math.random() * (max - min + 1)) + min
 }

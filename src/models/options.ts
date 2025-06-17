@@ -1,6 +1,4 @@
-import { Gift, Package, Search, Star, Users } from 'lucide-react'
-
-import { ERequestStatus, ERequestType } from './enums'
+import { EPostType, ERequestStatus, ESortOrder } from './enums'
 
 export const statusOptions = [
 	{ value: ERequestStatus.ALL, label: 'Tất cả trạng thái' },
@@ -12,9 +10,14 @@ export const statusOptions = [
 ]
 
 export const typeOptions = [
-	{ value: ERequestType.ALL, label: 'Tất cả loại' },
-	{ value: ERequestType.SEND_OLD, label: 'Gửi đồ cũ' },
-	{ value: ERequestType.RECEIVE_OLD, label: 'Nhận đồ cũ' },
-	{ value: ERequestType.RECEIVE_LOSE, label: 'Nhận đồ thất lạc' },
-	{ value: ERequestType.SEND_LOSE, label: 'Gửi đồ thất lạc' }
+	{ value: '', label: 'Tất cả' },
+	{ value: EPostType.GIVE_AWAY_OLD_ITEM, label: 'Cho tặng đồ cũ' },
+	{ value: EPostType.FOUND_ITEM, label: 'Tìm thấy đồ' },
+	{ value: EPostType.SEEK_LOSE_ITEM, label: 'Tìm đồ bị mất' },
+	{ value: EPostType.OTHER, label: 'Khác' }
+]
+
+export const sortOptions = [
+	{ value: ESortOrder.DESC, label: 'Mới nhất' },
+	{ value: ESortOrder.ASC, label: 'Cũ nhất' }
 ]
