@@ -11,9 +11,7 @@ const useListPostInterestQuery = (params: IListTypeParams<EInterestType>) => {
 			const res = await interestApi.list(params)
 			return res.data
 		},
-		enabled: !!params.type, // Chỉ chạy query khi type và search được cung cấp
-		staleTime: 5 * 60 * 1000, // Dữ liệu tươi trong 5 phút
-		gcTime: 10 * 60 * 1000 // Cache trong 10 phút
+		enabled: !!params.type // Chỉ chạy query khi type và search được cung cấp
 	})
 }
 

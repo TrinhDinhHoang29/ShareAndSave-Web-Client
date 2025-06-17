@@ -83,12 +83,19 @@ export const InterestedPost = ({
 						</button>
 
 						<button
-							className={`text-primary-foreground bg-chart-1 rounded-xl p-3 shadow-lg transition-all duration-200 hover:shadow-xl`}
+							className={`text-primary-foreground bg-chart-1 relative rounded-xl p-3 shadow-lg transition-all duration-200 hover:shadow-xl`}
 							onClick={handleOpenChat}
-							aria-label='Chat với tác giả'
-							title='Chat với tác giả'
+							aria-label='Chat với người đăng'
+							title='Chat với người đăng'
 						>
 							<MessageCircle className='h-5 w-5' />
+							{post.unreadMessageCount > 0 && (
+								<span className='absolute -top-1 -right-1 rounded-full bg-red-100 px-1 py-0.5 text-xs font-medium text-red-700'>
+									{post.unreadMessageCount <= 10
+										? post.unreadMessageCount
+										: 10 + '+'}
+								</span>
+							)}
 						</button>
 					</div>
 				</div>

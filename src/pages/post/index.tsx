@@ -45,7 +45,7 @@ const Post = () => {
 	const totalPage = data?.totalPage || 1
 
 	// Skeleton loading array (8 items to match limit)
-	const skeletonItems = Array.from({ length: 8 }, (_, index) => index)
+	const skeletonItems = Array.from({ length: 6 }, (_, index) => index)
 	const navigate = useNavigate()
 
 	return (

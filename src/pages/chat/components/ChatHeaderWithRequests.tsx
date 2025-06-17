@@ -94,6 +94,7 @@ export const ChatHeaderWithRequests = ({
 			setIsTransactionDialogOpen(false)
 		}
 	}
+	console.log(currentItem)
 
 	return (
 		<>

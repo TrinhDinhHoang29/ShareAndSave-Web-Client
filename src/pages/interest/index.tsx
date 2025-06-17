@@ -13,6 +13,7 @@ import { EInterestType, ESortOrder } from '@/models/enums'
 import { IListTypeParams } from '@/models/interfaces'
 import { sortOptions } from '@/models/options'
 
+import AlertPing from './components/AlertPing'
 import { PostItem } from './components/FollowedByPost'
 import { InterestedPost } from './components/InterestedPost'
 
@@ -39,6 +40,7 @@ const Interest = () => {
 	const { data, isPending } = useListPostInterestQuery(params)
 	const listPostInterest = data?.interests
 	const totalPage = data?.totalPage || 1
+	const hasNewMessage = data?.unreadMessageCount || 0 > 0
 	const queryClient = useQueryClient()
 
 	// Mutation để hủy quan tâm
@@ -97,12 +99,13 @@ const Interest = () => {
 					<div className='border-border bg-card/60 flex space-x-1 rounded-xl border p-2 backdrop-blur-sm'>
 						<button
 							onClick={() => setActiveTab(1)}
-							className={`flex flex-1 items-center justify-center space-x-2 rounded-lg px-4 py-3 font-medium transition-all duration-200 ${
+							className={`relative flex flex-1 items-center justify-center space-x-2 rounded-lg px-4 py-3 font-medium transition-all duration-200 ${
 								activeTab === 1
 									? 'bg-chart-1 text-primary-foreground shadow-md'
-									: 'text-muted-foreground hover:bg-muted hover:text-foreground'
+									: 'text-muted-foreground hover:bg-muted hover:text-foreground border'
 							}`}
 						>
+							{hasNewMessage && activeTab === 1 && <AlertPing />}
 							<Eye className='h-4 w-4' />
 							<span>Đang Quan Tâm</span>
 							{activeTab === 1 && (
@@ -122,9 +125,10 @@ const Interest = () => {
 							className={`flex flex-1 items-center justify-center space-x-2 rounded-lg px-4 py-3 font-medium transition-all duration-200 ${
 								activeTab === 2
 									? 'bg-primary text-primary-foreground shadow-md'
-									: 'text-muted-foreground hover:bg-muted hover:text-foreground'
+									: 'text-muted-foreground hover:bg-muted hover:text-foreground border'
 							}`}
 						>
+							{hasNewMessage && activeTab === 2 && <AlertPing />}
 							<CheckCircle className='h-4 w-4' />
 							<span>Được Quan Tâm</span>
 							{activeTab === 2 && (

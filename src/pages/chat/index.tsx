@@ -520,8 +520,16 @@ const Chat = () => {
 	const handleApplyItemTransactions = (index: number) => {
 		if (transactionData) {
 			const transactionItems = transactions[index].items
+			const updatedCurrentQuantityTransactionItems = transactionItems.map(
+				item => ({
+					...item,
+					currentQuantity:
+						postDetailData?.items.find(i => i.itemID === item.itemID)
+							?.currentQuantity || 0
+				})
+			)
 			const status = transactions[index].status.toString() as ETransactionStatus
-			setTransactionItems(transactionItems)
+			setTransactionItems(updatedCurrentQuantityTransactionItems)
 			setTransactionStatus(status)
 		}
 	}
