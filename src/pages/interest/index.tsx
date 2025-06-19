@@ -1,11 +1,12 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { CheckCircle, Eye, Frown, Smile } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import CustomSelect from '@/components/common/CustomSelect'
 import Loading from '@/components/common/Loading'
 import Pagination from '@/components/common/Pagination'
+import { useChatNotification } from '@/context/chat-noti-context'
 import { useDeleteInterestMutation } from '@/hooks/mutations/use-interest.mutation'
 import useListPostInterestQuery from '@/hooks/queries/use-interest.query'
 import useDebounce from '@/hooks/use-debounce'
@@ -21,18 +22,25 @@ const Interest = () => {
 	const [activeTab, setActiveTab] = useState<EInterestType>(1)
 	const [search, setSearch] = useState('')
 	const [currentPage, setCurrentPage] = useState(1)
-	const [order, setOrder] = useState<ESortOrder>(ESortOrder.DESC) // Mặc định là mới nhất
+	const [order, setOrder] = useState<ESortOrder>(ESortOrder.DESC)
 
-	const debouncedSearch = useDebounce(search, 500) // Debounce search 500ms
+	// State để quản lý trạng thái ping cho từng tab
+	const [followingPing, setFollowingPing] = useState(false)
+	const [followedByPing, setFollowedByPing] = useState(false)
+
+	const { followedByNotification, followingNotification } =
+		useChatNotification()
+
+	const debouncedSearch = useDebounce(search, 500)
 
 	const params: IListTypeParams<EInterestType> = useMemo(
 		() => ({
 			type: activeTab,
 			page: currentPage,
-			limit: 5, // Giới hạn 5 item mỗi trang
-			sort: 'createdAt', // Sắp xếp theo created_at
-			order, // ASC hoặc DESC
-			search: debouncedSearch || undefined // Chỉ gửi search nếu có giá trị
+			limit: 5,
+			sort: 'createdAt',
+			order,
+			search: debouncedSearch || undefined
 		}),
 		[activeTab, currentPage, order, debouncedSearch]
 	)
@@ -40,14 +48,36 @@ const Interest = () => {
 	const { data, isPending } = useListPostInterestQuery(params)
 	const listPostInterest = data?.interests
 	const totalPage = data?.totalPage || 1
-	const hasNewMessage = data?.unreadMessageCount || 0 > 0
+	const newMessages = data?.unreadMessageCount || 0
 	const queryClient = useQueryClient()
+
+	// Effect để theo dõi followingNotification (Đang quan tâm - Tab 1)
+	useEffect(() => {
+		if (followingNotification) {
+			setFollowingPing(true)
+			const timer = setTimeout(() => {
+				setFollowingPing(false)
+			}, 3000)
+			return () => clearTimeout(timer)
+		}
+	}, [followingNotification])
+
+	// Effect để theo dõi followedByNotification (Được quan tâm - Tab 2)
+	useEffect(() => {
+		if (followedByNotification) {
+			setFollowedByPing(true)
+			const timer = setTimeout(() => {
+				setFollowedByPing(false)
+			}, 3000)
+			return () => clearTimeout(timer)
+		}
+	}, [followedByNotification])
 
 	// Mutation để hủy quan tâm
 	const { mutate: deleteInterestMutation, isPending: isDeleteInterestPending } =
 		useDeleteInterestMutation({
 			onSuccess: (interestID: number) => {
-				queryClient.invalidateQueries({ queryKey: ['postInterests', params] }) // Làm mới cache
+				queryClient.invalidateQueries({ queryKey: ['postInterests', params] })
 				if (listPostInterest && listPostInterest.length > 0) {
 					const slug = listPostInterest.filter(
 						post => post.interests[0].id === interestID
@@ -64,6 +94,18 @@ const Interest = () => {
 	const getTotalCount = useMemo(() => {
 		return listPostInterest?.length || 0
 	}, [listPostInterest])
+
+	// Hàm để reset ping khi chuyển tab
+	const handleTabChange = (tabType: EInterestType) => {
+		setActiveTab(tabType)
+		// Reset ping state khi user nhấn vào tab đó
+		if (tabType === 1) {
+			setFollowingPing(false)
+		} else if (tabType === 2) {
+			setFollowedByPing(false)
+		}
+	}
+	// console.log(followedByNotification)
 
 	return (
 		<div className='bg-background mx-auto min-h-screen max-w-4xl'>
@@ -98,14 +140,17 @@ const Interest = () => {
 				<div className='mb-6'>
 					<div className='border-border bg-card/60 flex space-x-1 rounded-xl border p-2 backdrop-blur-sm'>
 						<button
-							onClick={() => setActiveTab(1)}
+							onClick={() => handleTabChange(1)}
 							className={`relative flex flex-1 items-center justify-center space-x-2 rounded-lg px-4 py-3 font-medium transition-all duration-200 ${
 								activeTab === 1
 									? 'bg-chart-1 text-primary-foreground shadow-md'
 									: 'text-muted-foreground hover:bg-muted hover:text-foreground border'
 							}`}
 						>
-							{hasNewMessage && activeTab === 1 && <AlertPing />}
+							{/* AlertPing cho tab "Đang Quan Tâm" */}
+							{followingPing || (newMessages && activeTab === 1) ? (
+								<AlertPing isPulse={followingPing} />
+							) : null}
 							<Eye className='h-4 w-4' />
 							<span>Đang Quan Tâm</span>
 							{activeTab === 1 && (
@@ -121,14 +166,16 @@ const Interest = () => {
 							)}
 						</button>
 						<button
-							onClick={() => setActiveTab(2)}
+							onClick={() => handleTabChange(2)}
 							className={`relative flex flex-1 items-center justify-center space-x-2 rounded-lg px-4 py-3 font-medium transition-all duration-200 ${
 								activeTab === 2
 									? 'bg-primary text-primary-foreground shadow-md'
 									: 'text-muted-foreground hover:bg-muted hover:text-foreground border'
 							}`}
 						>
-							{hasNewMessage && activeTab === 2 && <AlertPing />}
+							{followedByPing || (newMessages && activeTab === 2) ? (
+								<AlertPing isPulse={followedByPing} />
+							) : null}
 							<CheckCircle className='h-4 w-4' />
 							<span>Được Quan Tâm</span>
 							{activeTab === 2 && (

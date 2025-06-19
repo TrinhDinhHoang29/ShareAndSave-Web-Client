@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom'
 
 import AppRouter from '@/routes/index.route'
 
-import { getAccessToken } from './lib/token'
+import authApi from './apis/modules/auth.api'
+import { getAccessToken, getRefreshToken, setAccessToken } from './lib/token'
 import useAuthStore from './stores/authStore'
 
 function App() {
@@ -18,7 +19,13 @@ function App() {
 			try {
 				// Chỉ gọi syncAuthState nếu có token
 				const accessToken = getAccessToken()
-				if (accessToken) {
+				const refreshToken = getRefreshToken()
+				if (accessToken || refreshToken) {
+					if (refreshToken) {
+						const response = await authApi.refreshToken({ refreshToken })
+						const jwt = response.data.jwt
+						setAccessToken(jwt)
+					}
 					await syncAuthState()
 				} else {
 					useAuthStore.setState({ user: null, isAuthenticated: false }) // Sử dụng setState từ store

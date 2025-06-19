@@ -1,6 +1,8 @@
 import { Clock, FileText, Heart, MessageCircle, User } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import { useChatNotification } from '@/context/chat-noti-context'
 import { formatNearlyDateTimeVN } from '@/lib/utils'
 import { getTypeInfo } from '@/models/constants'
 import { EPostType } from '@/models/enums'
@@ -15,12 +17,25 @@ export const InterestedPost = ({
 }) => {
 	const typeInfo = getTypeInfo(post.type.toString() as EPostType)
 	const navigate = useNavigate()
+	const { followingNotification } = useChatNotification()
+	const [newMessages, setNewMessages] = useState<number>(
+		post.unreadMessageCount
+	)
+
+	useEffect(() => {
+		if (
+			followingNotification &&
+			followingNotification.interestID === post.interests[0].id
+		) {
+			setNewMessages(prev => ++prev)
+		}
+	}, [followingNotification])
 	const handleOpenChat = () => {
 		const receiver = {
 			id: post.authorID,
 			name: post.authorName
 		}
-
+		setNewMessages(0)
 		navigate(`/chat/${post.id}/${post.interests[0].id}`, {
 			state: { receiver }
 		})
@@ -89,11 +104,9 @@ export const InterestedPost = ({
 							title='Chat với người đăng'
 						>
 							<MessageCircle className='h-5 w-5' />
-							{post.unreadMessageCount > 0 && (
+							{newMessages > 0 && (
 								<span className='absolute -top-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full bg-red-100 text-xs font-medium text-red-700'>
-									{post.unreadMessageCount > 99
-										? '99+'
-										: post.unreadMessageCount}
+									{newMessages > 99 ? '99+' : newMessages}
 								</span>
 							)}
 						</button>

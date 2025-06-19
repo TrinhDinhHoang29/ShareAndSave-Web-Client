@@ -53,6 +53,6 @@ export enum EMessageStatus {
 }
 
 export enum ETypeNotification {
-	FOLLWED_BY = 'followedBy',
+	FOLLOWED_BY = 'followedBy',
 	FOLLOWING = 'following'
 }

@@ -1,4 +1,3 @@
-// src/context/ChatNotificationContext.tsx
 import React, {
 	createContext,
 	useContext,
@@ -26,8 +25,8 @@ interface ChatNotificationResponse {
 
 // Định nghĩa kiểu dữ liệu cho Context
 interface ChatNotificationContextType {
-	followedByNotifications: ChatNoti[]
-	followingNotifications: ChatNoti[]
+	followedByNotification: ChatNoti | null
+	followingNotification: ChatNoti | null
 }
 
 // Tạo Context với giá trị mặc định
@@ -40,19 +39,17 @@ export const ChatNotificationProvider: React.FC<{
 	children: React.ReactNode
 }> = ({ children }) => {
 	const socketRef = useRef<WebSocket | null>(null)
-	const [followedByNotifications, setFollowedByNotifications] = useState<
-		ChatNoti[]
-	>([])
-	const [followingNotifications, setFollwingNotifications] = useState<
-		ChatNoti[]
-	>([])
+	const [followedByNotification, setFollowedByNotification] =
+		useState<ChatNoti | null>(null)
+	const [followingNotification, setFollwingNotification] =
+		useState<ChatNoti | null>(null)
 	const token = getAccessToken()
 
 	// Hàm kết nối WebSocket
 	const connectNoti = (token: string) => {
-		if (socketRef.current && socketRef.current?.readyState === WebSocket.OPEN) {
+		if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
 			console.log(
-				'[ℹ️] Socket already connected or connecting, skipping reconnection'
+				'[ℹ️] Socket đã kết nối hoặc đang kết nối, bỏ qua kết nối lại'
 			)
 			return
 		}
@@ -65,37 +62,42 @@ export const ChatNotificationProvider: React.FC<{
 		const newSocket = new WebSocket(wsUrl, token || '')
 
 		newSocket.onopen = () => {
-			console.log('[✅] Connected to server noti. ReadyState:', newSocket)
+			console.log(
+				'[✅] Đã kết nối đến server noti. ReadyState:',
+				newSocket.readyState
+			)
 		}
 
 		newSocket.onmessage = event => {
+			console.log('[ℹ️] Tin nhắn thô nhận được:', event.data)
 			try {
 				const data = JSON.parse(event.data) as ChatNotificationResponse
 				if (data.event === 'send_message_response') {
 					const type = data.data.type as ETypeNotification
 					if (type === ETypeNotification.FOLLOWING) {
-						setFollwingNotifications(prev => [...prev, data.data])
+						setFollwingNotification(data.data)
 					} else {
-						setFollowedByNotifications(prev => [...prev, data.data])
+						setFollowedByNotification(data.data)
 					}
 				}
 			} catch (error) {
-				console.log('[⚠️] Error parsing message: ', error)
+				console.log('[⚠️] Lỗi phân tích tin nhắn: ', error)
 			}
 		}
 
 		newSocket.onclose = event => {
-			console.log(
-				'[❌] Connection closed. Code:',
-				event.code,
-				'Reason:',
-				event.reason
-			)
+			console.log('[❌] Kết nối đóng. Mã:', event.code, 'Lý do:', event.reason)
+			console.log('[ℹ️] Kết nối có được đóng sạch sẽ?', event.wasClean)
 			socketRef.current = null
+			// Thử kết nối lại sau 3 giây
+			setTimeout(() => {
+				console.log('[ℹ️] Đang thử kết nối lại...')
+				connectNoti(token)
+			}, 3000)
 		}
 
 		newSocket.onerror = err => {
-			console.log('[⚠️] Error: ', err)
+			console.error('[⚠️] Lỗi WebSocket:', err)
 		}
 
 		socketRef.current = newSocket
@@ -113,7 +115,7 @@ export const ChatNotificationProvider: React.FC<{
 		return () => {
 			if (
 				socketRef.current &&
-				socketRef.current?.readyState === WebSocket.OPEN
+				socketRef.current.readyState === WebSocket.OPEN
 			) {
 				socketRef.current.close() // Chỉ đóng nếu còn mở hoặc đang kết nối
 			}
@@ -122,8 +124,8 @@ export const ChatNotificationProvider: React.FC<{
 
 	// Cung cấp socket từ ref trong context
 	const contextValue = {
-		followedByNotifications,
-		followingNotifications
+		followedByNotification,
+		followingNotification
 	}
 
 	return (
@@ -138,7 +140,7 @@ export const useChatNotification = () => {
 	const context = useContext(ChatNotificationContext)
 	if (!context) {
 		throw new Error(
-			'useChatNotification must be used within a ChatNotificationProvider'
+			'useChatNotification phải được sử dụng trong ChatNotificationProvider'
 		)
 	}
 	return context
