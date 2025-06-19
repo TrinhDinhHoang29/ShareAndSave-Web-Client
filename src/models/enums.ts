@@ -49,7 +49,7 @@ export enum EMessageStatus {
 	SENDING = 'sending',
 	SENT = 'sent',
 	ERROR = 'error',
-	DELIVERED = 'delivered'
+	RECEIVED = 'received'
 }
 
 export enum ETypeNotification {

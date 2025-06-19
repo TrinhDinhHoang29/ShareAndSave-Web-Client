@@ -16,7 +16,7 @@ import {
 	Plus,
 	X
 } from 'lucide-react'
-import { useState } from 'react'
+import React, { useState } from 'react'
 
 import Loading from '@/components/common/Loading'
 import { getTransactionStatusConfig } from '@/models/constants'
@@ -51,7 +51,7 @@ interface Props {
 	sentinelRef?: (node: HTMLElement | null) => void
 }
 
-export const ChatHeaderWithRequests = ({
+const ChatHeaderWithRequests = ({
 	receiver,
 	postTitle,
 	transactionItems,
@@ -94,7 +94,6 @@ export const ChatHeaderWithRequests = ({
 			setIsTransactionDialogOpen(false)
 		}
 	}
-	console.log(currentItem)
 
 	return (
 		<>
@@ -350,3 +349,5 @@ export const ChatHeaderWithRequests = ({
 		</>
 	)
 }
+
+export default React.memo(ChatHeaderWithRequests)

@@ -1,4 +1,3 @@
-import { ESortOrder } from '@/models/enums'
 import {
 	IApiResponse,
 	ITransaction,

@@ -17,6 +17,9 @@ const messageApi = {
 		return axiosPrivate.get(messageEndpoints.common, {
 			params
 		})
+	},
+	async update(interesID: number): Promise<IApiResponse<string>> {
+		return axiosPrivate.patch(messageEndpoints.common + '/' + interesID)
 	}
 }
 

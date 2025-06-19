@@ -325,7 +325,7 @@ export interface IIdChatInfoParams {
 
 export interface IMessage {
 	id: number
-	receiver: 'user' | 'other'
+	receiver: string
 	message: string
 	time: string
 	status: EMessageStatus
@@ -347,4 +347,24 @@ export interface IListMessageParams {
 	page?: number
 	limit?: number
 	search?: string
+}
+
+export interface ISocketMessageResponse {
+	senderID: number
+	message: string
+	timestamp: string
+}
+
+export interface IChatMessagesPanel {
+	socket: WebSocket | null
+	socketInfo: {
+		isOwner: boolean
+		interestID: number
+		userID: number
+		senderID: number
+	}
+	socketMessageResponse: {
+		data?: ISocketMessageResponse
+		status: 'success' | 'error'
+	}
 }

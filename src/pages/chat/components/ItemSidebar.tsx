@@ -19,7 +19,7 @@ interface Props {
 	handleConfirmTransaction: (status: ETransactionStatus) => void
 }
 
-export const ItemSidebar = ({
+const ItemSidebar = ({
 	items,
 	selectedItems,
 	isAuthor,
@@ -220,3 +220,5 @@ export const ItemSidebar = ({
 		</div>
 	)
 }
+
+export default React.memo(ItemSidebar)

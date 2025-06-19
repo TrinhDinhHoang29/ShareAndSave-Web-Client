@@ -2,6 +2,9 @@ import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { v4 as uuidv4 } from 'uuid'
 
+import { TIME_GAP_THRESHOLD } from '@/models/constants'
+import { IMessage } from '@/models/interfaces'
+
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs))
 }
@@ -105,6 +108,41 @@ export const formatHoverTime = (dateString: string): string => {
 	} catch {
 		return dateString
 	}
+}
+
+export const isOneMinuteDifference = (backendTime: string): boolean => {
+	try {
+		const givenTime = new Date(backendTime)
+		const currentTime = new Date()
+
+		// Kiểm tra xem thời gian backend có hợp lệ không
+		if (isNaN(givenTime.getTime())) {
+			return false
+		}
+
+		// Tính chênh lệch thời gian (theo giây)
+		const diffInSeconds = Math.abs(
+			(currentTime.getTime() - givenTime.getTime()) / 1000
+		)
+
+		// Kiểm tra xem chênh lệch có đúng 60 giây không
+		return diffInSeconds > 60
+	} catch (error) {
+		return false
+	}
+}
+
+export const shouldShowTimestamp = (
+	currentMessage: IMessage,
+	previousMessage?: IMessage
+): boolean => {
+	if (!previousMessage) return true // Always show timestamp for first message
+
+	const currentTime = new Date(currentMessage.time).getTime()
+	const previousTime = new Date(previousMessage.time).getTime()
+	const timeDiff = Math.abs(currentTime - previousTime)
+
+	return timeDiff >= TIME_GAP_THRESHOLD
 }
 
 export function getDeviceType() {

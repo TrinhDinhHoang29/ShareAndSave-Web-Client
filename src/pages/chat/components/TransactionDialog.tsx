@@ -1,6 +1,6 @@
 import { Dialog, Transition } from '@headlessui/react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronDown, Loader2, X } from 'lucide-react'
+import { ChevronDown, X } from 'lucide-react'
 import { Fragment, useState } from 'react'
 
 import Loading from '@/components/common/Loading'
@@ -154,14 +154,6 @@ const TransactionItem = ({
 		</div>
 	)
 }
-
-// Loading spinner component for infinite scroll
-const LoadingSpinner = () => (
-	<div className='flex items-center justify-center py-4'>
-		<Loader2 className='text-muted-foreground h-6 w-6 animate-spin' />
-		<span className='text-muted-foreground ml-2 text-sm'>Đang tải thêm...</span>
-	</div>
-)
 
 export const TransactionsDialog = ({
 	isOpen,

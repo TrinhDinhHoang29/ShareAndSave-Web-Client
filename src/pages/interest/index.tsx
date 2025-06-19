@@ -122,7 +122,7 @@ const Interest = () => {
 						</button>
 						<button
 							onClick={() => setActiveTab(2)}
-							className={`flex flex-1 items-center justify-center space-x-2 rounded-lg px-4 py-3 font-medium transition-all duration-200 ${
+							className={`relative flex flex-1 items-center justify-center space-x-2 rounded-lg px-4 py-3 font-medium transition-all duration-200 ${
 								activeTab === 2
 									? 'bg-primary text-primary-foreground shadow-md'
 									: 'text-muted-foreground hover:bg-muted hover:text-foreground border'

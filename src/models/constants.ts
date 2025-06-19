@@ -88,4 +88,8 @@ export const getTransactionStatusConfig = (
 	return configs[status]
 }
 
-export const LIMIT_MESSAGE = 20
+export const LIMIT_MESSAGE = 30
+
+export const SCROLL_THRESHOLD = 100
+export const SCROLL_TIMEOUT = 300
+export const TIME_GAP_THRESHOLD = 30 * 60 * 1000 // 30 minutes in milliseconds

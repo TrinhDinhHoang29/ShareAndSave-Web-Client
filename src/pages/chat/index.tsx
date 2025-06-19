@@ -8,26 +8,22 @@ import {
 	useCreateTransactionMutation,
 	useUpdateTransactionMutation
 } from '@/hooks/mutations/use-transaction.mutation'
-import { useListMessageQuery } from '@/hooks/queries/use-chat.query'
 import { useDetailPostQueryByID } from '@/hooks/queries/use-post-query'
 import { useListTransactionQuery } from '@/hooks/queries/use-transaction.query'
 import { getAccessToken } from '@/lib/token'
-import { generateRandomId } from '@/lib/utils'
-import { LIMIT_MESSAGE } from '@/models/constants'
-import { EMessageStatus, ESortOrder, ETransactionStatus } from '@/models/enums'
+import { ESortOrder, ETransactionStatus } from '@/models/enums'
 import {
-	IMessage,
-	IMessageResponse,
 	IReceiver,
+	ISocketMessageResponse,
 	ITransactionItem,
 	ITransactionParams,
 	ITransactionRequest
 } from '@/models/interfaces'
 import useAuthStore from '@/stores/authStore'
 
-import { ChatHeaderWithRequests } from './components/ChatHeaderWithRequests'
+import ChatHeaderWithRequests from './components/ChatHeaderWithRequests'
 import ChatMessagesPanel from './components/ChatMessagesPanel'
-import { ItemSidebar } from './components/ItemSidebar'
+import ItemSidebar from './components/ItemSidebar'
 
 interface ChatState {
 	receiver: IReceiver
@@ -65,113 +61,16 @@ const Chat = () => {
 		refetch: postDetailDataRefetch
 	} = useDetailPostQueryByID(parsedPostID)
 
-	// Sử dụng useListMessageQuery để lấy lịch sử tin nhắn
-	const {
-		data: messagesData,
-		fetchNextPage: messageFetchNextPage,
-		hasNextPage: messageHasNextPage,
-		isFetchingNextPage: isMessageFetchingNextPage,
-		refetch: messageRefetch
-	} = useListMessageQuery({
-		interestID: parsedInterestID,
-		limit: LIMIT_MESSAGE
-	})
-	const [isMoreThanLimitMessage, setIsMoreThanLimitMessage] = useState(false)
-	const pageMessages: IMessageResponse[] = useMemo(() => {
-		return messagesData?.pages.flatMap(page => page) || []
-	}, [messagesData])
-
-	// Sử dụng useInView để theo dõi đầu danh sách (infinite scroll khi cuộn lên)
-	const { ref: messageRef, inView: messageInView } = useInView({
-		threshold: 0.5,
-		rootMargin: '100px' // Tải sớm hơn 100px khi cuộn lên
-	})
-
-	// Tải thêm khi cuộn lên và sentinel ở đầu vào vùng hiển thị
-	useEffect(() => {
-		if (messageInView && messageHasNextPage && !isMessageFetchingNextPage) {
-			messageFetchNextPage()
-		}
-	}, [
-		messageInView,
-		messageHasNextPage,
-		isMessageFetchingNextPage,
-		messageFetchNextPage
-	])
-
 	const socketRef = useRef<WebSocket | null>(null)
 	const token = getAccessToken()
 
 	const { user } = useAuthStore()
 	const senderID = user?.id
 	const isAuthor = senderID === postDetailData?.authorID
-
-	const [message, setMessage] = useState('')
-	const [messages, setMessages] = useState<IMessage[]>([])
-
-	// Thêm state để track việc scroll
-	const [shouldScrollToBottom, setShouldScrollToBottom] = useState(true)
-	const [isInitialLoad, setIsInitialLoad] = useState(true)
-	const messagesContainerRef = useRef<HTMLDivElement>(null)
-
-	const handleSend = () => {
-		if (message.trim()) {
-			const newMessage: IMessage = {
-				id: generateRandomId(),
-				receiver: 'user',
-				message,
-				time: new Date().toISOString(),
-				status: EMessageStatus.SENDING
-			}
-			setMessages(prev => [...prev, newMessage])
-			setShouldScrollToBottom(true) // Đánh dấu cần scroll xuống
-
-			if (socketRef.current?.readyState === WebSocket.OPEN) {
-				const msgId = newMessage.id
-				socketRef.current.send(
-					JSON.stringify({
-						event: 'send_message',
-						data: {
-							isOwner: isAuthor,
-							interestID: parsedInterestID,
-							userID: receiver.id,
-							message: message
-						}
-					})
-				)
-
-				const retrySend = () => {
-					setMessages(prev =>
-						prev.map(m =>
-							m.id === msgId && m.status === EMessageStatus.ERROR
-								? { ...m, status: EMessageStatus.SENDING }
-								: m
-						)
-					)
-					socketRef.current?.send(
-						JSON.stringify({
-							event: 'send_message',
-							data: {
-								isOwner: isAuthor,
-								interestID: parsedInterestID,
-								userID: receiver.id,
-								message: message
-							}
-						})
-					)
-				}
-
-				setMessages(prev =>
-					prev.map(m =>
-						m.id === msgId
-							? { ...m, retry: retrySend, status: EMessageStatus.SENDING }
-							: m
-					)
-				)
-			}
-			setMessage('')
-		}
-	}
+	const [socketMessageResponse, setSocketMessageResponse] = useState<{
+		data?: ISocketMessageResponse
+		status: 'success' | 'error'
+	}>(Object)
 
 	useEffect(() => {
 		if (
@@ -198,66 +97,18 @@ const Chat = () => {
 				try {
 					const data = JSON.parse(event.data)
 					if (data.event === 'send_message_response' && data.data.message) {
-						const { senderID: senderChatID, message, timestamp } = data.data
-						const isCurrentUser = senderID === senderChatID
-						const receiverType = isCurrentUser ? 'user' : 'other'
-
-						if (isCurrentUser) {
-							setMessages((prev: IMessage[]) => {
-								return prev.map(m => {
-									if (
-										m.status === EMessageStatus.SENDING ||
-										m.status === EMessageStatus.SENT
-									) {
-										const status =
-											m.status === EMessageStatus.SENDING
-												? EMessageStatus.SENT
-												: m.status === EMessageStatus.SENT
-													? EMessageStatus.DELIVERED
-													: m.status
-										return { ...m, status }
-									} else {
-										return m
-									}
-								})
-							})
-						} else {
-							setMessages((prev: IMessage[]) => {
-								const updatedMessages: IMessage[] = [
-									...prev,
-									{
-										id: generateRandomId(),
-										receiver: receiverType,
-										message,
-										time: timestamp,
-										status: EMessageStatus.DELIVERED
-									}
-								]
-
-								return updatedMessages.map(m =>
-									m.status === EMessageStatus.SENT
-										? { ...m, status: EMessageStatus.DELIVERED }
-										: m
-								)
-							})
-							// Scroll xuống khi nhận tin nhắn mới từ người khác
-							setShouldScrollToBottom(true)
-						}
+						const messageResponse: ISocketMessageResponse = data.data
+						setSocketMessageResponse({
+							data: messageResponse,
+							status: 'success'
+						})
 					} else if (
 						data.event === 'send_message_response' &&
 						data.status === 'error'
 					) {
-						setMessages((prev: IMessage[]) =>
-							prev.map(m =>
-								m.status === EMessageStatus.SENDING
-									? {
-											...m,
-											status: EMessageStatus.ERROR,
-											retry: () => handleSend()
-										}
-									: m
-							)
-						)
+						setSocketMessageResponse({
+							status: 'error'
+						})
 					}
 				} catch (error) {
 					console.error('❌ Parse error:', error)
@@ -265,18 +116,9 @@ const Chat = () => {
 			}
 
 			socketRef.current.onerror = error => {
-				console.log(error)
-				setMessages((prev: IMessage[]) =>
-					prev.map(m =>
-						m.status === EMessageStatus.SENDING
-							? {
-									...m,
-									status: EMessageStatus.ERROR,
-									retry: () => handleSend()
-								}
-							: m
-					)
-				)
+				setSocketMessageResponse({
+					status: 'error'
+				})
 			}
 
 			socketRef.current.onclose = event => {
@@ -298,75 +140,9 @@ const Chat = () => {
 					socketRef.current?.send(JSON.stringify(msg))
 				}
 				socketRef.current.close()
-				if (pageMessages.length !== messages.length) {
-					messageRefetch()
-				}
 			}
 		}
 	}, [token, interestID])
-
-	// Cập nhật useEffect xử lý messagesData
-	useEffect(() => {
-		if (pageMessages.length !== messages.length) {
-			const convertedMessages: IMessage[] = pageMessages.map(m => {
-				const isCurrentUser = senderID === m.senderID
-				const receiverType = isCurrentUser ? 'user' : 'other'
-				return {
-					id: m.id,
-					receiver: receiverType,
-					message: m.message,
-					time: m.createdAt,
-					status: EMessageStatus.DELIVERED
-				}
-			})
-
-			// Kiểm tra xem đây có phải là lần load đầu tiên không
-			const isFirstLoad = messages.length === 0
-
-			setMessages(prev => {
-				// Nếu là lần load đầu tiên, thay thế toàn bộ và đánh dấu scroll xuống bottom
-				if (isFirstLoad) {
-					setShouldScrollToBottom(true)
-					setIsMoreThanLimitMessage(pageMessages.length > LIMIT_MESSAGE)
-					return convertedMessages
-				}
-				// Nếu load thêm messages cũ (infinite scroll), thêm vào đầu
-				return [...convertedMessages, ...prev]
-			})
-		}
-	}, [pageMessages, senderID])
-	// Logic auto scroll cải tiến
-	useEffect(() => {
-		if (messagesContainerRef.current) {
-			const container = messagesContainerRef.current
-
-			// Nếu là lần load đầu tiên hoặc được đánh dấu cần scroll xuống bottom
-			if (shouldScrollToBottom || isInitialLoad) {
-				setTimeout(() => {
-					container.scrollTop = container.scrollHeight
-					setShouldScrollToBottom(false)
-					setIsInitialLoad(false)
-				}, 0)
-				return
-			}
-
-			// Chỉ auto scroll khi user ở gần cuối danh sách (cho tin nhắn mới)
-			const isAtBottom =
-				container.scrollHeight - container.scrollTop - container.clientHeight <
-				100
-			if (isAtBottom && messages.length > 0) {
-				const lastMessage = messages[messages.length - 1]
-				if (
-					lastMessage &&
-					(lastMessage.receiver === 'user' || shouldScrollToBottom)
-				) {
-					setTimeout(() => {
-						container.scrollTop = container.scrollHeight
-					}, 0)
-				}
-			}
-		}
-	}, [messages, shouldScrollToBottom, isInitialLoad])
 
 	//Handle Transactions
 	const transactionParams: ITransactionParams = useMemo(
@@ -606,20 +382,13 @@ const Chat = () => {
 								transactionID={transactionID}
 							/>
 							<ChatMessagesPanel
-								isMoreThanLimitMessage={isMoreThanLimitMessage}
-								ref={messagesContainerRef}
-								sentinelRef={messageRef}
-								hasNextPage={messageHasNextPage}
-								isFetchingNextPage={isMessageFetchingNextPage}
-								messages={messages}
-								message={message}
-								setMessage={setMessage}
-								handleSend={handleSend}
-								handleKeyPress={e => {
-									if (e.key === 'Enter' && !e.shiftKey) {
-										e.preventDefault()
-										handleSend()
-									}
+								socketMessageResponse={socketMessageResponse}
+								socket={socketRef.current}
+								socketInfo={{
+									isOwner: isAuthor,
+									interestID: parsedInterestID,
+									userID: receiver.id,
+									senderID: senderID || 0
 								}}
 							/>
 						</div>
