@@ -31,9 +31,7 @@ export const useListTransactionQuery = (params: ITransactionParams) => {
 			return undefined
 		},
 		initialPageParam: 1,
-		enabled: !!params.postID && !!params.searchValue,
-		staleTime: 5 * 60 * 1000,
-		gcTime: 10 * 60 * 1000
+		enabled: !!params.postID && !!params.searchValue
 	})
 }
 

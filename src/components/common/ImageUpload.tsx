@@ -2,9 +2,9 @@ import { motion } from 'framer-motion'
 import { Upload } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { FieldError, FieldValues } from 'react-hook-form'
+import { FieldError } from 'react-hook-form'
 
-interface ImageUploadProps<T extends FieldValues> {
+interface ImageUploadProps {
 	name: string
 	label: string
 	field: {
@@ -18,7 +18,7 @@ interface ImageUploadProps<T extends FieldValues> {
 	animationDelay?: number
 }
 
-const ImageUpload = <T extends FieldValues>({
+const ImageUpload = ({
 	name,
 	label,
 	field,
@@ -26,7 +26,7 @@ const ImageUpload = <T extends FieldValues>({
 	maxImages = 4,
 	type = 'multiple',
 	animationDelay = 0.2
-}: ImageUploadProps<T>) => {
+}: ImageUploadProps) => {
 	const isSingle = type === 'single'
 	const [selectedImage, setSelectedImage] = useState<string | null>(null)
 	const [isMounted, setIsMounted] = useState(false)
@@ -189,7 +189,7 @@ const ImageUpload = <T extends FieldValues>({
 								>
 									✕
 								</button>
-								<p className='text-chart-1 mt-1 text-center text-xs'>
+								<p className='text-success mt-1 text-center text-xs'>
 									✓ Hình ảnh đã được tải lên
 								</p>
 							</div>
@@ -225,7 +225,7 @@ const ImageUpload = <T extends FieldValues>({
 									>
 										✕
 									</button>
-									<p className='text-chart-1 mt-1 text-center text-xs'>
+									<p className='text-success mt-1 text-center text-xs'>
 										✓ Hình ảnh đã được tải lên
 									</p>
 								</div>

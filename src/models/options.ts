@@ -21,3 +21,14 @@ export const sortOptions = [
 	{ value: ESortOrder.DESC, label: 'Mới nhất' },
 	{ value: ESortOrder.ASC, label: 'Cũ nhất' }
 ]
+
+export const methodOptions = [
+	{
+		value: 'Gặp trực tiếp',
+		label: 'Gặp trực tiếp'
+	},
+	{
+		value: 'Giao hàng',
+		label: 'Giao hàng'
+	}
+]

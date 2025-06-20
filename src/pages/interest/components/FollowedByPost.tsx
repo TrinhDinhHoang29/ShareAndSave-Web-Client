@@ -86,6 +86,7 @@ export const PostItem = ({ post }: { post: IPostInterest }) => {
 								<div className='space-y-4'>
 									{post.interests.map(interest => (
 										<InterestItem
+											authorID={post.authorID}
 											userInterest={interest}
 											key={interest.id}
 											postID={post.id}

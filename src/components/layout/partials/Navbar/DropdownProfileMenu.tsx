@@ -1,5 +1,5 @@
 // components/DropdownProfileMenu.tsx
-import { UserCircle } from 'lucide-react'
+import { User } from 'lucide-react'
 import React from 'react'
 
 import Dropdown from '@/components/common/Dropdown'
@@ -31,13 +31,12 @@ const DropdownProfileMenu: React.FC<DropdownProfileMenuProps> = ({
 				trigger={
 					<button
 						className={
-							className ||
-							'border-muted-foreground text-secondary rounded-md border-2 border-solid p-2 shadow-md transition-colors hover:opacity-90'
+							className || 'hover:bg-muted rounded-full p-2 transition-colors'
 						}
 						title='Hồ sơ'
 						onClick={isAuthenticated ? undefined : handleOpenDialog}
 					>
-						<UserCircle size={24} />
+						<User size={24} />
 					</button>
 				}
 			>

@@ -70,19 +70,16 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
 			{/* Profile Header */}
 			<div className='bg-background border-accent-foreground/50 rounded-t-md border-b px-4 py-4'>
 				<div className='flex items-center gap-3'>
-					<div className='relative'>
-						<div className='flex h-12 w-12 items-center justify-center rounded-full bg-gray-200'>
-							{user?.avatar ? (
-								<img
-									src={user.avatar}
-									alt={`${user?.fullName} avatar`}
-									className='h-full w-full rounded-full object-cover'
-								/>
-							) : (
-								<User className='text-secondary h-5 w-5' /> // Placeholder nếu không có avatar
-							)}
-						</div>
-						<div className='absolute -right-0.5 -bottom-0.5 h-4 w-4 rounded-full border-2 border-white bg-green-500'></div>
+					<div className='flex h-12 w-12 items-center justify-center rounded-full bg-gray-200'>
+						{user?.avatar ? (
+							<img
+								src={user.avatar}
+								alt={`${user?.fullName} avatar`}
+								className='h-full w-full rounded-full object-cover'
+							/>
+						) : (
+							<User className='text-secondary h-5 w-5' /> // Placeholder nếu không có avatar
+						)}
 					</div>
 					<div className='flex-1'>
 						<h3 className='text-foreground/80 max-w-[170px] truncate overflow-hidden font-medium whitespace-nowrap'>
@@ -96,7 +93,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
 			</div>
 
 			{/* Menu Items */}
-			<div className='bg-background/70 rounded-b-md pb-2'>
+			<div className='bg-background/90 rounded-b-md pb-2'>
 				{profileMenuItems.map((item: MenuItem, index: number) => (
 					<div key={index}>
 						{item.divider && (

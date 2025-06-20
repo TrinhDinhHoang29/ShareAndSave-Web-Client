@@ -1,6 +1,6 @@
 import { Clock, FileText, Heart, MessageCircle, User } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 import { useChatNotification } from '@/context/chat-noti-context'
 import { formatNearlyDateTimeVN } from '@/lib/utils'
@@ -16,7 +16,6 @@ export const InterestedPost = ({
 	onDeleteInterest: (postID: number) => void
 }) => {
 	const typeInfo = getTypeInfo(post.type.toString() as EPostType)
-	const navigate = useNavigate()
 	const { followingNotification } = useChatNotification()
 	const [newMessages, setNewMessages] = useState<number>(
 		post.unreadMessageCount
@@ -30,16 +29,6 @@ export const InterestedPost = ({
 			setNewMessages(prev => ++prev)
 		}
 	}, [followingNotification])
-	const handleOpenChat = () => {
-		const receiver = {
-			id: post.authorID,
-			name: post.authorName
-		}
-		setNewMessages(0)
-		navigate(`/chat/${post.id}/${post.interests[0].id}`, {
-			state: { receiver }
-		})
-	}
 
 	return (
 		<div className='border-border bg-card/80 overflow-hidden rounded-2xl border shadow-lg backdrop-blur-sm transition-shadow duration-200 hover:shadow-xl'>
@@ -48,7 +37,7 @@ export const InterestedPost = ({
 				<div className='mb-4 flex items-center justify-between'>
 					<div className='flex items-center space-x-4'>
 						<div
-							className={`bg-chart-1 flex h-12 w-12 items-center justify-center rounded-xl shadow-lg`}
+							className={`bg-success flex h-12 w-12 items-center justify-center rounded-xl shadow-lg`}
 						>
 							<span className='text-primary-foreground text-lg'>
 								{typeInfo.icon}
@@ -79,14 +68,14 @@ export const InterestedPost = ({
 					</div>
 
 					<div className='flex space-x-2'>
-						<button
+						<Link
+							to={`/bai-dang/${post.slug}`}
 							className='border-border hover:bg-muted rounded-xl border p-3 transition-all duration-200'
 							aria-label='Xem bài đăng'
 							title='Xem bài đăng'
-							onClick={() => navigate(`/bai-dang/${post.slug}`)}
 						>
 							<FileText className='text-muted-foreground h-5 w-5' />
-						</button>
+						</Link>
 
 						<button
 							className={`text-primary-foreground bg-destructive rounded-xl p-3 shadow-lg transition-all duration-200 hover:shadow-xl`}
@@ -97,9 +86,9 @@ export const InterestedPost = ({
 							<Heart className='h-5 w-5' />
 						</button>
 
-						<button
-							className={`text-primary-foreground bg-chart-1 relative rounded-xl p-3 shadow-lg transition-all duration-200 hover:shadow-xl`}
-							onClick={handleOpenChat}
+						<Link
+							to={`/chat/${post.interests[0].id}`}
+							className={`text-primary-foreground bg-success relative rounded-xl p-3 shadow-lg transition-all duration-200 hover:shadow-xl`}
 							aria-label='Chat với người đăng'
 							title='Chat với người đăng'
 						>
@@ -109,7 +98,7 @@ export const InterestedPost = ({
 									{newMessages > 99 ? '99+' : newMessages}
 								</span>
 							)}
-						</button>
+						</Link>
 					</div>
 				</div>
 

@@ -1,14 +1,15 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useInView } from 'react-intersection-observer'
-import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
+import messageApi from '@/apis/modules/message.api'
 import Loading from '@/components/common/Loading'
 import { useAlertModalContext } from '@/context/alert-modal-context'
 import {
 	useCreateTransactionMutation,
 	useUpdateTransactionMutation
 } from '@/hooks/mutations/use-transaction.mutation'
-import { useDetailPostQueryByID } from '@/hooks/queries/use-post-query'
+import { useDetailPostInterestQuery } from '@/hooks/queries/use-interest.query'
 import { useListTransactionQuery } from '@/hooks/queries/use-transaction.query'
 import { getAccessToken } from '@/lib/token'
 import { ESortOrder, ETransactionStatus } from '@/models/enums'
@@ -25,76 +26,107 @@ import ChatHeaderWithRequests from './components/ChatHeaderWithRequests'
 import ChatMessagesPanel from './components/ChatMessagesPanel'
 import ItemSidebar from './components/ItemSidebar'
 
-interface ChatState {
-	receiver: IReceiver
-}
-
 const Chat = () => {
-	const { postID, interestID } = useParams<{
-		postID: string
-		interestID: string
-	}>()
-	const { state } = useLocation() as { state: ChatState | undefined }
+	const params = useParams()
+	const interestID = Number(params.interestID)
 	const navigate = useNavigate()
 	const { showInfo, showConfirm, close } = useAlertModalContext()
 
-	const parsedPostID = Number(postID)
-	const parsedInterestID = Number(interestID)
-
-	const initialState = state || {
-		receiver: { id: 0, name: 'Unknown' },
-		postTitle: 'No Title',
-		items: [],
-		authorID: 0
-	}
-	const { receiver } = initialState
-
 	useEffect(() => {
-		if (isNaN(parsedPostID) || isNaN(parsedInterestID) || !receiver) {
+		if (isNaN(interestID)) {
 			navigate('/', { replace: true })
 		}
-	}, [parsedPostID, parsedInterestID, receiver, navigate])
+	}, [interestID, navigate])
 
 	const {
-		data: postDetailData,
-		isPending: isPostDetailDataPending,
+		data: postDetailInterestData,
+		isPending: isPostDetailInterestDataPending,
 		refetch: postDetailDataRefetch
-	} = useDetailPostQueryByID(parsedPostID)
+	} = useDetailPostInterestQuery(interestID)
 
 	const socketRef = useRef<WebSocket | null>(null)
+	const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+	const reconnectAttemptsRef = useRef(0)
+	const maxReconnectAttempts = 5
+	const reconnectDelayRef = useRef(1000) // Start with 1 second
+	const isReconnectingRef = useRef(false)
+	const shouldReconnectRef = useRef(true)
+
 	const token = getAccessToken()
 
 	const { user } = useAuthStore()
 	const senderID = user?.id
-	const isAuthor = senderID === postDetailData?.authorID
+	const isAuthor = senderID === postDetailInterestData?.authorID
+	const receiver: IReceiver = isAuthor
+		? {
+				id: postDetailInterestData?.interests[0]?.userID || 0,
+				name: postDetailInterestData?.interests[0]?.userName || '',
+				avatar: postDetailInterestData?.interests[0]?.userAvatar || ''
+			}
+		: {
+				id: postDetailInterestData?.authorID || 0,
+				name: postDetailInterestData?.authorName || '',
+				avatar: postDetailInterestData?.authorAvatar || ''
+			}
 	const [socketMessageResponse, setSocketMessageResponse] = useState<{
 		data?: ISocketMessageResponse
 		status: 'success' | 'error'
 	}>(Object)
 
-	useEffect(() => {
-		if (
-			!socketRef.current ||
-			socketRef.current.readyState === WebSocket.CLOSED
-		) {
-			const wsUrl =
-				import.meta.env.VITE_SOCKET_CHAT || 'ws://34.142.168.171:8001/chat'
+	const [connectionStatus, setConnectionStatus] = useState<
+		'connecting' | 'connected' | 'disconnected' | 'reconnecting'
+	>('disconnected')
+
+	// Join room function
+	const joinRoom = useCallback(() => {
+		if (socketRef.current?.readyState === WebSocket.OPEN && interestID) {
+			const msg = {
+				event: 'join_room',
+				data: {
+					interestID
+				}
+			}
+			socketRef.current.send(JSON.stringify(msg))
+		}
+	}, [interestID])
+
+	// Leave room function
+	const leaveRoom = useCallback(() => {
+		if (socketRef.current?.readyState === WebSocket.OPEN && interestID) {
+			const msg = {
+				event: 'left_room',
+				data: {
+					interestID
+				}
+			}
+			socketRef.current.send(JSON.stringify(msg))
+		}
+	}, [interestID])
+
+	// WebSocket connection function
+	const connectWebSocket = useCallback(() => {
+		if (isReconnectingRef.current || !shouldReconnectRef.current) return
+
+		setConnectionStatus('connecting')
+
+		const wsUrl =
+			import.meta.env.VITE_SOCKET_CHAT || 'ws://34.142.168.171:8001/chat'
+
+		try {
 			socketRef.current = new WebSocket(wsUrl, [token ?? ''])
 
 			socketRef.current.onopen = () => {
-				if (interestID) {
-					const msg = {
-						event: 'join_room',
-						data: {
-							interestID: parsedInterestID
-						}
-					}
-					socketRef.current?.send(JSON.stringify(msg))
-				}
+				console.log('✅ WebSocket connected')
+				setConnectionStatus('connected')
+				reconnectAttemptsRef.current = 0
+				reconnectDelayRef.current = 1000 // Reset delay
+				isReconnectingRef.current = false
+				joinRoom()
 			}
 
 			socketRef.current.onmessage = event => {
 				try {
+					console.log(event.data)
 					const data = JSON.parse(event.data)
 					if (data.event === 'send_message_response' && data.data.message) {
 						const messageResponse: ISocketMessageResponse = data.data
@@ -116,6 +148,7 @@ const Chat = () => {
 			}
 
 			socketRef.current.onerror = error => {
+				console.error('❌ WebSocket error:', error)
 				setSocketMessageResponse({
 					status: 'error'
 				})
@@ -123,39 +156,136 @@ const Chat = () => {
 
 			socketRef.current.onclose = event => {
 				console.warn(
-					`⚠️ WebSocket closed. Code: ${event.code}, Reason: ${event.reason}, ReadyState: ${socketRef.current?.readyState}`
+					`⚠️ WebSocket closed. Code: ${event.code}, Reason: ${event.reason}`
 				)
+				setConnectionStatus('disconnected')
+
+				// Only attempt reconnect if it wasn't a manual close and we should reconnect
+				if (shouldReconnectRef.current && event.code !== 1000) {
+					attemptReconnect()
+				}
 			}
+		} catch (error) {
+			console.error('❌ WebSocket connection error:', error)
+			setConnectionStatus('disconnected')
+			if (shouldReconnectRef.current) {
+				attemptReconnect()
+			}
+		}
+	}, [token, joinRoom])
+
+	// Reconnect function with exponential backoff
+	const attemptReconnect = useCallback(() => {
+		if (isReconnectingRef.current || !shouldReconnectRef.current) return
+
+		if (reconnectAttemptsRef.current >= maxReconnectAttempts) {
+			console.error('❌ Max reconnection attempts reached')
+			setConnectionStatus('disconnected')
+			showInfo({
+				infoTitle: 'Mất kết nối',
+				infoMessage:
+					'Không thể kết nối lại với server. Vui lòng tải lại trang.',
+				infoButtonText: 'Đã hiểu'
+			})
+			return
 		}
 
+		isReconnectingRef.current = true
+		setConnectionStatus('reconnecting')
+		reconnectAttemptsRef.current += 1
+
+		console.log(
+			`🔄 Attempting to reconnect... (${reconnectAttemptsRef.current}/${maxReconnectAttempts})`
+		)
+
+		reconnectTimeoutRef.current = setTimeout(() => {
+			connectWebSocket()
+			// Exponential backoff: double the delay each time, max 30 seconds
+			reconnectDelayRef.current = Math.min(reconnectDelayRef.current * 2, 30000)
+		}, reconnectDelayRef.current)
+	}, [connectWebSocket, showInfo])
+
+	// Manual reconnect function
+	const manualReconnect = useCallback(() => {
+		if (socketRef.current) {
+			socketRef.current.close()
+		}
+
+		// Clear any existing reconnect timeout
+		if (reconnectTimeoutRef.current) {
+			clearTimeout(reconnectTimeoutRef.current)
+			reconnectTimeoutRef.current = null
+		}
+
+		// Reset reconnect state
+		reconnectAttemptsRef.current = 0
+		reconnectDelayRef.current = 1000
+		isReconnectingRef.current = false
+		shouldReconnectRef.current = true
+
+		// Attempt to connect
+		connectWebSocket()
+	}, [connectWebSocket])
+
+	// Initialize WebSocket connection
+	useEffect(() => {
+		shouldReconnectRef.current = true
+		connectWebSocket()
+
 		return () => {
+			shouldReconnectRef.current = false
+			isReconnectingRef.current = false
+
+			if (reconnectTimeoutRef.current) {
+				clearTimeout(reconnectTimeoutRef.current)
+				reconnectTimeoutRef.current = null
+			}
+
 			if (socketRef.current?.readyState === WebSocket.OPEN) {
-				if (interestID) {
-					const msg = {
-						event: 'left_room',
-						data: {
-							interestID: parsedInterestID
-						}
-					}
-					socketRef.current?.send(JSON.stringify(msg))
-				}
-				socketRef.current.close()
+				leaveRoom()
+				socketRef.current.close(1000, 'Component unmounting')
 			}
 		}
-	}, [token, interestID])
+	}, [connectWebSocket, leaveRoom])
+
+	// Cleanup on interestID change
+	useEffect(() => {
+		return () => {
+			if (socketRef.current?.readyState === WebSocket.OPEN) {
+				leaveRoom()
+			}
+		}
+	}, [interestID, leaveRoom])
+
+	useEffect(() => {
+		const handleRefetch = async () => {
+			await messageApi.update(interestID)
+		}
+		if (interestID) handleRefetch()
+	}, [interestID])
 
 	//Handle Transactions
 	const transactionParams: ITransactionParams = useMemo(
 		() => ({
-			postID: parsedPostID,
+			postID: postDetailInterestData?.id || 0,
 			searchBy: 'interestID',
-			searchValue: parsedInterestID.toString(),
+			searchValue: interestID.toString(),
 			sort: 'createdAt',
 			page: 1,
 			order: ESortOrder.DESC
 		}),
-		[parsedInterestID, parsedPostID]
+		[interestID, postDetailInterestData]
 	)
+
+	const [selectedMethod, setSelectedMethod] = useState<string>('Gặp trực tiếp')
+	const handleSendRequest = (method: string) => {
+		if (selectedItems.length > 0) {
+			setSelectedMethod(method) // Store the selected method
+			setTransactionItems([...transactionItems, ...selectedItems])
+			setSelectedItems([])
+			setCurrentRequestIndex(0)
+		}
+	}
 	const {
 		data: transactionData,
 		fetchNextPage: transactionFetchNextPage,
@@ -239,7 +369,8 @@ const Chat = () => {
 				items: transactionItems.map(item => ({
 					postItemID: item.postItemID,
 					quantity: item.quantity
-				}))
+				})),
+				method: selectedMethod // Add method here
 			}
 			updateTransactionMutation({
 				transactionID,
@@ -254,12 +385,14 @@ const Chat = () => {
 				onConfirm: () => {
 					close()
 					const transactionRequest: ITransactionRequest = {
-						interestID: parsedInterestID,
+						interestID,
 						items: transactionItems.map(item => ({
 							postItemID: item.postItemID,
 							quantity: item.quantity
-						}))
+						})),
+						method: selectedMethod // Add method here
 					}
+					// console.log(transactionRequest)
 					createTransactionMutation({ data: transactionRequest })
 				},
 				cancelButtonText: 'Hủy'
@@ -289,10 +422,6 @@ const Chat = () => {
 		})
 	}
 
-	const handleBack = () => {
-		navigate(-1)
-	}
-
 	const handleApplyItemTransactions = (index: number) => {
 		if (transactionData) {
 			const transactionItems = transactions[index].items
@@ -300,7 +429,7 @@ const Chat = () => {
 				item => ({
 					...item,
 					currentQuantity:
-						postDetailData?.items.find(i => i.itemID === item.itemID)
+						postDetailInterestData?.items.find(i => i.itemID === item.itemID)
 							?.currentQuantity || 0
 				})
 			)
@@ -312,26 +441,27 @@ const Chat = () => {
 
 	return (
 		<>
-			{isPostDetailDataPending ? (
-				<Loading
-					position='in'
-					size='lg'
-					color='primary'
-					text='Đang tải...'
-				/>
+			{isPostDetailInterestDataPending ? (
+				<div className='flex items-center justify-center py-12'>
+					<Loading
+						size='lg'
+						color='primary'
+						text='Đang tải...'
+					/>
+				</div>
 			) : (
-				<div className='bg-background min-h-full'>
-					<div className='bg-card flex w-full overflow-hidden rounded-2xl shadow-md'>
+				<div className='container mx-auto py-12'>
+					<div className='flex w-full overflow-hidden rounded-2xl shadow-md'>
 						<div className='flex w-full flex-1 flex-col'>
 							<ChatHeaderWithRequests
+								method={selectedMethod}
 								receiver={receiver}
-								postTitle={postDetailData?.title || ''}
+								postTitle={postDetailInterestData?.title || ''}
 								transactionItems={transactionItems}
 								currentRequestIndex={currentRequestIndex}
 								isRequestsVisible={isRequestsVisible}
 								transactionStatus={transactionStatus}
 								isAuthor={isAuthor}
-								onClose={handleBack}
 								toggleRequestsVisibility={() =>
 									setIsRequestsVisible(!isRequestsVisible)
 								}
@@ -365,7 +495,7 @@ const Chat = () => {
 														quantity: Math.max(
 															1,
 															Math.min(
-																postDetailData?.items?.find(
+																postDetailInterestData?.items?.find(
 																	i => i.itemID === itemId
 																)?.quantity || 1,
 																item.quantity + change
@@ -386,16 +516,18 @@ const Chat = () => {
 								socket={socketRef.current}
 								socketInfo={{
 									isOwner: isAuthor,
-									interestID: parsedInterestID,
+									interestID,
 									userID: receiver.id,
 									senderID: senderID || 0
 								}}
+								connectionStatus={connectionStatus}
+								onReconnect={manualReconnect}
 							/>
 						</div>
 
 						<ItemSidebar
 							handleConfirmTransaction={handleConfirmTransaction}
-							items={postDetailData?.items || []}
+							items={postDetailInterestData?.items || []}
 							selectedItems={selectedItems}
 							isAuthor={isAuthor}
 							transactionStatus={transactionStatus}
@@ -431,7 +563,7 @@ const Chat = () => {
 													quantity: Math.max(
 														1,
 														Math.min(
-															postDetailData?.items?.find(
+															postDetailInterestData?.items?.find(
 																i => i.itemID === itemId
 															)?.quantity || 1,
 															item.quantity + change
@@ -447,13 +579,7 @@ const Chat = () => {
 									prev.filter(item => item.itemID !== itemId)
 								)
 							}}
-							handleSendRequest={() => {
-								if (selectedItems.length > 0) {
-									setTransactionItems([...transactionItems, ...selectedItems])
-									setSelectedItems([])
-									setCurrentRequestIndex(0)
-								}
-							}}
+							handleSendRequest={handleSendRequest} // Updated to accept method parameter
 							setSelectedItems={setSelectedItems}
 						/>
 					</div>

@@ -24,24 +24,22 @@ const queryClient = new QueryClient({
 })
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-	<StrictMode>
-		<QueryClientProvider client={queryClient}>
-			<ThemeProvider
-				defaultTheme='light'
-				storageKey='vite-ui-theme'
-			>
-				<FontProvider>
-					<AuthDialogProvider>
-						<AlertModalProvider>
-							<ChatNotificationProvider>
-								<BrowserRouter>
-									<App />
-								</BrowserRouter>
-							</ChatNotificationProvider>
-						</AlertModalProvider>
-					</AuthDialogProvider>
-				</FontProvider>
-			</ThemeProvider>
-		</QueryClientProvider>
-	</StrictMode>
+	<QueryClientProvider client={queryClient}>
+		<ThemeProvider
+			defaultTheme='light'
+			storageKey='vite-ui-theme'
+		>
+			<FontProvider>
+				<AuthDialogProvider>
+					<AlertModalProvider>
+						<ChatNotificationProvider>
+							<BrowserRouter>
+								<App />
+							</BrowserRouter>
+						</ChatNotificationProvider>
+					</AlertModalProvider>
+				</AuthDialogProvider>
+			</FontProvider>
+		</ThemeProvider>
+	</QueryClientProvider>
 )

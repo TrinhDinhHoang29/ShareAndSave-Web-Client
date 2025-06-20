@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 
-import messageApi from '@/apis/modules/message.api'
 import { useListMessageQuery } from '@/hooks/queries/use-chat.query'
 import { useInfiniteScroll } from '@/hooks/use-infinite-scroll'
 import { useMessageHandling } from '@/hooks/use-message-handling'
@@ -9,6 +8,7 @@ import { LIMIT_MESSAGE } from '@/models/constants'
 import { EMessageStatus } from '@/models/enums'
 import { IChatMessagesPanel, IMessage } from '@/models/interfaces'
 
+import ConnectionStatusIndicator from './ConnectionStatusIndicator'
 import MessageInput from './MessageInput'
 import MessagesContainer from './MessagesContainer'
 import ScrollToBottomButton from './ScrollToBottomButton'
@@ -16,7 +16,9 @@ import ScrollToBottomButton from './ScrollToBottomButton'
 const ChatMessagesPanel = ({
 	socketInfo,
 	socket,
-	socketMessageResponse
+	socketMessageResponse,
+	connectionStatus,
+	onReconnect
 }: IChatMessagesPanel) => {
 	const isInitialLoad = useRef(true)
 
@@ -29,6 +31,7 @@ const ChatMessagesPanel = ({
 		showScrollToBottom,
 		unreadCount
 	} = useScrollManagement()
+
 	const {
 		message,
 		setMessage,
@@ -46,6 +49,7 @@ const ChatMessagesPanel = ({
 	const handleScrollToBottomClick = useCallback(() => {
 		scrollToBottom(true, true)
 	}, [scrollToBottom])
+
 	// API data fetching
 	const {
 		data: messagesData,
@@ -59,17 +63,11 @@ const ChatMessagesPanel = ({
 	})
 
 	useEffect(() => {
-		const handleRefetch = async () => {
-			const data = await messageApi.update(socketInfo.interestID)
-			console.log(data.message)
-			refetch()
-		}
-		handleRefetch()
+		refetch()
 	}, [])
 
 	const { handleLoadMore, maintainScrollPosition } =
 		useInfiniteScroll(fetchNextPage)
-
 	// Simplified API messages conversion
 	const apiMessages: IMessage[] = useMemo(() => {
 		if (!messagesData?.pages?.length) return []
@@ -126,6 +124,13 @@ const ChatMessagesPanel = ({
 		updateMessageStatus(socketMessageResponse, socketInfo.senderID)
 	}, [socketMessageResponse, socketInfo.senderID, updateMessageStatus])
 
+	// Refetch messages when connection is restored
+	useEffect(() => {
+		if (connectionStatus === 'connected') {
+			refetch()
+		}
+	}, [connectionStatus, refetch])
+
 	// Event handlers
 	const handleInputChange = useCallback(
 		(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -138,11 +143,21 @@ const ChatMessagesPanel = ({
 		(e: React.KeyboardEvent) => {
 			if (e.key === 'Enter' && !e.shiftKey) {
 				e.preventDefault()
-				handleSend()
+				// Only allow sending if connected
+				if (connectionStatus === 'connected') {
+					handleSend()
+				}
 			}
 		},
-		[handleSend]
+		[handleSend, connectionStatus]
 	)
+
+	const handleSendClick = useCallback(() => {
+		// Only allow sending if connected
+		if (connectionStatus === 'connected') {
+			handleSend()
+		}
+	}, [handleSend, connectionStatus])
 
 	const throttledHandleScroll = useCallback(() => {
 		handleScroll(handleLoadMore, hasNextPage, isFetchingNextPage)
@@ -160,30 +175,49 @@ const ChatMessagesPanel = ({
 		)
 	}, [allMessages.length, realtimeMessages.length, apiMessages.length])
 
+	// Check if should show connection status in chat area
+	const shouldShowConnectionStatus = connectionStatus !== 'connected'
+
 	return (
-		<>
-			<MessagesContainer
-				scrollContainerRef={scrollContainerRef}
-				onScroll={throttledHandleScroll}
-				hasNextPage={hasNextPage}
-				isFetchingNextPage={isFetchingNextPage}
-				allMessages={allMessages}
-				isStatusChange={isStatusChange}
-			/>
-			<div className='relative'>
-				<ScrollToBottomButton
-					onClick={handleScrollToBottomClick}
-					unreadCount={unreadCount}
-					show={showScrollToBottom}
+		<div className='relative flex h-full flex-col'>
+			{/* Connection Status Banner in Chat Area */}
+			{shouldShowConnectionStatus && (
+				<ConnectionStatusIndicator
+					status={connectionStatus}
+					onReconnect={onReconnect}
+					inline={true}
 				/>
-				<MessageInput
-					message={message}
-					onMessageChange={handleInputChange}
-					onSend={handleSend}
-					onKeyPress={handleKeyPress}
+			)}
+
+			<div className='flex flex-1 flex-col'>
+				<MessagesContainer
+					scrollContainerRef={scrollContainerRef}
+					onScroll={throttledHandleScroll}
+					hasNextPage={hasNextPage}
+					isFetchingNextPage={isFetchingNextPage}
+					allMessages={allMessages}
+					isStatusChange={isStatusChange}
 				/>
+
+				<div className='relative'>
+					<ScrollToBottomButton
+						onClick={handleScrollToBottomClick}
+						unreadCount={unreadCount}
+						show={showScrollToBottom}
+					/>
+
+					<MessageInput
+						message={message}
+						onMessageChange={handleInputChange}
+						onSend={handleSendClick}
+						onKeyPress={handleKeyPress}
+						// disabled={connectionStatus !== 'connected'}
+						// connectionStatus={connectionStatus}
+						// onReconnect={onReconnect}
+					/>
+				</div>
 			</div>
-		</>
+		</div>
 	)
 }
 

@@ -1,43 +1,52 @@
-import { Check, CheckCircle, Clock, XCircleIcon } from 'lucide-react'
+import {
+	Check,
+	CheckCircle,
+	Clock,
+	FileText,
+	Gift,
+	HelpCircle,
+	Search,
+	XCircle
+} from 'lucide-react'
 
 import { EPostType, ETransactionStatus } from './enums'
 
 export const getTypeInfo = (type: EPostType) => {
 	switch (type) {
-		case '1':
+		case EPostType.GIVE_AWAY_OLD_ITEM:
 			return {
 				label: 'Cho tặng đồ cũ',
 				color:
-					'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
-				icon: '🎁'
+					'bg-post-type-1 text-post-type-foreground-1 dark:bg-post-type-1/20 dark:text-post-type-foreground-1',
+				Icon: Gift
 			}
-		case '2':
+		case EPostType.FOUND_ITEM:
 			return {
 				label: 'Tìm thấy đồ',
 				color:
-					'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
-				icon: '🔍'
+					'bg-post-type-2 text-post-type-foreground-2 dark:bg-post-type-2/20 dark:text-post-type-foreground-2',
+				Icon: Search
 			}
-		case '3':
+		case EPostType.SEEK_LOSE_ITEM:
 			return {
 				label: 'Tìm đồ bị mất',
 				color:
-					'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400',
-				icon: '❓'
+					'bg-post-type-3 text-post-type-foreground-3 dark:bg-post-type-3/20 dark:text-post-type-foreground-3',
+				Icon: HelpCircle
 			}
-		case '4':
+		case EPostType.OTHER:
 			return {
 				label: 'Khác',
 				color:
-					'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400',
-				icon: '📝'
+					'bg-post-type-4 text-post-type-foreground-4 dark:bg-post-type-4/20 dark:text-post-type-foreground-4',
+				Icon: FileText
 			}
 		default:
 			return {
 				label: 'Khác',
 				color:
-					'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400',
-				icon: '📝'
+					'bg-post-type-4 text-post-type-foreground-4 dark:bg-post-type-4/20 dark:text-post-type-foreground-4',
+				Icon: FileText
 			}
 	}
 }
@@ -50,7 +59,7 @@ export const getTransactionStatusConfig = (
 		ETransactionStatus,
 		{
 			label: string
-			icon: React.ComponentType<{ className?: string }>
+			Icon: React.ComponentType<{ className?: string }>
 			background: string
 			border: string
 			textColor: string
@@ -58,38 +67,37 @@ export const getTransactionStatusConfig = (
 	> = {
 		[ETransactionStatus.DEFAULT]: {
 			label: 'Xác nhận',
-			icon: Check,
-			background: 'bg-chart-1/90 hover:bg-chart-1',
-			textColor: 'text-white',
-			border: ''
+			Icon: Check,
+			background: 'bg-success/90 hover:bg-success',
+			textColor: 'text-success-foreground',
+			border: 'border-success border-solid border-2'
 		},
 		[ETransactionStatus.PENDING]: {
 			label: 'Đang trong giao dịch',
-			icon: Clock,
-			background: 'bg-chart-2/90 hover:bg-chart-2',
-			textColor: 'text-white',
-			border: 'border-chart-2 border-solid border-2'
+			Icon: Clock,
+			background: 'bg-warning/90 hover:bg-warning',
+			textColor: 'text-success-foreground',
+			border: 'border-warning border-solid border-2'
 		},
 		[ETransactionStatus.SUCCESS]: {
 			label: 'Hoàn tất',
-			icon: CheckCircle,
-			background: 'bg-chart-1/90 hover:bg-chart-1',
-			textColor: 'text-white',
-			border: 'border-chart-1 border-solid border-2'
+			Icon: CheckCircle,
+			background: 'bg-success/90 hover:bg-success',
+			textColor: 'text-success-foreground',
+			border: 'border-success border-solid border-2'
 		},
 		[ETransactionStatus.CANCELLED]: {
 			label: isAuthor ? 'Đã từ chối' : 'Đã bị từ chối',
-			icon: XCircleIcon,
-			background: 'bg-chart-3/90 hover:bg-chart-3',
-			textColor: 'text-white',
-			border: 'border-chart-3 border-solid border-2'
+			Icon: XCircle,
+			background: 'bg-error/90 hover:bg-error',
+			textColor: 'text-success-foreground',
+			border: 'border-error border-solid border-2'
 		}
 	}
 	return configs[status]
 }
 
 export const LIMIT_MESSAGE = 30
-
 export const SCROLL_THRESHOLD = 100
 export const SCROLL_TIMEOUT = 300
 export const TIME_GAP_THRESHOLD = 30 * 60 * 1000 // 30 minutes in milliseconds

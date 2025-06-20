@@ -263,53 +263,51 @@ const PostAction: React.FC = () => {
 
 	return (
 		<>
-			<div className='bg-background min-h-screen'>
-				<div className='grid w-full grid-cols-1 gap-6 md:grid-cols-3'>
-					<div className='col-span-1 md:col-span-2'>
-						<div className='bg-card border-border rounded-xl border p-8 shadow-lg'>
-							<ProgressBar currentStep={isCompleted ? 3 : currentStep} />
+			<div className='container mx-auto grid w-full grid-cols-1 gap-6 py-12 md:grid-cols-3'>
+				<div className='top-0 col-span-1 md:top-16'>
+					<Instruction />
+				</div>
+				<div className='col-span-1 md:col-span-2'>
+					<div className='bg-card border-border rounded-xl border p-8 shadow-lg'>
+						<ProgressBar currentStep={isCompleted ? 3 : currentStep} />
 
-							<div className='mb-8 min-h-[400px]'>{renderCurrentForm()}</div>
+						<div className='mb-8 min-h-[400px]'>{renderCurrentForm()}</div>
 
-							{!isCompleted && (
-								<div className='border-border flex items-center justify-between border-t pt-6'>
-									{(currentStep > 0 && !isAuthenticated) ||
-									(currentStep > 1 && isAuthenticated) ? (
-										<SecondaryButton onClick={handleBack}>
-											Quay lại
-										</SecondaryButton>
+						{!isCompleted && (
+							<div className='border-border flex items-center justify-between border-t pt-6'>
+								{(currentStep > 0 && !isAuthenticated) ||
+								(currentStep > 1 && isAuthenticated) ? (
+									<SecondaryButton onClick={handleBack}>
+										Quay lại
+									</SecondaryButton>
+								) : (
+									<div></div>
+								)}
+
+								<div>
+									{currentStep < steps.length - 1 ? (
+										<PrimaryButton
+											icon={<ChevronRight size={18} />}
+											positionIcon='right'
+											onClick={handleNext}
+										>
+											Tiếp theo
+										</PrimaryButton>
 									) : (
-										<div></div>
+										<button
+											onClick={handleSubmit}
+											className='bg-success hover:bg-success/90 flex items-center rounded-lg px-6 py-2 font-medium text-white transition-colors duration-200'
+										>
+											<Send
+												size={18}
+												className='mr-2'
+											/>{' '}
+											Đăng bài
+										</button>
 									)}
-
-									<div>
-										{currentStep < steps.length - 1 ? (
-											<PrimaryButton
-												icon={<ChevronRight size={18} />}
-												positionIcon='right'
-												onClick={handleNext}
-											>
-												Tiếp theo
-											</PrimaryButton>
-										) : (
-											<button
-												onClick={handleSubmit}
-												className='bg-chart-1 hover:bg-chart-1/90 flex items-center rounded-lg px-6 py-2 font-medium text-white transition-colors duration-200'
-											>
-												<Send
-													size={18}
-													className='mr-2'
-												/>{' '}
-												Đăng bài
-											</button>
-										)}
-									</div>
 								</div>
-							)}
-						</div>
-					</div>
-					<div className='top-0 col-span-1 md:top-16'>
-						<Instruction />
+							</div>
+						)}
 					</div>
 				</div>
 			</div>

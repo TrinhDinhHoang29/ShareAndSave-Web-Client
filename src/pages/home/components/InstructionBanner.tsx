@@ -82,8 +82,8 @@ export default function HomepageBanner() {
 			{/* Gradient background with theme colors */}
 			<div className='absolute inset-0'>
 				<div className='from-primary/5 via-background to-accent/20 absolute top-0 left-0 h-full w-full bg-gradient-to-br'></div>
-				<div className='from-primary/10 to-chart-1/10 absolute top-20 left-20 h-64 w-64 rounded-full bg-gradient-to-r blur-3xl'></div>
-				<div className='from-chart-1/8 to-primary/8 absolute top-40 right-20 h-80 w-80 rounded-full bg-gradient-to-r blur-3xl'></div>
+				<div className='from-primary/10 to-success/10 absolute top-20 left-20 h-64 w-64 rounded-full bg-gradient-to-r blur-3xl'></div>
+				<div className='from-success/8 to-primary/8 absolute top-40 right-20 h-80 w-80 rounded-full bg-gradient-to-r blur-3xl'></div>
 				<div className='from-accent/20 to-secondary/10 absolute bottom-20 left-1/3 h-72 w-72 rounded-full bg-gradient-to-r blur-3xl'></div>
 			</div>
 
@@ -94,7 +94,7 @@ export default function HomepageBanner() {
 					variants={floatVariants}
 					animate='float'
 				>
-					<Recycle className='text-chart-1 h-6 w-6' />
+					<Recycle className='text-success h-6 w-6' />
 				</motion.div>
 				<motion.div
 					className='absolute top-1/3 right-1/4 opacity-20'
@@ -142,7 +142,7 @@ export default function HomepageBanner() {
 							className='mb-6 text-4xl leading-tight font-bold lg:text-6xl'
 							variants={itemVariants}
 						>
-							<span className='from-primary via-chart-1 to-primary bg-gradient-to-r bg-clip-text text-transparent'>
+							<span className='from-primary via-success to-primary bg-gradient-to-r bg-clip-text text-transparent'>
 								Chia Sẻ
 							</span>{' '}
 							Tạo Nên
@@ -170,7 +170,7 @@ export default function HomepageBanner() {
 								transition={{ duration: 0.2 }}
 							>
 								<motion.div
-									className='bg-chart-1 h-2 w-2 rounded-full'
+									className='bg-success h-2 w-2 rounded-full'
 									animate={{ scale: [1, 1.2, 1] }}
 									transition={{ duration: 2, repeat: Infinity }}
 								></motion.div>
@@ -222,14 +222,14 @@ export default function HomepageBanner() {
 							whileHover='hover'
 							whileTap={{ scale: 0.98 }}
 						>
-							<div className='from-chart-1/5 to-chart-1/10 absolute inset-0 bg-gradient-to-br opacity-0 transition-opacity duration-300 group-hover:opacity-100'></div>
+							<div className='from-success/5 to-success/10 absolute inset-0 bg-gradient-to-br opacity-0 transition-opacity duration-300 group-hover:opacity-100'></div>
 							<div className='relative z-10'>
 								<motion.div
-									className='from-chart-1/10 to-chart-1/20 mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br'
+									className='from-success/10 to-success/20 mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br'
 									whileHover={{ scale: 1.1, rotate: 5 }}
 									transition={{ duration: 0.2 }}
 								>
-									<Gift className='text-chart-1 h-6 w-6' />
+									<Gift className='text-success h-6 w-6' />
 								</motion.div>
 								<h3 className='text-foreground mb-3 text-xl font-semibold'>
 									Cho Tặng Đồ Cũ
@@ -239,7 +239,7 @@ export default function HomepageBanner() {
 									có ý nghĩa mới với người cần.
 								</p>
 								<motion.div
-									className='text-chart-1 flex items-center gap-2 text-sm font-medium'
+									className='text-success flex items-center gap-2 text-sm font-medium'
 									whileHover={{ gap: 12 }}
 									transition={{ duration: 0.2 }}
 								>
@@ -332,7 +332,7 @@ export default function HomepageBanner() {
 								transition={{ duration: 0.2 }}
 							>
 								<motion.div
-									className='from-chart-1 to-chart-1/80 mb-2 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent lg:text-3xl'
+									className='from-success to-success/80 mb-2 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent lg:text-3xl'
 									initial={{ opacity: 0, y: 20 }}
 									animate={{ opacity: 1, y: 0 }}
 									transition={{ delay: 0.5, duration: 0.5 }}
@@ -406,7 +406,7 @@ export default function HomepageBanner() {
 							Bắt đầu hành trình chia sẻ và kết nối với cộng đồng
 						</p>
 						<motion.div
-							className='from-primary to-chart-1 mx-auto h-0.5 w-16 rounded-full bg-gradient-to-r'
+							className='from-primary to-success mx-auto h-0.5 w-16 rounded-full bg-gradient-to-r'
 							initial={{ width: 0 }}
 							animate={{ width: 64 }}
 							transition={{ delay: 1.5, duration: 0.8 }}

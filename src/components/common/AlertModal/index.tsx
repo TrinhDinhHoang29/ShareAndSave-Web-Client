@@ -104,7 +104,7 @@ const AlertModal: React.FC<AlertModalProps> = ({
 				{[...Array(3)].map((_, i) => (
 					<div
 						key={i}
-						className='bg-chart-1 absolute h-2 w-2 animate-pulse rounded-full opacity-30'
+						className='bg-success absolute h-2 w-2 animate-pulse rounded-full opacity-30'
 						style={{
 							left: `${25 + i * 20}%`,
 							top: `${15 + (i % 2) * 15}%`,
@@ -117,11 +117,11 @@ const AlertModal: React.FC<AlertModalProps> = ({
 			<AnimatedIcon
 				className={clsx(
 					'mx-auto flex h-20 w-20 items-center justify-center rounded-full',
-					'bg-chart-1/10 border-chart-1/20 mb-6 border-2'
+					'bg-success/10 border-success/20 mb-6 border-2'
 				)}
 				type='pulse'
 			>
-				<CheckCircle className='text-chart-1 h-10 w-10' />
+				<CheckCircle className='text-success h-10 w-10' />
 			</AnimatedIcon>
 			<h3 className='text-foreground mb-4 text-2xl font-bold'>
 				{successTitle}
@@ -132,7 +132,7 @@ const AlertModal: React.FC<AlertModalProps> = ({
 			<button
 				onClick={onClose}
 				className={clsx(
-					'bg-chart-1 w-full rounded-2xl px-6 py-4 text-white',
+					'bg-success w-full rounded-2xl px-6 py-4 text-white',
 					'hover:bg-chart-1/90 font-semibold transition-all duration-200'
 				)}
 			>

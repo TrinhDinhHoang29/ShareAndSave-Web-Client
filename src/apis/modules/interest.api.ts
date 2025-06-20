@@ -2,6 +2,7 @@ import { EInterestType } from '@/models/enums'
 import {
 	IApiResponse,
 	IListTypeParams,
+	IPostInterest,
 	IPostInterestResponse
 } from '@/models/interfaces'
 
@@ -26,6 +27,11 @@ const interestApi = {
 	},
 	async delete(postID: number): Promise<IApiResponse<{ interestID: number }>> {
 		return axiosPrivate.delete(interestEndpoints.common + '/' + postID)
+	},
+	detail(
+		interestID: number
+	): Promise<IApiResponse<{ interest: IPostInterest }>> {
+		return axiosPrivate.get(interestEndpoints.common + '/' + interestID)
 	}
 }
 

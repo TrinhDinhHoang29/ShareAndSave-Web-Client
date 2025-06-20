@@ -11,7 +11,7 @@ const MessageStatusIndicator = React.memo(
 		switch (message.status) {
 			case EMessageStatus.SENDING:
 				return (
-					<div className='text-muted-foreground flex items-center text-xs'>
+					<div className='text-muted-foreground flex items-center justify-end text-xs'>
 						<div className='border-muted-foreground mr-1 h-3 w-3 animate-spin rounded-full border border-t-transparent' />
 						Đang gửi...
 					</div>

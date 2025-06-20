@@ -4,10 +4,10 @@ import { useRoutes } from 'react-router-dom'
 import Loading from '@/components/common/Loading'
 import LayoutDefault from '@/components/layout'
 import Chat from '@/pages/chat'
+import Home from '@/pages/home'
 
 import PrivateRoute from './private.route'
 // Lazy load các components
-const Home = lazy(() => import('@/pages/home'))
 const PostAction = lazy(() => import('@/pages/post-action'))
 const SendRequest = lazy(() => import('@/pages/profile/send-request/send'))
 const Interest = lazy(() => import('@/pages/interest'))
@@ -22,12 +22,13 @@ const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
 	return (
 		<Suspense
 			fallback={
-				<Loading
-					position='in'
-					size='lg'
-					color='primary'
-					text='Đang tải...'
-				/>
+				<div className='flex items-center justify-center py-12'>
+					<Loading
+						size='lg'
+						color='primary'
+						text='Đang tải...'
+					/>
+				</div>
 			}
 		>
 			{children}
@@ -105,7 +106,7 @@ function AppRouter() {
 					)
 				},
 				{
-					path: '/chat/:postID/:interestID',
+					path: '/chat/:interestID',
 					element: (
 						<PrivateRoute>
 							<Chat />

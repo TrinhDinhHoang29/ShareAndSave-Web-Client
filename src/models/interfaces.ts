@@ -175,7 +175,10 @@ export interface IUserInterest {
 	userID: number
 	userName: string
 	createdAt: string
-	unreadMessageCount: number
+	unreadMessageCount?: number
+	messageFromID?: number
+	newMessage?: string
+	newMessageIsRead?: number
 }
 
 export interface IPostInterest {
@@ -183,6 +186,7 @@ export interface IPostInterest {
 	title: string
 	authorID: number
 	authorName: string
+	authorAvatar: string
 	description: string
 	slug: string
 	type: EPostType
@@ -265,6 +269,7 @@ export interface IPostInterestResponse {
 export interface IReceiver {
 	id: number
 	name: string
+	avatar: string
 }
 
 export interface ITransactionItem {
@@ -297,6 +302,7 @@ export interface ITransaction {
 	items: ITransactionItem[]
 	createdAt: string
 	updatedAt: string
+	method?: string
 }
 
 export interface ITransactionRequest {
@@ -305,6 +311,7 @@ export interface ITransactionRequest {
 		postItemID: number
 		quantity: number
 	}[]
+	method?: string
 	status?: number
 }
 
@@ -367,4 +374,11 @@ export interface IChatMessagesPanel {
 		data?: ISocketMessageResponse
 		status: 'success' | 'error'
 	}
+	connectionStatus: 'connected' | 'connecting' | 'disconnected' | 'reconnecting'
+	onReconnect: () => void
+}
+
+export interface IOption {
+	value: string
+	label: string
 }

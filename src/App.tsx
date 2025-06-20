@@ -20,12 +20,12 @@ function App() {
 				// Chỉ gọi syncAuthState nếu có token
 				const accessToken = getAccessToken()
 				const refreshToken = getRefreshToken()
-				if (accessToken || refreshToken) {
-					if (refreshToken) {
-						const response = await authApi.refreshToken({ refreshToken })
-						const jwt = response.data.jwt
-						setAccessToken(jwt)
-					}
+				if (accessToken) {
+					await syncAuthState()
+				} else if (refreshToken) {
+					const response = await authApi.refreshToken({ refreshToken })
+					const jwt = response.data.jwt
+					setAccessToken(jwt)
 					await syncAuthState()
 				} else {
 					useAuthStore.setState({ user: null, isAuthenticated: false }) // Sử dụng setState từ store

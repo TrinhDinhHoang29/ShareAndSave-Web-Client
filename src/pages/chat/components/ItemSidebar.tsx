@@ -6,6 +6,18 @@ import React from 'react'
 import { ETransactionStatus } from '@/models/enums'
 import { IItem, ITransactionItem } from '@/models/interfaces'
 
+// Method options
+export const methodOptions = [
+	{
+		value: 'Gặp trực tiếp',
+		label: 'Gặp trực tiếp'
+	},
+	{
+		value: 'Giao hàng',
+		label: 'Giao hàng'
+	}
+]
+
 interface Props {
 	items: IItem[]
 	selectedItems: ITransactionItem[]
@@ -14,7 +26,7 @@ interface Props {
 	handleItemSelect: (item: IItem) => void
 	handleQuantityChange: (itemId: number, change: number) => void
 	handleRemoveSelectedItem: (itemId: number) => void
-	handleSendRequest: () => void
+	handleSendRequest: (method: string) => void
 	setSelectedItems: React.Dispatch<React.SetStateAction<ITransactionItem[]>>
 	handleConfirmTransaction: (status: ETransactionStatus) => void
 }
@@ -31,12 +43,17 @@ const ItemSidebar = ({
 	setSelectedItems,
 	handleConfirmTransaction
 }: Props) => {
+	const [selectedMethod, setSelectedMethod] = React.useState<string>(
+		methodOptions[0].value
+	)
+
 	if (items.length === 0) return null
 	transactionStatus = transactionStatus.toString() as ETransactionStatus
+
 	return (
 		<div className='border-border/50 bg-muted/30 flex w-80 flex-col border-l'>
 			{transactionStatus === ETransactionStatus.DEFAULT && !isAuthor && (
-				<div className='border-border from-primary/5 to-chart-1/5 border-b bg-gradient-to-r p-4'>
+				<div className='border-border from-primary/5 to-success/5 border-b bg-gradient-to-r p-4'>
 					<h3 className='text-foreground mb-1 flex items-center gap-2 font-semibold'>
 						<Package className='text-primary h-5 w-5' />
 						Vật phẩm có sẵn
@@ -109,8 +126,56 @@ const ItemSidebar = ({
 								))}
 							</div>
 
+							{/* Method Selection Radio Group */}
+							<div className='mb-3'>
+								<h4 className='text-primary mb-2 text-sm font-medium'>
+									Phương thức giao dịch
+								</h4>
+								<div className='flex items-center gap-2'>
+									{methodOptions.map(option => (
+										<label
+											key={option.value}
+											className='group flex cursor-pointer items-center gap-2'
+										>
+											<div className='relative'>
+												<input
+													type='radio'
+													name='transactionMethod'
+													value={option.value}
+													checked={selectedMethod === option.value}
+													onChange={e => setSelectedMethod(e.target.value)}
+													className='sr-only'
+												/>
+												<div
+													className={clsx(
+														'h-4 w-4 rounded-full border-2 transition-all duration-200',
+														selectedMethod === option.value
+															? 'border-primary bg-primary'
+															: 'border-muted-foreground group-hover:border-primary'
+													)}
+												>
+													{selectedMethod === option.value && (
+														<div className='h-full w-full scale-50 rounded-full bg-white' />
+													)}
+												</div>
+											</div>
+											<span
+												className={clsx(
+													'text-xs font-medium transition-colors duration-200',
+													selectedMethod === option.value
+														? 'text-primary'
+														: 'text-muted-foreground group-hover:text-foreground'
+												)}
+											>
+												{option.label}
+											</span>
+										</label>
+									))}
+								</div>
+							</div>
+
 							<button
-								onClick={handleSendRequest}
+								onClick={() => handleSendRequest(selectedMethod)}
 								className='bg-primary hover:bg-primary/90 text-primary-foreground flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium shadow-lg hover:shadow-xl'
 							>
 								<Send className='h-4 w-4' />
@@ -121,14 +186,7 @@ const ItemSidebar = ({
 				</div>
 			)}
 
-			<div
-				className={clsx(
-					'flex-1 space-y-3 overflow-y-auto p-4'
-					// transactionStatus === ETransactionStatus.DEFAULT || isAuthor
-					//   ? 'max-h-56'
-					//   : 'max-h-full'
-				)}
-			>
+			<div className={clsx('flex-1 space-y-3 overflow-y-auto p-4')}>
 				{items.map(item => {
 					const isSelected = selectedItems.some(
 						selected => selected.itemID === item.itemID
@@ -210,7 +268,7 @@ const ItemSidebar = ({
 						Từ chối
 					</button>
 					<button
-						className='bg-chart-1 rounded-md px-4 py-2 text-white'
+						className='bg-success rounded-md px-4 py-2 text-white'
 						onClick={() => handleConfirmTransaction(ETransactionStatus.SUCCESS)}
 					>
 						Hoàn tất

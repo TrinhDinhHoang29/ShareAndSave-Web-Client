@@ -3,7 +3,6 @@
 import clsx from 'clsx'
 import { motion } from 'framer-motion'
 import {
-	ArrowLeft,
 	ArrowLeftRight,
 	Check,
 	ChevronLeft,
@@ -14,6 +13,7 @@ import {
 	Minus,
 	Package,
 	Plus,
+	User,
 	X
 } from 'lucide-react'
 import React, { useState } from 'react'
@@ -27,14 +27,14 @@ import { TransactionsDialog } from './TransactionDialog'
 import { TutorialTransactionDialog } from './TutorialTransactionDialog'
 
 interface Props {
-	receiver: IReceiver
+	method: string
+	receiver?: IReceiver
 	postTitle: string
 	transactionItems: ITransactionItem[]
 	currentRequestIndex: number
 	isRequestsVisible: boolean
 	transactionStatus: ETransactionStatus
 	isAuthor: boolean
-	onClose: () => void
 	toggleRequestsVisibility: () => void
 	handlePrevRequest: () => void
 	handleNextRequest: () => void
@@ -52,6 +52,7 @@ interface Props {
 }
 
 const ChatHeaderWithRequests = ({
+	method,
 	receiver,
 	postTitle,
 	transactionItems,
@@ -59,7 +60,6 @@ const ChatHeaderWithRequests = ({
 	isRequestsVisible,
 	transactionStatus,
 	isAuthor,
-	onClose,
 	toggleRequestsVisibility,
 	handlePrevRequest,
 	handleNextRequest,
@@ -102,26 +102,32 @@ const ChatHeaderWithRequests = ({
 				{/* Header với nút quay lại */}
 				<div className='flex items-center justify-between'>
 					<div className='flex items-center space-x-3'>
-						<button
-							onClick={onClose}
-							className='hover:bg-primary-foreground/20 rounded-full p-2'
-						>
-							<ArrowLeft className='text-primary-foreground h-6 w-6' />
-						</button>
+						<div className='flex h-12 w-12 items-center justify-center rounded-full bg-gray-200'>
+							{receiver?.avatar ? (
+								<img
+									src={receiver.avatar}
+									alt={`${receiver?.name} avatar`}
+									className='h-full w-full rounded-full object-cover'
+								/>
+							) : (
+								<User className='text-secondary h-5 w-5' /> // Placeholder nếu không có avatar
+							)}
+						</div>
 						<div>
 							<h3 className='font-manrope text-lg font-semibold'>
-								{receiver.name}
+								{receiver?.name}
 							</h3>
 							<p className='text-primary-foreground/90 text-sm'>{postTitle}</p>
 						</div>
 					</div>
 					<div className='flex items-center gap-2'>
+						{/* Hiển thị method ở đây */}
 						<button
 							title='Hướng dẫn giao dịch'
 							onClick={() => setIsTutorialTransactionDialogOpen(true)}
 							className='bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200'
 						>
-							<CircleHelp className='h-6 w-6' />
+							<span>Hướng dẫn</span> <CircleHelp className='h-5 w-5' />
 						</button>
 						<div className='relative'>
 							<button
@@ -129,7 +135,7 @@ const ChatHeaderWithRequests = ({
 								onClick={() => setIsTransactionDialogOpen(true)}
 								className='bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200'
 							>
-								<ArrowLeftRight className='h-6 w-6' />
+								<span>Giao dịch</span> <ArrowLeftRight className='h-5 w-5' />
 							</button>
 							{transactionID ? (
 								<div className='bg-chart-2 text-primary-foreground absolute -top-2 -right-2 rounded-full px-2 py-1 text-sm font-medium shadow-lg'>
@@ -159,6 +165,9 @@ const ChatHeaderWithRequests = ({
 								)}
 							</h4>
 							<div className='flex items-center gap-2'>
+								<div className='bg-foreground text-accent flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200'>
+									{method}
+								</div>
 								<button
 									onClick={toggleRequestsVisibility}
 									className='bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200'
@@ -193,7 +202,7 @@ const ChatHeaderWithRequests = ({
 										disabled={isCreateTransactionPending}
 										onClick={handleConfirmRequest}
 										className={clsx(
-											'bg-chart-1/90 hover:bg-chart-1 flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white shadow-lg hover:shadow-xl'
+											'bg-success/90 hover:bg-success flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white shadow-lg hover:shadow-xl'
 										)}
 									>
 										{isCreateTransactionPending ? (

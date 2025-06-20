@@ -35,7 +35,7 @@ const Download = () => {
 								<div className='flex items-center space-x-1'>
 									<div className='bg-muted-foreground h-2 w-4 rounded-sm'></div>
 									<div className='bg-muted-foreground h-2 w-6 rounded-sm'></div>
-									<div className='bg-chart-1 h-2 w-6 rounded-sm'></div>
+									<div className='bg-success h-2 w-6 rounded-sm'></div>
 								</div>
 							</div>
 
@@ -91,8 +91,8 @@ const Download = () => {
 									</div>
 
 									<div className='bg-card/80 border-border/50 flex items-center space-x-3 rounded-lg border p-2 backdrop-blur-sm'>
-										<div className='bg-chart-1/20 flex h-8 w-8 items-center justify-center rounded-lg'>
-											<Search className='text-chart-1 h-3 w-3' />
+										<div className='bg-success/20 flex h-8 w-8 items-center justify-center rounded-lg'>
+											<Search className='text-success h-3 w-3' />
 										</div>
 										<div className='flex-1'>
 											<div className='text-foreground text-xs font-medium'>
