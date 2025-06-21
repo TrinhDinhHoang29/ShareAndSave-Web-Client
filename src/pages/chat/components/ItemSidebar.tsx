@@ -3,20 +3,9 @@ import { motion } from 'framer-motion'
 import { Check, Minus, Package, Plus, Send, X } from 'lucide-react'
 import React from 'react'
 
-import { ETransactionStatus } from '@/models/enums'
+import { EMethod, ETransactionStatus } from '@/models/enums'
 import { IItem, ITransactionItem } from '@/models/interfaces'
-
-// Method options
-export const methodOptions = [
-	{
-		value: 'Gặp trực tiếp',
-		label: 'Gặp trực tiếp'
-	},
-	{
-		value: 'Giao hàng',
-		label: 'Giao hàng'
-	}
-]
+import { methodOptions } from '@/models/options'
 
 interface Props {
 	items: IItem[]
@@ -26,7 +15,7 @@ interface Props {
 	handleItemSelect: (item: IItem) => void
 	handleQuantityChange: (itemId: number, change: number) => void
 	handleRemoveSelectedItem: (itemId: number) => void
-	handleSendRequest: (method: string) => void
+	handleSendRequest: (method: EMethod) => void
 	setSelectedItems: React.Dispatch<React.SetStateAction<ITransactionItem[]>>
 	handleConfirmTransaction: (status: ETransactionStatus) => void
 }
@@ -43,8 +32,8 @@ const ItemSidebar = ({
 	setSelectedItems,
 	handleConfirmTransaction
 }: Props) => {
-	const [selectedMethod, setSelectedMethod] = React.useState<string>(
-		methodOptions[0].value
+	const [selectedMethod, setSelectedMethod] = React.useState<EMethod>(
+		methodOptions[0].value as EMethod
 	)
 
 	if (items.length === 0) return null
@@ -63,124 +52,100 @@ const ItemSidebar = ({
 					</p>
 
 					{selectedItems.length > 0 && (
-						<div className='bg-primary/10 border-primary/20 mb-3 rounded-lg border p-3'>
-							<div className='mb-2 flex items-center justify-between'>
-								<span className='text-primary text-sm font-medium'>
-									Đã chọn: {selectedItems.length} vật phẩm
-								</span>
-								<button
-									onClick={() => setSelectedItems([])}
-									className='text-muted-foreground hover:text-foreground text-xs'
-								>
-									Xóa tất cả
-								</button>
-							</div>
-
-							<div className='mb-3 max-h-28 space-y-2 overflow-y-auto'>
-								{selectedItems.map(item => (
-									<div
-										key={item.itemID || 0}
-										className='bg-background/50 flex items-center gap-2 rounded-md p-2'
-									>
-										<img
-											src={item.itemImage}
-											alt={item.itemName}
-											className='h-8 w-8 rounded object-cover'
-										/>
-										<div className='min-w-0 flex-1'>
-											<p className='truncate text-xs font-medium'>
-												{item.itemName}
-											</p>
-										</div>
-										<div className='flex items-center gap-1'>
-											<button
-												onClick={() =>
-													handleQuantityChange(item.itemID || 0, -1)
-												}
-												className='bg-muted hover:bg-muted/80 flex h-6 w-6 items-center justify-center rounded'
-											>
-												<Minus className='h-3 w-3' />
-											</button>
-											<span className='w-6 text-center text-xs font-medium'>
-												{item.quantity}
-											</span>
-											<button
-												onClick={() =>
-													handleQuantityChange(item.itemID || 0, 1)
-												}
-												disabled={item.quantity >= (item.currentQuantity || 1)}
-												className='bg-muted hover:bg-muted/80 flex h-6 w-6 items-center justify-center rounded disabled:opacity-50'
-											>
-												<Plus className='h-3 w-3' />
-											</button>
-											<button
-												onClick={() =>
-													handleRemoveSelectedItem(item.itemID || 0)
-												}
-												className='ml-1 text-red-500 hover:text-red-700'
-											>
-												<X className='h-3 w-3' />
-											</button>
-										</div>
-									</div>
-								))}
-							</div>
-
-							{/* Method Selection Radio Group */}
-							<div className='mb-3'>
-								<h4 className='text-primary mb-2 text-sm font-medium'>
-									Phương thức giao dịch
-								</h4>
-								<div className='flex items-center gap-2'>
+						<div className='bg-primary/10 border-primary/20 mb-3 rounded-lg border'>
+							{/* Method Selection Tabs - Moved to top */}
+							<div>
+								<div className='bg-muted flex rounded-lg p-1'>
 									{methodOptions.map(option => (
-										<label
+										<div
 											key={option.value}
-											className='group flex cursor-pointer items-center gap-2'
+											onClick={() => setSelectedMethod(option.value)}
+											className={clsx(
+												'flex-1 cursor-pointer rounded-md px-3 py-2 text-center text-xs font-medium transition-all duration-200',
+												selectedMethod === option.value
+													? 'bg-primary text-primary-foreground shadow-sm'
+													: 'text-muted-foreground hover:text-foreground hover:bg-background/50'
+											)}
 										>
-											<div className='relative'>
-												<input
-													type='radio'
-													name='transactionMethod'
-													value={option.value}
-													checked={selectedMethod === option.value}
-													onChange={e => setSelectedMethod(e.target.value)}
-													className='sr-only'
-												/>
-												<div
-													className={clsx(
-														'h-4 w-4 rounded-full border-2 transition-all duration-200',
-														selectedMethod === option.value
-															? 'border-primary bg-primary'
-															: 'border-muted-foreground group-hover:border-primary'
-													)}
-												>
-													{selectedMethod === option.value && (
-														<div className='h-full w-full scale-50 rounded-full bg-white' />
-													)}
-												</div>
-											</div>
-											<span
-												className={clsx(
-													'text-xs font-medium transition-colors duration-200',
-													selectedMethod === option.value
-														? 'text-primary'
-														: 'text-muted-foreground group-hover:text-foreground'
-												)}
-											>
-												{option.label}
-											</span>
-										</label>
+											{option.label}
+										</div>
 									))}
 								</div>
 							</div>
 
-							<button
-								onClick={() => handleSendRequest(selectedMethod)}
-								className='bg-primary hover:bg-primary/90 text-primary-foreground flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium shadow-lg hover:shadow-xl'
-							>
-								<Send className='h-4 w-4' />
-								Gửi yêu cầu trao đổi
-							</button>
+							<div className='p-3'>
+								<div className='mb-2 flex items-center justify-between'>
+									<span className='text-primary text-sm font-medium'>
+										Đã chọn: {selectedItems.length} vật phẩm
+									</span>
+									<button
+										onClick={() => setSelectedItems([])}
+										className='text-muted-foreground hover:text-foreground text-xs'
+									>
+										Xóa tất cả
+									</button>
+								</div>
+
+								<div className='mb-3 max-h-28 space-y-2 overflow-y-auto'>
+									{selectedItems.map(item => (
+										<div
+											key={item.itemID || 0}
+											className='bg-background/50 flex items-center gap-2 rounded-md p-2'
+										>
+											<img
+												src={item.itemImage}
+												alt={item.itemName}
+												className='h-8 w-8 rounded object-cover'
+											/>
+											<div className='min-w-0 flex-1'>
+												<p className='truncate text-xs font-medium'>
+													{item.itemName}
+												</p>
+											</div>
+											<div className='flex items-center gap-1'>
+												<button
+													onClick={() =>
+														handleQuantityChange(item.itemID || 0, -1)
+													}
+													className='bg-muted hover:bg-muted/80 flex h-6 w-6 items-center justify-center rounded'
+												>
+													<Minus className='h-3 w-3' />
+												</button>
+												<span className='w-6 text-center text-xs font-medium'>
+													{item.quantity}
+												</span>
+												<button
+													onClick={() =>
+														handleQuantityChange(item.itemID || 0, 1)
+													}
+													disabled={
+														item.quantity >= (item.currentQuantity || 1)
+													}
+													className='bg-muted hover:bg-muted/80 flex h-6 w-6 items-center justify-center rounded disabled:opacity-50'
+												>
+													<Plus className='h-3 w-3' />
+												</button>
+												<button
+													onClick={() =>
+														handleRemoveSelectedItem(item.itemID || 0)
+													}
+													className='ml-1 text-red-500 hover:text-red-700'
+												>
+													<X className='h-3 w-3' />
+												</button>
+											</div>
+										</div>
+									))}
+								</div>
+
+								<button
+									onClick={() => handleSendRequest(selectedMethod)}
+									className='bg-primary hover:bg-primary/90 text-primary-foreground flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium shadow-lg hover:shadow-xl'
+								>
+									<Send className='h-4 w-4' />
+									Tạo giao dịch
+								</button>
+							</div>
 						</div>
 					)}
 				</div>
@@ -260,7 +225,7 @@ const ItemSidebar = ({
 			{isAuthor && transactionStatus === ETransactionStatus.PENDING && (
 				<div className='grid grid-cols-2 gap-2 p-4'>
 					<button
-						className='bg-chart-3 rounded-md px-4 py-2 text-white'
+						className='bg-error rounded-md px-4 py-2 text-white'
 						onClick={() =>
 							handleConfirmTransaction(ETransactionStatus.CANCELLED)
 						}
@@ -272,6 +237,18 @@ const ItemSidebar = ({
 						onClick={() => handleConfirmTransaction(ETransactionStatus.SUCCESS)}
 					>
 						Hoàn tất
+					</button>
+				</div>
+			)}
+			{isAuthor && transactionStatus === ETransactionStatus.SUCCESS && (
+				<div className='p-4'>
+					<button
+						className='bg-error w-full rounded-md px-4 py-2 text-white'
+						onClick={() =>
+							handleConfirmTransaction(ETransactionStatus.REJECTED)
+						}
+					>
+						Hủy giao dịch
 					</button>
 				</div>
 			)}

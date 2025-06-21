@@ -12,7 +12,8 @@ import {
 import { useDetailPostInterestQuery } from '@/hooks/queries/use-interest.query'
 import { useListTransactionQuery } from '@/hooks/queries/use-transaction.query'
 import { getAccessToken } from '@/lib/token'
-import { ESortOrder, ETransactionStatus } from '@/models/enums'
+import { getConfirmContentTransactionStatus } from '@/models/constants'
+import { EMethod, ESortOrder, ETransactionStatus } from '@/models/enums'
 import {
 	IReceiver,
 	ISocketMessageResponse,
@@ -276,9 +277,11 @@ const Chat = () => {
 		}),
 		[interestID, postDetailInterestData]
 	)
-
-	const [selectedMethod, setSelectedMethod] = useState<string>('Gặp trực tiếp')
-	const handleSendRequest = (method: string) => {
+	const [selectedTransactionID, setSelectedTransactionID] = useState<number>(0)
+	const [selectedMethod, setSelectedMethod] = useState<EMethod>(
+		EMethod.IN_PERSON
+	)
+	const handleSendRequest = (method: EMethod) => {
 		if (selectedItems.length > 0) {
 			setSelectedMethod(method) // Store the selected method
 			setTransactionItems([...transactionItems, ...selectedItems])
@@ -322,14 +325,14 @@ const Chat = () => {
 	const [transactionStatus, setTransactionStatus] =
 		useState<ETransactionStatus>(ETransactionStatus.DEFAULT)
 
-	const transactionID = useMemo(() => {
-		if (transactionData) {
-			return (transactions[0]?.status.toString() as ETransactionStatus) ===
+	const isPendingTransaction = useMemo(() => {
+		if (transactions && transactions.length > 0) {
+			return (
+				(transactions[0]?.status.toString() as ETransactionStatus) ===
 				ETransactionStatus.PENDING
-				? transactions[0].id
-				: 0
+			)
 		}
-		return 0
+		return false
 	}, [transactions])
 
 	const {
@@ -347,14 +350,17 @@ const Chat = () => {
 		onSuccess: (status: ETransactionStatus) => {
 			setTransactionStatus(status)
 			transactionDataRefetch()
-			if (status === ETransactionStatus.SUCCESS) {
+			if (
+				status === ETransactionStatus.SUCCESS ||
+				status === ETransactionStatus.REJECTED
+			) {
 				postDetailDataRefetch()
 			}
 		}
 	})
 
 	const handleConfirmRequest = async () => {
-		if (transactionData && !isAuthor && transactionID) {
+		if (transactionData && !isAuthor && isPendingTransaction) {
 			showInfo({
 				infoTitle: 'Bạn đang ở trong 1 giao dịch.',
 				infoMessage:
@@ -373,7 +379,7 @@ const Chat = () => {
 				method: selectedMethod // Add method here
 			}
 			updateTransactionMutation({
-				transactionID,
+				transactionID: selectedTransactionID,
 				data: transactionRequest
 			})
 		} else {
@@ -401,20 +407,17 @@ const Chat = () => {
 	}
 
 	const handleConfirmTransaction = async (status: ETransactionStatus) => {
+		const contentStatus = getConfirmContentTransactionStatus(status)
 		showConfirm({
 			confirmButtonText: 'Xác nhận',
-			confirmMessage:
-				'Hành động này không thể hoàn tác. Bạn cần cân nhắc trước khi xác nhận',
-			confirmTitle:
-				status === ETransactionStatus.SUCCESS
-					? 'Xác nhận hoàn tất giao dịch?'
-					: 'Xác nhận từ chối giao dịch?',
+			confirmMessage: contentStatus.message,
+			confirmTitle: contentStatus.title,
 			onConfirm: async () => {
 				const transactionRequest: ITransactionRequest = {
 					status: Number(status)
 				}
 				updateTransactionMutation({
-					transactionID,
+					transactionID: selectedTransactionID,
 					data: transactionRequest
 				})
 			},
@@ -423,6 +426,7 @@ const Chat = () => {
 	}
 
 	const handleApplyItemTransactions = (index: number) => {
+		console.log(index)
 		if (transactionData) {
 			const transactionItems = transactions[index].items
 			const updatedCurrentQuantityTransactionItems = transactionItems.map(
@@ -436,6 +440,10 @@ const Chat = () => {
 			const status = transactions[index].status.toString() as ETransactionStatus
 			setTransactionItems(updatedCurrentQuantityTransactionItems)
 			setTransactionStatus(status)
+			setSelectedMethod(
+				(transactions[index].method as EMethod) || EMethod.IN_PERSON
+			)
+			setSelectedTransactionID(transactions[index].id)
 		}
 	}
 
@@ -454,6 +462,9 @@ const Chat = () => {
 					<div className='flex w-full overflow-hidden rounded-2xl shadow-md'>
 						<div className='flex w-full flex-1 flex-col'>
 							<ChatHeaderWithRequests
+								setSelectedMethod={(method: EMethod) =>
+									setSelectedMethod(method)
+								}
 								method={selectedMethod}
 								receiver={receiver}
 								postTitle={postDetailInterestData?.title || ''}
@@ -509,7 +520,7 @@ const Chat = () => {
 								hasNextPage={transactionHasNextPage}
 								isFetchingNextPage={isTransactionFetchingNextPage}
 								sentinelRef={transactionRef}
-								transactionID={transactionID}
+								isPendingTransaction={isPendingTransaction}
 							/>
 							<ChatMessagesPanel
 								socketMessageResponse={socketMessageResponse}

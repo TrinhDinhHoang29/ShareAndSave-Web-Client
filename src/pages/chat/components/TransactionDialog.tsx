@@ -36,7 +36,7 @@ const TransactionItem = ({
 	const [isExpanded, setIsExpanded] = useState(false)
 	const status = transaction.status.toString() as ETransactionStatus
 	const statusConfig = getTransactionStatusConfig(isAuthor, status)
-	const StatusIcon = statusConfig.icon
+	const { Icon: StatusIcon } = statusConfig
 
 	const handleToggle = () => {
 		setIsExpanded(!isExpanded)
@@ -53,7 +53,9 @@ const TransactionItem = ({
 			{/* Collapse Header */}
 			<div
 				onClick={
-					isAuthor && status === ETransactionStatus.PENDING
+					isAuthor &&
+					(status === ETransactionStatus.PENDING ||
+						status === ETransactionStatus.SUCCESS)
 						? handleApplyTransactions
 						: handleToggle
 				}
@@ -76,13 +78,23 @@ const TransactionItem = ({
 					</div>
 
 					<div className='flex items-center gap-4'>
+						{transaction.method && (
+							<div
+								className={`bg-primary/80 text-primary-foreground flex items-center gap-2 rounded-full p-2 text-xs font-medium`}
+							>
+								<span>{transaction.method}</span>
+							</div>
+						)}
+
 						<div
 							className={`flex items-center gap-2 rounded-full p-2 text-xs font-medium ${statusConfig.background} ${statusConfig.textColor}`}
 						>
 							<StatusIcon className='h-3 w-3' />
 							<span>{statusConfig.label}</span>
 						</div>
-						{((isAuthor && status !== ETransactionStatus.PENDING) ||
+						{((isAuthor &&
+							status !== ETransactionStatus.PENDING &&
+							status !== ETransactionStatus.SUCCESS) ||
 							!isAuthor) && (
 							<ChevronDown
 								className={`text-muted-foreground h-5 w-5 transition-transform duration-200 ${

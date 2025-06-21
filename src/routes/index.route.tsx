@@ -16,6 +16,7 @@ const Post = lazy(() => import('@/pages/post'))
 const LoginSession = lazy(() => import('@/pages/login-session'))
 const Dowload = lazy(() => import('@/pages/dowload'))
 const EditProfile = lazy(() => import('@/pages/profile/edit-profile'))
+const Leaderboard = lazy(() => import('@/pages/leader-board'))
 
 // Error Boundary Component
 const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
@@ -102,6 +103,14 @@ function AppRouter() {
 					element: (
 						<ErrorBoundary>
 							<Dowload />
+						</ErrorBoundary>
+					)
+				},
+				{
+					path: 'bang-xep-hang',
+					element: (
+						<ErrorBoundary>
+							<Leaderboard />
 						</ErrorBoundary>
 					)
 				},

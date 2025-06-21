@@ -1,12 +1,10 @@
 import clsx from 'clsx'
 import {
-	Check,
 	ChevronDown,
 	Clock,
 	MessageCircle,
 	MessageCircleWarning,
-	User,
-	X
+	User
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -15,13 +13,46 @@ import { useAlertModalContext } from '@/context/alert-modal-context'
 import { useUpdateTransactionMutation } from '@/hooks/mutations/use-transaction.mutation'
 import { useListTransactionQuery } from '@/hooks/queries/use-transaction.query'
 import { formatNearlyDateTimeVN } from '@/lib/utils'
+import {
+	getConfirmContentTransactionStatus,
+	getTransactionStatusConfig
+} from '@/models/constants'
 import { ESortOrder, ETransactionStatus } from '@/models/enums'
 import {
+	ITransaction,
 	ITransactionParams,
 	ITransactionRequest,
 	IUserInterest
 } from '@/models/interfaces'
 import useAuthStore from '@/stores/authStore'
+
+const ButtonStatus = ({
+	handleClick,
+	type
+}: {
+	handleClick: () => void
+	type: ETransactionStatus
+}) => {
+	const { Icon, background, textColor, label } = getTransactionStatusConfig(
+		true,
+		type
+	)
+	return (
+		<button
+			onClick={handleClick}
+			className={clsx(
+				'flex w-full items-center space-x-2 px-4 py-2 text-sm font-medium transition-colors',
+				background,
+				textColor
+			)}
+		>
+			<div className='flex h-8 w-8 items-center justify-center rounded-full'>
+				<Icon className='h-4 w-4' />
+			</div>
+			<span>{label}</span>
+		</button>
+	)
+}
 
 export const InterestItem = ({
 	userInterest,
@@ -35,7 +66,8 @@ export const InterestItem = ({
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 	const { user } = useAuthStore()
 	const { showConfirm } = useAlertModalContext()
-	const [isPendingTransaction, setIsPendingTransaction] = useState(false)
+	const [latestTransaction, setLatestTransaction] =
+		useState<ITransaction | null>(null)
 
 	const params: ITransactionParams = useMemo(
 		() => ({
@@ -54,23 +86,11 @@ export const InterestItem = ({
 		return transactionData?.pages.flatMap(page => page.transactions) || []
 	}, [transactionData])
 
-	const latestTransaction = useMemo(() => {
-		return transactions.length > 0 ? transactions[0] : null
-	}, [transactions])
 	useEffect(() => {
 		if (transactions && transactions.length > 0) {
-			const status = transactions[0].status.toString() as ETransactionStatus
-			setIsPendingTransaction(status === ETransactionStatus.PENDING)
+			setLatestTransaction(transactions[0])
 		}
 	}, [transactions])
-
-	// const isPendingTransaction = useMemo(() => {
-	// 	if (transactions && transactions.length > 0) {
-	// 		const status = transactions[0].status.toString() as ETransactionStatus
-	// 		return status === ETransactionStatus.PENDING
-	// 	}
-	// 	return false
-	// }, [transactions])
 
 	const itemsText = useMemo(() => {
 		if (!latestTransaction?.items || latestTransaction.items.length === 0) {
@@ -91,21 +111,31 @@ export const InterestItem = ({
 		return fullText
 	}, [latestTransaction])
 
+	const transactionStatusConfig = useMemo(() => {
+		if (latestTransaction)
+			return getTransactionStatusConfig(
+				true,
+				latestTransaction?.status || ETransactionStatus.DEFAULT
+			)
+	}, [latestTransaction])
+
 	const { mutate: updateTransactionMutation } = useUpdateTransactionMutation({
 		onSuccess: (status: ETransactionStatus) => {
-			setIsPendingTransaction(true)
+			if (latestTransaction) {
+				setLatestTransaction({
+					...latestTransaction,
+					status
+				})
+			}
 		}
 	})
 
 	const handleConfirmTransaction = async (status: ETransactionStatus) => {
+		const content = getConfirmContentTransactionStatus(status)
 		showConfirm({
 			confirmButtonText: 'Xác nhận',
-			confirmMessage:
-				'Hành động này không thể hoàn tác. Bạn cần cân nhắc trước khi xác nhận',
-			confirmTitle:
-				status === ETransactionStatus.SUCCESS
-					? 'Xác nhận hoàn tất giao dịch?'
-					: 'Xác nhận từ chối giao dịch?',
+			confirmMessage: content.message,
+			confirmTitle: content.title,
 			onConfirm: async () => {
 				const transactionRequest: ITransactionRequest = {
 					status: Number(status)
@@ -120,7 +150,7 @@ export const InterestItem = ({
 	}
 
 	return (
-		<div className='border-border bg-card relative space-y-2 rounded-xl border p-4 shadow-sm transition-shadow duration-200 hover:shadow-md'>
+		<div className='border-border bg-card relative space-y-4 rounded-xl border p-4 shadow-sm transition-shadow duration-200 hover:shadow-md'>
 			<div className='flex items-center justify-between'>
 				<div className='flex items-center space-x-4'>
 					<div className='flex h-12 w-12 items-center justify-center rounded-full bg-gray-200'>
@@ -134,7 +164,15 @@ export const InterestItem = ({
 							<User className='text-secondary h-5 w-5' />
 						)}
 					</div>
-					<div className='flex-1'>
+					<div className='flex-1 space-y-1'>
+						{latestTransaction?.method && (
+							<span
+								className={`bg-primary text-primary-foreground inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium`}
+							>
+								{latestTransaction.method}
+							</span>
+						)}
+
 						<div className='flex items-center gap-2'>
 							<p className='text-foreground font-semibold'>
 								{userInterest.userName}
@@ -145,62 +183,100 @@ export const InterestItem = ({
 							</div>
 						</div>
 
-						{latestTransaction && (
-							<div className='mt-2 space-y-1 text-sm'>
-								{latestTransaction.method && (
-									<div className='text-muted-foreground'>
-										<span className='font-medium'>Phương thức:</span>{' '}
-										{latestTransaction.method}
-									</div>
-								)}
-								{itemsText && (
-									<div className='text-muted-foreground'>
-										<span className='font-medium'>Sản phẩm:</span> {itemsText}
-									</div>
-								)}
+						{itemsText && (
+							<div className='text-muted-foreground text-sm'>
+								<span className='font-medium'>Yêu cầu:</span> {itemsText}
 							</div>
 						)}
 					</div>
 				</div>
 
+				{/* Right section - Actions */}
 				<div className='flex items-center gap-2'>
-					{isPendingTransaction && (
+					{transactionStatusConfig && (
 						<div className='relative'>
-							<button
-								onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-								className='flex items-center space-x-1 rounded-full bg-orange-100 px-3 py-1.5 text-sm text-orange-700 transition-colors hover:bg-orange-200'
-							>
-								<span>Chờ xử lý</span>
-								<ChevronDown
-									className={clsx('h-4 w-4 transition-transform', {
-										'rotate-180': isDropdownOpen
-									})}
-								/>
-							</button>
+							{(latestTransaction?.status.toString() as ETransactionStatus) ===
+								ETransactionStatus.SUCCESS ||
+							(latestTransaction?.status.toString() as ETransactionStatus) ===
+								ETransactionStatus.PENDING ? (
+								<button
+									onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+									className={clsx(
+										'flex items-center space-x-1 rounded-full px-3 py-1.5 text-sm transition-colors',
+										transactionStatusConfig?.background,
+										transactionStatusConfig?.textColor
+									)}
+								>
+									<span>{transactionStatusConfig?.label}</span>
+									<ChevronDown
+										className={clsx('h-4 w-4 transition-transform', {
+											'rotate-180': isDropdownOpen
+										})}
+									/>
+								</button>
+							) : (
+								<button
+									className={clsx(
+										'flex items-center space-x-1 rounded-full px-3 py-1.5 text-sm transition-colors',
+										transactionStatusConfig?.background,
+										transactionStatusConfig?.textColor
+									)}
+								>
+									<span>{transactionStatusConfig?.label}</span>
+								</button>
+							)}
 
 							{isDropdownOpen && (
-								<div className='absolute top-full right-0 z-10 mt-1 w-48 rounded-lg border border-gray-200 bg-white shadow-lg'>
-									<div className='py-2'>
-										<button
-											onClick={() =>
-												handleConfirmTransaction(ETransactionStatus.SUCCESS)
-											}
-											className='flex w-full items-center space-x-2 px-4 py-2 text-sm text-green-700 transition-colors hover:bg-green-50'
-										>
-											<Check className='h-4 w-4' />
-											<span>Xác nhận</span>
-										</button>
-										<button
-											onClick={() =>
-												handleConfirmTransaction(ETransactionStatus.CANCELLED)
-											}
-											className='flex w-full items-center space-x-2 px-4 py-2 text-sm text-red-700 transition-colors hover:bg-red-50'
-										>
-											<X className='h-4 w-4' />
-											<span>Từ chối</span>
-										</button>
+								<>
+									{/* Background overlay */}
+									<div
+										className='fixed inset-0 z-10'
+										onClick={() => setIsDropdownOpen(false)}
+									/>
+
+									{/* Dropdown menu */}
+									<div className='absolute top-full right-0 z-20 mt-2 w-48 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl'>
+										<div className='divide-y divide-gray-100'>
+											{latestTransaction &&
+												(latestTransaction.status.toString() as ETransactionStatus) ===
+													ETransactionStatus.PENDING && (
+													<>
+														<ButtonStatus
+															handleClick={() => {
+																handleConfirmTransaction(
+																	ETransactionStatus.SUCCESS
+																)
+																setIsDropdownOpen(false)
+															}}
+															type={ETransactionStatus.SUCCESS}
+														/>
+														<ButtonStatus
+															handleClick={() => {
+																handleConfirmTransaction(
+																	ETransactionStatus.CANCELLED
+																)
+																setIsDropdownOpen(false)
+															}}
+															type={ETransactionStatus.CANCELLED}
+														/>
+													</>
+												)}
+											{latestTransaction &&
+												(latestTransaction.status.toString() as ETransactionStatus) ===
+													ETransactionStatus.SUCCESS && (
+													<ButtonStatus
+														handleClick={() => {
+															handleConfirmTransaction(
+																ETransactionStatus.REJECTED
+															)
+															setIsDropdownOpen(false)
+														}}
+														type={ETransactionStatus.REJECTED}
+													/>
+												)}
+										</div>
 									</div>
-								</div>
+								</>
 							)}
 						</div>
 					)}
@@ -209,11 +285,18 @@ export const InterestItem = ({
 						to={`/chat/${userInterest.id}`}
 						className={clsx(
 							'text-primary-foreground rounded-xl p-3 shadow-lg transition-all duration-200 hover:shadow-xl',
-							isPendingTransaction ? 'bg-chart-2' : 'bg-primary'
+							latestTransaction?.status === ETransactionStatus.PENDING
+								? 'bg-warning'
+								: 'bg-primary'
 						)}
 						aria-label='Chat'
+						title={
+							latestTransaction?.status === ETransactionStatus.PENDING
+								? 'Đang có giao dịch'
+								: 'Chat với đối phương'
+						}
 					>
-						{isPendingTransaction ? (
+						{latestTransaction?.status === ETransactionStatus.PENDING ? (
 							<MessageCircleWarning className='h-5 w-5' />
 						) : (
 							<MessageCircle className='h-5 w-5' />
@@ -221,6 +304,7 @@ export const InterestItem = ({
 					</Link>
 				</div>
 			</div>
+
 			{userInterest.newMessage && (
 				<p className='text-muted-foreground bg-muted/50 line-clamp-2 rounded-lg px-4 py-2 text-sm leading-relaxed'>
 					{authorID === user?.id ? 'Bạn' : 'Đối phương'}:{' '}

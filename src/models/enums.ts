@@ -42,7 +42,8 @@ export enum ETransactionStatus {
 	DEFAULT = '0',
 	PENDING = '1',
 	SUCCESS = '2',
-	CANCELLED = '3'
+	CANCELLED = '3',
+	REJECTED = '4'
 }
 
 export enum EMessageStatus {
@@ -55,4 +56,9 @@ export enum EMessageStatus {
 export enum ETypeNotification {
 	FOLLOWED_BY = 'followedBy',
 	FOLLOWING = 'following'
+}
+
+export enum EMethod {
+	IN_PERSON = 'Gặp trực tiếp',
+	SHIP = 'Giao hàng'
 }

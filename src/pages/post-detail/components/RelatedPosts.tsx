@@ -2,6 +2,7 @@ import { File } from 'lucide-react'
 import React, { memo } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import Loading from '@/components/common/Loading'
 import { useListPostQuery } from '@/hooks/queries/use-post-query'
 import { EPostType } from '@/models/enums'
 import { IPost } from '@/models/interfaces'
@@ -14,7 +15,7 @@ interface RelatedPostsProps {
 }
 
 const RelatedPosts: React.FC<RelatedPostsProps> = ({ type, postID }) => {
-	const { data: allPostsResponse } = useListPostQuery({ type })
+	const { data: allPostsResponse, isPending } = useListPostQuery({ type })
 	const navigate = useNavigate()
 
 	// Lấy danh sách bài đăng và lọc ra 3 bài không trùng postID
@@ -39,21 +40,25 @@ const RelatedPosts: React.FC<RelatedPostsProps> = ({ type, postID }) => {
 					<File className='text-primary h-5 w-5' />
 					<h2 className='text-lg font-medium'>Bài đăng liên quan</h2>
 				</div>
-				<div className='space-y-6'>
-					{relatedPosts.length > 0 ? (
-						relatedPosts.map(post => (
-							<PostItemTile
-								key={post.slug}
-								post={post}
-								onPostClick={(slug: string) => navigate(`/bai-dang/${slug}`)}
-							/>
-						))
-					) : (
-						<p className='text-muted-foreground text-center'>
-							Không có bài đăng liên quan.
-						</p>
-					)}
-				</div>
+				{isPending ? (
+					<Loading text='Đang tải...' />
+				) : (
+					<div className='space-y-6'>
+						{relatedPosts.length > 0 ? (
+							relatedPosts.map(post => (
+								<PostItemTile
+									key={post.slug}
+									post={post}
+									onPostClick={(slug: string) => navigate(`/bai-dang/${slug}`)}
+								/>
+							))
+						) : (
+							<p className='text-muted-foreground text-center'>
+								Không có bài đăng liên quan.
+							</p>
+						)}
+					</div>
+				)}
 			</div>
 		</div>
 	)

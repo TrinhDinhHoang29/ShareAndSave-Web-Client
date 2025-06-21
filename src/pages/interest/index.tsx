@@ -23,7 +23,6 @@ const Interest = () => {
 	const [search, setSearch] = useState('')
 	const [currentPage, setCurrentPage] = useState(1)
 	const [order, setOrder] = useState<ESortOrder>(ESortOrder.DESC)
-
 	// State để quản lý trạng thái ping cho từng tab
 	const [followingPing, setFollowingPing] = useState(false)
 	const [followedByPing, setFollowedByPing] = useState(false)
@@ -142,7 +141,7 @@ const Interest = () => {
 						onClick={() => handleTabChange(1)}
 						className={`relative flex flex-1 items-center justify-center space-x-2 rounded-lg px-4 py-3 font-medium transition-all duration-200 ${
 							activeTab === 1
-								? 'bg-success text-primary-foreground shadow-md'
+								? 'bg-primary text-primary-foreground shadow-md'
 								: 'text-muted-foreground hover:bg-muted hover:text-foreground border'
 						}`}
 					>
@@ -157,7 +156,7 @@ const Interest = () => {
 								className={`rounded-full px-2 py-1 text-xs font-semibold ${
 									activeTab === 1
 										? 'bg-primary-foreground/20 text-primary-foreground'
-										: 'bg-success text-accent-foreground'
+										: 'bg-accent text-accent-foreground'
 								}`}
 							>
 								{getTotalCount}

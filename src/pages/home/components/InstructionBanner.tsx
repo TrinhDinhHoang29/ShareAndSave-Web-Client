@@ -1,25 +1,73 @@
-import { motion } from 'framer-motion'
+import { animate, motion, useMotionValue, useTransform } from 'framer-motion'
 import {
 	ArrowRight,
 	Gift,
 	Heart,
+	Package,
 	Recycle,
 	Search,
 	TrendingUp,
 	Users
 } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { useInView } from 'react-intersection-observer'
+import { useNavigate } from 'react-router-dom'
+
+// Counter component with animation
+const AnimatedCounter = ({
+	target,
+	suffix = '',
+	duration = 2,
+	isVisible
+}: {
+	target: number
+	suffix?: string
+	duration?: number
+	isVisible: boolean
+}) => {
+	const [count, setCount] = useState(0)
+
+	useEffect(() => {
+		if (!isVisible) return
+
+		const controls = animate(0, target, {
+			duration,
+			ease: 'easeOut',
+			onUpdate: value => {
+				setCount(Math.floor(value))
+			}
+		})
+
+		return controls.stop
+	}, [isVisible, target, duration])
+
+	return (
+		<span>
+			{count.toLocaleString()}
+			{suffix}
+		</span>
+	)
+}
 
 export default function HomepageBanner() {
+	const navigate = useNavigate()
+
+	// Intersection observer for stats section
+	const { ref: statsRef, inView: statsInView } = useInView({
+		threshold: 0.3,
+		triggerOnce: true
+	})
+
 	const handleGiveAwayClick = () => {
-		console.log('Chuyển đến trang đăng bài cho đồ')
+		navigate('dang-bai')
 	}
 
 	const handleFindItemsClick = () => {
-		console.log('Chuyển đến trang tìm đồ thất lạc')
+		navigate('dang-bai')
 	}
 
 	const handleExploreClick = () => {
-		console.log('Chuyển đến trang khám phá')
+		navigate('kho-do-cu')
 	}
 
 	// Animation variants
@@ -134,7 +182,7 @@ export default function HomepageBanner() {
 								<TrendingUp className='text-primary h-4 w-4' />
 							</motion.div>
 							<span className='text-foreground text-sm font-medium'>
-								Cộng đồng chia sẻ đang phát triển
+								Cộng đồng chia sẻ trường Cao Thắng
 							</span>
 						</motion.div>
 
@@ -153,11 +201,13 @@ export default function HomepageBanner() {
 						</motion.h1>
 
 						<motion.p
-							className='text-muted-foreground mx-auto mb-8 max-w-2xl text-lg leading-relaxed lg:text-xl'
+							className='text-muted-foreground mb-8 text-center text-lg leading-relaxed lg:text-xl'
 							variants={itemVariants}
 						>
 							Nền tảng kết nối cộng đồng chia sẻ đồ cũ và tìm kiếm đồ thất lạc.
-							Biến những món đồ không dùng thành cơ hội giúp đỡ người khác.
+							<br />
+							Mỗi món đồ được chia sẻ là một cơ hội để giúp đỡ chúng tôi tạo ra
+							nhiều chiến dịch để giúp đỡ mọi người.
 						</motion.p>
 
 						<motion.div
@@ -198,7 +248,7 @@ export default function HomepageBanner() {
 								transition={{ duration: 0.2 }}
 							>
 								<motion.div
-									className='bg-chart-2 h-2 w-2 rounded-full'
+									className='bg-secondary h-2 w-2 rounded-full'
 									animate={{ scale: [1, 1.2, 1] }}
 									transition={{ duration: 2, repeat: Infinity, delay: 1 }}
 								></motion.div>
@@ -299,29 +349,30 @@ export default function HomepageBanner() {
 									whileHover={{ scale: 1.1, rotate: 10 }}
 									transition={{ duration: 0.2 }}
 								>
-									<Users className='text-secondary h-6 w-6' />
+									<Package className='text-secondary h-6 w-6' />
 								</motion.div>
 								<h3 className='text-foreground mb-3 text-xl font-semibold'>
-									Khám Phá Cộng Đồng
+									Khám Phá Kho đồ cũ
 								</h3>
 								<p className='text-muted-foreground mb-6 text-sm leading-relaxed'>
-									Tham gia cộng đồng chia sẻ, kết nối với những người có cùng
-									mong muốn lan tỏa điều tốt đẹp.
+									Các món đồ cũ sẽ được trưng bày để các sinh viên có thể xem
+									xét và chọn ra các món đồ phù hợp với nhu cầu của mình.
 								</p>
 								<motion.div
 									className='text-secondary flex items-center gap-2 text-sm font-medium'
 									whileHover={{ gap: 12 }}
 									transition={{ duration: 0.2 }}
 								>
-									<span>Tham gia ngay</span>
+									<span>Khám phá ngay</span>
 									<ArrowRight className='h-4 w-4' />
 								</motion.div>
 							</div>
 						</motion.div>
 					</motion.div>
 
-					{/* Stats section */}
+					{/* Stats section with animated counters */}
 					<motion.div
+						ref={statsRef}
 						className='glass border-border rounded-2xl border p-8'
 						variants={itemVariants}
 					>
@@ -337,7 +388,12 @@ export default function HomepageBanner() {
 									animate={{ opacity: 1, y: 0 }}
 									transition={{ delay: 0.5, duration: 0.5 }}
 								>
-									1,200+
+									<AnimatedCounter
+										target={58}
+										suffix='+'
+										duration={2.5}
+										isVisible={statsInView}
+									/>
 								</motion.div>
 								<div className='text-muted-foreground text-sm font-medium'>
 									Món đồ được chia sẻ
@@ -354,7 +410,12 @@ export default function HomepageBanner() {
 									animate={{ opacity: 1, y: 0 }}
 									transition={{ delay: 0.7, duration: 0.5 }}
 								>
-									650+
+									<AnimatedCounter
+										target={148}
+										suffix='+'
+										duration={2.2}
+										isVisible={statsInView}
+									/>
 								</motion.div>
 								<div className='text-muted-foreground text-sm font-medium'>
 									Thành viên tích cực
@@ -366,12 +427,17 @@ export default function HomepageBanner() {
 								transition={{ duration: 0.2 }}
 							>
 								<motion.div
-									className='from-chart-2 to-chart-2/80 mb-2 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent lg:text-3xl'
+									className='from-warning to-warning/80 mb-2 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent lg:text-3xl'
 									initial={{ opacity: 0, y: 20 }}
 									animate={{ opacity: 1, y: 0 }}
 									transition={{ delay: 0.9, duration: 0.5 }}
 								>
-									280+
+									<AnimatedCounter
+										target={32}
+										suffix='+'
+										duration={2.0}
+										isVisible={statsInView}
+									/>
 								</motion.div>
 								<div className='text-muted-foreground text-sm font-medium'>
 									Đồ thất lạc được tìm thấy
@@ -388,7 +454,12 @@ export default function HomepageBanner() {
 									animate={{ opacity: 1, y: 0 }}
 									transition={{ delay: 1.1, duration: 0.5 }}
 								>
-									98%
+									<AnimatedCounter
+										target={98}
+										suffix='%'
+										duration={1.8}
+										isVisible={statsInView}
+									/>
 								</motion.div>
 								<div className='text-muted-foreground text-sm font-medium'>
 									Mức độ hài lòng

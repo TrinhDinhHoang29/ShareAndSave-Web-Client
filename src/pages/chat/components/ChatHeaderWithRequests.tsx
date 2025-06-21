@@ -12,6 +12,7 @@ import {
 	EyeOff,
 	Minus,
 	Package,
+	Pencil,
 	Plus,
 	User,
 	X
@@ -20,7 +21,7 @@ import React, { useState } from 'react'
 
 import Loading from '@/components/common/Loading'
 import { getTransactionStatusConfig } from '@/models/constants'
-import { ETransactionStatus } from '@/models/enums'
+import { EMethod, ETransactionStatus } from '@/models/enums'
 import { IReceiver, ITransaction, ITransactionItem } from '@/models/interfaces'
 
 import { TransactionsDialog } from './TransactionDialog'
@@ -45,10 +46,11 @@ interface Props {
 	isCreateTransactionPending: boolean
 	transactions: ITransaction[]
 	handleApplyItemTransactions: (index: number) => void
-	transactionID: number
+	isPendingTransaction: boolean
 	hasNextPage?: boolean
 	isFetchingNextPage?: boolean
 	sentinelRef?: (node: HTMLElement | null) => void
+	setSelectedMethod: (method: EMethod) => void
 }
 
 const ChatHeaderWithRequests = ({
@@ -70,10 +72,11 @@ const ChatHeaderWithRequests = ({
 	isCreateTransactionPending,
 	transactions,
 	handleApplyItemTransactions,
-	transactionID,
+	isPendingTransaction,
 	hasNextPage = false,
 	isFetchingNextPage = false,
-	sentinelRef
+	sentinelRef,
+	setSelectedMethod
 }: Props) => {
 	transactionStatus = transactionStatus.toString() as ETransactionStatus
 	const currentItem = transactionItems[currentRequestIndex]
@@ -81,17 +84,29 @@ const ChatHeaderWithRequests = ({
 		isAuthor,
 		transactionStatus
 	)
-	const TransactionIconStatus = transactionStatusConfig.icon
+	const { Icon: TransactionIconStatus } = transactionStatusConfig
 	const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false)
 	const [isTutorialTransactionDialogOpen, setIsTutorialTransactionDialogOpen] =
 		useState(false)
 
 	const handleTransactionSelect = (index: number) => {
 		const status = transactions[index]?.status.toString() as ETransactionStatus
-		if (isAuthor && status === ETransactionStatus.PENDING) {
+		if (
+			isAuthor &&
+			(status === ETransactionStatus.PENDING ||
+				status === ETransactionStatus.SUCCESS)
+		) {
 			setCurrentRequestIndex(0)
 			handleApplyItemTransactions(index)
 			setIsTransactionDialogOpen(false)
+		}
+	}
+
+	const handleToggleMethod = () => {
+		if (method === EMethod.IN_PERSON) {
+			setSelectedMethod(EMethod.SHIP)
+		} else {
+			setSelectedMethod(EMethod.IN_PERSON)
 		}
 	}
 
@@ -137,8 +152,8 @@ const ChatHeaderWithRequests = ({
 							>
 								<span>Giao dịch</span> <ArrowLeftRight className='h-5 w-5' />
 							</button>
-							{transactionID ? (
-								<div className='bg-chart-2 text-primary-foreground absolute -top-2 -right-2 rounded-full px-2 py-1 text-sm font-medium shadow-lg'>
+							{isPendingTransaction ? (
+								<div className='bg-warning text-primary-foreground absolute -top-2 -right-2 rounded-full px-2 py-1 text-sm font-medium shadow-lg'>
 									!
 								</div>
 							) : null}
@@ -165,9 +180,6 @@ const ChatHeaderWithRequests = ({
 								)}
 							</h4>
 							<div className='flex items-center gap-2'>
-								<div className='bg-foreground text-accent flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200'>
-									{method}
-								</div>
 								<button
 									onClick={toggleRequestsVisibility}
 									className='bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200'
@@ -182,6 +194,7 @@ const ChatHeaderWithRequests = ({
 										</>
 									)}
 								</button>
+
 								{transactionStatus !== ETransactionStatus.DEFAULT && (
 									<div
 										className={clsx(
@@ -194,6 +207,21 @@ const ChatHeaderWithRequests = ({
 										{transactionStatusConfig.label}
 									</div>
 								)}
+								<button
+									title={
+										isAuthor && transactionStatus === ETransactionStatus.PENDING
+											? 'Nhấn vào để thay đổi phương thức'
+											: 'Phương thức'
+									}
+									onClick={() =>
+										isAuthor &&
+										transactionStatus === ETransactionStatus.PENDING &&
+										handleToggleMethod()
+									}
+									className='bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200'
+								>
+									{method}
+								</button>
 								{((!isAuthor &&
 									transactionStatus === ETransactionStatus.DEFAULT) ||
 									(isAuthor &&
@@ -207,10 +235,14 @@ const ChatHeaderWithRequests = ({
 									>
 										{isCreateTransactionPending ? (
 											<Loading size='sm' />
-										) : (
+										) : transactionStatus === ETransactionStatus.DEFAULT ? (
 											<Check className='h-4 w-4' />
-										)}{' '}
-										Xác nhận
+										) : (
+											<Pencil className='h-4 w-4' />
+										)}
+										{transactionStatus === ETransactionStatus.DEFAULT
+											? 'Xác nhận'
+											: 'Cập nhật'}
 									</button>
 								)}
 							</div>
@@ -255,10 +287,11 @@ const ChatHeaderWithRequests = ({
 											<div
 												className={clsx(
 													'absolute -top-1 -right-1 rounded-full p-1',
-													transactionStatusConfig.background
+													transactionStatusConfig.background,
+													transactionStatusConfig.textColor
 												)}
 											>
-												<TransactionIconStatus className='h-3 w-3 text-white' />
+												<TransactionIconStatus className='h-3 w-3' />
 											</div>
 										)}
 									</div>

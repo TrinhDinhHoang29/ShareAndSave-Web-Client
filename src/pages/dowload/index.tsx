@@ -13,7 +13,7 @@ import {
 
 const Download = () => {
 	return (
-		<div className='bg-background text-foreground'>
+		<div className='text-foreground container mx-auto py-12'>
 			<div className='mb-12 text-center'>
 				<h1 className='text-foreground font-manrope mb-4 text-3xl font-bold'>
 					Tải ứng dụng ShareAndSave

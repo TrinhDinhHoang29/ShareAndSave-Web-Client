@@ -6,6 +6,7 @@ import {
 	Gift,
 	HelpCircle,
 	Search,
+	ShieldX,
 	XCircle
 } from 'lucide-react'
 
@@ -68,29 +69,36 @@ export const getTransactionStatusConfig = (
 		[ETransactionStatus.DEFAULT]: {
 			label: 'Xác nhận',
 			Icon: Check,
-			background: 'bg-success/90 hover:bg-success',
-			textColor: 'text-success-foreground',
+			background: 'bg-green-100 hover:bg-green-200',
+			textColor: 'text-success',
 			border: 'border-success border-solid border-2'
 		},
 		[ETransactionStatus.PENDING]: {
 			label: 'Đang trong giao dịch',
 			Icon: Clock,
-			background: 'bg-warning/90 hover:bg-warning',
-			textColor: 'text-success-foreground',
+			background: 'bg-yellow-100 hover:bg-yellow-200',
+			textColor: 'text-warning',
 			border: 'border-warning border-solid border-2'
 		},
 		[ETransactionStatus.SUCCESS]: {
 			label: 'Hoàn tất',
 			Icon: CheckCircle,
-			background: 'bg-success/90 hover:bg-success',
-			textColor: 'text-success-foreground',
+			background: 'bg-green-100 hover:bg-green-200',
+			textColor: 'text-success',
 			border: 'border-success border-solid border-2'
 		},
 		[ETransactionStatus.CANCELLED]: {
 			label: isAuthor ? 'Đã từ chối' : 'Đã bị từ chối',
 			Icon: XCircle,
-			background: 'bg-error/90 hover:bg-error',
-			textColor: 'text-success-foreground',
+			background: 'bg-red-100 hover:bg-red-200',
+			textColor: 'text-error',
+			border: 'border-error border-solid border-2'
+		},
+		[ETransactionStatus.REJECTED]: {
+			label: isAuthor ? 'Hủy' : 'Đã hủy',
+			Icon: ShieldX,
+			background: 'bg-red-100 hover:bg-red-200',
+			textColor: 'text-error',
 			border: 'border-error border-solid border-2'
 		}
 	}
@@ -101,3 +109,29 @@ export const LIMIT_MESSAGE = 30
 export const SCROLL_THRESHOLD = 100
 export const SCROLL_TIMEOUT = 300
 export const TIME_GAP_THRESHOLD = 30 * 60 * 1000 // 30 minutes in milliseconds
+
+export const getConfirmContentTransactionStatus = (
+	status: ETransactionStatus
+) => {
+	switch (status) {
+		case ETransactionStatus.SUCCESS:
+		default:
+			return {
+				message:
+					'Hành động này không thể hoàn tác. Bạn cần cân nhắc trước khi xác nhận.',
+				title: 'Xác nhận hoàn tất giao dịch?'
+			}
+		case ETransactionStatus.CANCELLED:
+			return {
+				message:
+					'Hành động này không thể hoàn tác. Bạn cần cân nhắc trước khi xác nhận.',
+				title: 'Xác nhận từ chối giao dịch?'
+			}
+		case ETransactionStatus.REJECTED:
+			return {
+				message:
+					'Hành động này không thể hoàn tác. Số lượng yêu cầu sẽ được hoàn tác.',
+				title: 'Xác nhận hủy giao dịch?'
+			}
+	}
+}

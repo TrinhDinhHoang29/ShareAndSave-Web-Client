@@ -1,4 +1,4 @@
-import { EPostType, ERequestStatus, ESortOrder } from './enums'
+import { EMethod, EPostType, ERequestStatus, ESortOrder } from './enums'
 
 export const statusOptions = [
 	{ value: ERequestStatus.ALL, label: 'Tất cả trạng thái' },
@@ -24,11 +24,11 @@ export const sortOptions = [
 
 export const methodOptions = [
 	{
-		value: 'Gặp trực tiếp',
-		label: 'Gặp trực tiếp'
+		value: EMethod.IN_PERSON,
+		label: EMethod.IN_PERSON
 	},
 	{
-		value: 'Giao hàng',
-		label: 'Giao hàng'
+		value: EMethod.SHIP,
+		label: EMethod.SHIP
 	}
 ]

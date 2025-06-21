@@ -11,7 +11,7 @@ import { InterestItem } from './InterestItem'
 
 export const PostItem = ({ post }: { post: IPostInterest }) => {
 	const [isExpanded, setIsExpanded] = useState(false)
-	const typeInfo = getTypeInfo(post.type.toString() as EPostType)
+	const { Icon, label, color } = getTypeInfo(post.type.toString() as EPostType)
 	const navigate = useNavigate()
 
 	return (
@@ -26,15 +26,15 @@ export const PostItem = ({ post }: { post: IPostInterest }) => {
 							className={`bg-primary flex h-12 w-12 items-center justify-center rounded-xl shadow-lg`}
 						>
 							<span className='text-primary-foreground text-lg'>
-								{typeInfo.icon}
+								<Icon />
 							</span>
 						</div>
 						<div>
 							<div className='space-y-2'>
 								<span
-									className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${typeInfo.color}`}
+									className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${color}`}
 								>
-									{typeInfo.label}
+									{label}
 								</span>
 								<h3 className='text-foreground font-manrope truncate text-xl font-semibold'>
 									{post.title}
