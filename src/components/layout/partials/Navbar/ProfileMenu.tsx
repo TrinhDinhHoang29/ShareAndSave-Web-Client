@@ -43,9 +43,9 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
 			onClick: () => navigate('doi-mat-khau')
 		},
 		{
-			label: 'Yêu cầu đã gửi',
+			label: 'Bài đăng của tôi',
 			icon: <ClipboardList className='h-4 w-4' />,
-			onClick: () => navigate('ho-so/yeu-cau-da-gui')
+			onClick: () => navigate('ho-so/bai-dang-cua-toi')
 		},
 		{
 			label: 'Đăng xuất',

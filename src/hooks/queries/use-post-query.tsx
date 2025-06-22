@@ -21,6 +21,19 @@ export const useListPostQuery = (params: IListTypeParams<EPostType>) => {
 	})
 }
 
+export const useListMyPostQuery = (params: IListTypeParams<EPostType>) => {
+	return useQuery<IPostResponse>({
+		queryKey: ['my-post', params], // Key để cache, dựa trên params
+		queryFn: async () => {
+			const res = await postApi.myPost(params)
+			return res.data
+		},
+		// keepPreviousData: true, // Giữ dữ liệu cũ khi thay đổi page/limit (option not available in current react-query version)
+		staleTime: 5 * 60 * 1000, // Dữ liệu tươi trong 5 phút
+		gcTime: 10 * 60 * 1000 // Cache trong 10 phút
+	})
+}
+
 export const useDetailPostQuery = (slug: string) => {
 	return useQuery<IPostDetail | null>({
 		queryKey: ['posts', slug], // Key để cache, dựa trên id

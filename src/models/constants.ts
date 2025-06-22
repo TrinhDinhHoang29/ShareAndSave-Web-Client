@@ -5,12 +5,13 @@ import {
 	FileText,
 	Gift,
 	HelpCircle,
+	Lock,
 	Search,
 	ShieldX,
 	XCircle
 } from 'lucide-react'
 
-import { EPostType, ETransactionStatus } from './enums'
+import { EPostSTatus, EPostType, ETransactionStatus } from './enums'
 
 export const getTypeInfo = (type: EPostType) => {
 	switch (type) {
@@ -48,6 +49,51 @@ export const getTypeInfo = (type: EPostType) => {
 				color:
 					'bg-post-type-4 text-post-type-foreground-4 dark:bg-post-type-4/20 dark:text-post-type-foreground-4',
 				Icon: FileText
+			}
+	}
+}
+
+export const getStatusConfig = (status: number) => {
+	switch (status.toString()) {
+		case EPostSTatus.PENDING:
+			return {
+				label: 'Đang chờ duyệt',
+				icon: Clock,
+				bgColor: 'bg-warning/10',
+				textColor: 'text-warning',
+				iconColor: 'text-warning/80'
+			}
+		case EPostSTatus.REJECTED:
+			return {
+				label: 'Bị từ chối',
+				icon: XCircle,
+				bgColor: 'bg-error/10',
+				textColor: 'text-error',
+				iconColor: 'text-error/80'
+			}
+		case EPostSTatus.APPROVED:
+			return {
+				label: 'Đã duyệt',
+				icon: CheckCircle,
+				bgColor: 'bg-success/10 ',
+				textColor: 'text-success ',
+				iconColor: 'text-success/80'
+			}
+		case EPostSTatus.SEAL:
+			return {
+				label: 'Đã khóa',
+				icon: Lock,
+				bgColor: 'bg-secondary/10',
+				textColor: 'text-secondary ',
+				iconColor: 'text-secondary/80 '
+			}
+		default:
+			return {
+				label: 'Không xác định',
+				icon: Clock,
+				bgColor: 'bg-secondary/10',
+				textColor: 'text-secondary ',
+				iconColor: 'text-secondary/80 '
 			}
 	}
 }

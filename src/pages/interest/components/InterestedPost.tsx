@@ -1,4 +1,4 @@
-import { Clock, FileText, Heart, MessageCircle, User } from 'lucide-react'
+import { Clock, FileText, Heart, User } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
@@ -7,6 +7,8 @@ import { formatNearlyDateTimeVN } from '@/lib/utils'
 import { getTypeInfo } from '@/models/constants'
 import { EPostType } from '@/models/enums'
 import { IPostInterest } from '@/models/interfaces'
+
+import ChatButton from './ChatButton'
 
 export const InterestedPost = ({
 	post,
@@ -17,16 +19,22 @@ export const InterestedPost = ({
 }) => {
 	const { label, Icon, color } = getTypeInfo(post.type.toString() as EPostType)
 	const { followingNotification } = useChatNotification()
+	const [duplicateFollowingNotification, setDuplicateFollowingNotification] =
+		useState(followingNotification)
 	const [newMessages, setNewMessages] = useState<number>(
 		post.unreadMessageCount
 	)
+	const [isPing, setIsPing] = useState(false)
 
 	useEffect(() => {
 		if (
 			followingNotification &&
-			followingNotification.interestID === post.interests[0].id
+			followingNotification.interestID === post.interests[0].id &&
+			duplicateFollowingNotification !== followingNotification
 		) {
-			setNewMessages(prev => ++prev)
+			setNewMessages(prev => prev + 1)
+			setIsPing(true)
+			setDuplicateFollowingNotification(followingNotification)
 		}
 	}, [followingNotification])
 
@@ -86,19 +94,11 @@ export const InterestedPost = ({
 							<Heart className='h-5 w-5' />
 						</button>
 
-						<Link
-							to={`/chat/${post.interests[0].id}`}
-							className={`text-primary-foreground bg-primary relative rounded-xl p-3 shadow-lg transition-all duration-200 hover:shadow-xl`}
-							aria-label='Chat với người đăng'
-							title='Chat với người đăng'
-						>
-							<MessageCircle className='h-5 w-5' />
-							{newMessages > 0 && (
-								<span className='absolute -top-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full bg-red-100 text-xs font-medium text-red-700'>
-									{newMessages > 99 ? '99+' : newMessages}
-								</span>
-							)}
-						</Link>
+						<ChatButton
+							interestID={post.interests[0].id}
+							newMessages={newMessages}
+							isPing={isPing}
+						/>
 					</div>
 				</div>
 

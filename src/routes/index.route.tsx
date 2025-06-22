@@ -2,14 +2,16 @@ import { lazy, Suspense } from 'react'
 import { useRoutes } from 'react-router-dom'
 
 import Loading from '@/components/common/Loading'
+import PageTitle from '@/components/common/PageTitle'
 import LayoutDefault from '@/components/layout'
 import Chat from '@/pages/chat'
 import Home from '@/pages/home'
 
 import PrivateRoute from './private.route'
+
 // Lazy load các components
 const PostAction = lazy(() => import('@/pages/post-action'))
-const SendRequest = lazy(() => import('@/pages/profile/send-request/send'))
+const MyPost = lazy(() => import('@/pages/profile/my-post'))
 const Interest = lazy(() => import('@/pages/interest'))
 const PostDetail = lazy(() => import('@/pages/post-detail'))
 const Post = lazy(() => import('@/pages/post'))
@@ -46,17 +48,23 @@ function AppRouter() {
 				{
 					index: true,
 					element: (
-						<ErrorBoundary>
-							<Home />
-						</ErrorBoundary>
+						<>
+							<PageTitle title='Trang chủ' />
+							<ErrorBoundary>
+								<Home />
+							</ErrorBoundary>
+						</>
 					)
 				},
 				{
 					path: 'phien-dang-nhap',
 					element: (
-						<ErrorBoundary>
-							<LoginSession />
-						</ErrorBoundary>
+						<>
+							<PageTitle title='Phiên đăng nhập' />
+							<ErrorBoundary>
+								<LoginSession />
+							</ErrorBoundary>
+						</>
 					)
 				},
 				{
@@ -65,17 +73,23 @@ function AppRouter() {
 						{
 							path: ':slug',
 							element: (
-								<ErrorBoundary>
-									<PostDetail />
-								</ErrorBoundary>
+								<>
+									<PageTitle title='Chi tiết bài đăng' />
+									<ErrorBoundary>
+										<PostDetail />
+									</ErrorBoundary>
+								</>
 							)
 						},
 						{
 							path: '',
 							element: (
-								<ErrorBoundary>
-									<Post />
-								</ErrorBoundary>
+								<>
+									<PageTitle title='Danh sách bài đăng' />
+									<ErrorBoundary>
+										<Post />
+									</ErrorBoundary>
+								</>
 							)
 						}
 					]
@@ -83,15 +97,19 @@ function AppRouter() {
 				{
 					path: 'dang-bai',
 					element: (
-						<ErrorBoundary>
-							<PostAction />
-						</ErrorBoundary>
+						<>
+							<PageTitle title='Đăng bài' />
+							<ErrorBoundary>
+								<PostAction />
+							</ErrorBoundary>
+						</>
 					)
 				},
 				{
 					path: 'quan-tam',
 					element: (
 						<PrivateRoute>
+							<PageTitle title='Quan tâm' />
 							<ErrorBoundary>
 								<Interest />
 							</ErrorBoundary>
@@ -101,24 +119,33 @@ function AppRouter() {
 				{
 					path: 'tai-xuong',
 					element: (
-						<ErrorBoundary>
-							<Dowload />
-						</ErrorBoundary>
+						<>
+							<PageTitle title='Tải xuống' />
+							<ErrorBoundary>
+								<Dowload />
+							</ErrorBoundary>
+						</>
 					)
 				},
 				{
 					path: 'bang-xep-hang',
 					element: (
-						<ErrorBoundary>
-							<Leaderboard />
-						</ErrorBoundary>
+						<>
+							<PageTitle title='Bảng xếp hạng' />
+							<ErrorBoundary>
+								<Leaderboard />
+							</ErrorBoundary>
+						</>
 					)
 				},
 				{
 					path: '/chat/:interestID',
 					element: (
 						<PrivateRoute>
-							<Chat />
+							<PageTitle title='Trò chuyện' />
+							<ErrorBoundary>
+								<Chat />
+							</ErrorBoundary>
 						</PrivateRoute>
 					)
 				},
@@ -128,21 +155,32 @@ function AppRouter() {
 						{
 							path: 'chinh-sua-thong-tin',
 							element: (
-								<ErrorBoundary>
-									<EditProfile />
-								</ErrorBoundary>
+								<>
+									<PageTitle title='Chỉnh sửa thông tin' />
+									<ErrorBoundary>
+										<EditProfile />
+									</ErrorBoundary>
+								</>
 							)
 						},
 						{
 							path: 'doi-mat-khau',
-							element: <div>Đổi mật khẩu</div>
+							element: (
+								<>
+									<PageTitle title='Đổi mật khẩu' />
+									<div>Đổi mật khẩu</div>
+								</>
+							)
 						},
 						{
-							path: 'yeu-cau-da-gui',
+							path: 'bai-dang-cua-toi',
 							element: (
-								<ErrorBoundary>
-									<SendRequest />
-								</ErrorBoundary>
+								<>
+									<PageTitle title='Bài đăng của tôi' />
+									<ErrorBoundary>
+										<MyPost />
+									</ErrorBoundary>
+								</>
 							)
 						}
 					]

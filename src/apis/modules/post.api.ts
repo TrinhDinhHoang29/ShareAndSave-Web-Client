@@ -2,6 +2,7 @@ import { EPostType } from '@/models/enums'
 import {
 	IApiResponse,
 	IListTypeParams,
+	IMyPostRequest,
 	IPostActionRequest,
 	IPostActionResponse,
 	IPostDetail,
@@ -14,7 +15,8 @@ import axiosPublic from '../client/public.client'
 const postEndpoints = {
 	post: 'posts',
 	listPosts: 'client/posts',
-	detail: 'posts/slug'
+	detail: 'posts/slug',
+	myPost: 'posts/my-post'
 }
 
 const postApi = {
@@ -38,6 +40,13 @@ const postApi = {
 			params
 		})
 	},
+	async myPost(
+		params: IListTypeParams<EPostType>
+	): Promise<IApiResponse<IPostResponse>> {
+		return axiosPrivate.get(postEndpoints.myPost, {
+			params
+		})
+	},
 	async detail(slug: string): Promise<IApiResponse<{ post: IPostDetail }>> {
 		// eslint-disable-next-line no-useless-catch
 		try {
@@ -53,34 +62,16 @@ const postApi = {
 		} catch (error) {
 			throw error
 		}
+	},
+	async update(
+		postID: number,
+		data: IMyPostRequest,
+		signal?: AbortSignal
+	): Promise<IApiResponse<string>> {
+		return axiosPrivate.patch(postEndpoints.post + '/' + postID, data, {
+			signal
+		})
 	}
-	//   async add(data: { ten: string }): Promise<IApiResponse> {
-	//     // eslint-disable-next-line no-useless-catch
-	//     try {
-	//       return await axiosPrivate.post(requestEndpoints.common, data);
-	//     } catch (error) {
-	//       throw error;
-	//     }
-	//   },
-	//   async delete(id: number | string): Promise<IApiResponse> {
-	//     // eslint-disable-next-line no-useless-catch
-	//     try {
-	//       return await axiosPrivate.delete(requestEndpoints.common + "/" + id);
-	//     } catch (error) {
-	//       throw error;
-	//     }
-	//   },
-	//   async edit(data: {
-	//     id: string | number;
-	//     ten: string;
-	//   }): Promise<IApiResponse> {
-	//     // eslint-disable-next-line no-useless-catch
-	//     try {
-	//       return await axiosPrivate.put(requestEndpoints.common, data);
-	//     } catch (error) {
-	//       throw error;
-	//     }
-	//   },
 }
 
 export default postApi

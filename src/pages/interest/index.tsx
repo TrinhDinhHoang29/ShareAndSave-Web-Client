@@ -23,9 +23,8 @@ const Interest = () => {
 	const [search, setSearch] = useState('')
 	const [currentPage, setCurrentPage] = useState(1)
 	const [order, setOrder] = useState<ESortOrder>(ESortOrder.DESC)
-	// State để quản lý trạng thái ping cho từng tab
-	const [followingPing, setFollowingPing] = useState(false)
-	const [followedByPing, setFollowedByPing] = useState(false)
+	const [isFollowedByPing, setIsFollowedByPing] = useState(false)
+	const [isFollowingPing, setIsFollowingPing] = useState(false)
 
 	const { followedByNotification, followingNotification } =
 		useChatNotification()
@@ -50,28 +49,22 @@ const Interest = () => {
 	const newMessages = data?.unreadMessageCount || 0
 	const queryClient = useQueryClient()
 
-	// Effect để theo dõi followingNotification (Đang quan tâm - Tab 1)
-	useEffect(() => {
-		if (followingNotification) {
-			setFollowingPing(true)
-			const timer = setTimeout(() => {
-				setFollowingPing(false)
-			}, 3000)
-			return () => clearTimeout(timer)
-		}
-	}, [followingNotification])
-
-	// Effect để theo dõi followedByNotification (Được quan tâm - Tab 2)
 	useEffect(() => {
 		if (followedByNotification) {
-			setFollowedByPing(true)
-			const timer = setTimeout(() => {
-				setFollowedByPing(false)
-			}, 3000)
-			return () => clearTimeout(timer)
+			setIsFollowedByPing(true)
 		}
 	}, [followedByNotification])
 
+	useEffect(() => {
+		if (followingNotification) {
+			setIsFollowingPing(true)
+		}
+	}, [followingNotification])
+
+	useEffect(() => {
+		setIsFollowingPing(false)
+		setIsFollowedByPing(false)
+	}, [])
 	// Mutation để hủy quan tâm
 	const { mutate: deleteInterestMutation, isPending: isDeleteInterestPending } =
 		useDeleteInterestMutation({
@@ -97,14 +90,8 @@ const Interest = () => {
 	// Hàm để reset ping khi chuyển tab
 	const handleTabChange = (tabType: EInterestType) => {
 		setActiveTab(tabType)
-		// Reset ping state khi user nhấn vào tab đó
-		if (tabType === 1) {
-			setFollowingPing(false)
-		} else if (tabType === 2) {
-			setFollowedByPing(false)
-		}
 	}
-	// console.log(followedByNotification)
+	console.log(isFollowingPing || (newMessages && activeTab === 1))
 
 	return (
 		<div className='container mx-auto py-12'>
@@ -146,9 +133,9 @@ const Interest = () => {
 						}`}
 					>
 						{/* AlertPing cho tab "Đang Quan Tâm" */}
-						{followingPing || (newMessages && activeTab === 1) ? (
-							<AlertPing isPulse={followingPing} />
-						) : null}
+						{(isFollowingPing || (newMessages && activeTab === 1)) && (
+							<AlertPing isPulse={isFollowingPing} />
+						)}
 						<Eye className='h-4 w-4' />
 						<span>Đang Quan Tâm</span>
 						{activeTab === 1 && (
@@ -171,9 +158,9 @@ const Interest = () => {
 								: 'text-muted-foreground hover:bg-muted hover:text-foreground border'
 						}`}
 					>
-						{followedByPing || (newMessages && activeTab === 2) ? (
-							<AlertPing isPulse={followedByPing} />
-						) : null}
+						{(isFollowedByPing || (newMessages && activeTab === 2)) && (
+							<AlertPing isPulse={isFollowedByPing} />
+						)}
 						<CheckCircle className='h-4 w-4' />
 						<span>Được Quan Tâm</span>
 						{activeTab === 2 && (

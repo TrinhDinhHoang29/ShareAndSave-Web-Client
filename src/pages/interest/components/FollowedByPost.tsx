@@ -1,8 +1,10 @@
+import clsx from 'clsx'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, FileTextIcon, User } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import { useChatNotification } from '@/context/chat-noti-context'
 import { getTypeInfo } from '@/models/constants'
 import { EPostType } from '@/models/enums'
 import { IPostInterest } from '@/models/interfaces'
@@ -13,9 +15,26 @@ export const PostItem = ({ post }: { post: IPostInterest }) => {
 	const [isExpanded, setIsExpanded] = useState(false)
 	const { Icon, label, color } = getTypeInfo(post.type.toString() as EPostType)
 	const navigate = useNavigate()
+	const { followedByNotification } = useChatNotification()
+	const [isPing, setIsPing] = useState(false)
+	useEffect(() => {
+		if (
+			followedByNotification &&
+			post.interests.some(
+				interest => interest.id === followedByNotification.interestID
+			)
+		) {
+			setIsPing(true)
+		}
+	}, [followedByNotification])
 
 	return (
-		<div className='border-border bg-card/80 overflow-hidden rounded-2xl border shadow-lg backdrop-blur-sm transition-shadow duration-200 hover:shadow-xl'>
+		<div
+			className={clsx(
+				'bg-card/80 overflow-hidden rounded-2xl border shadow-lg backdrop-blur-sm transition-shadow duration-200 hover:shadow-xl',
+				isPing ? 'border-error' : 'border-border'
+			)}
+		>
 			<div
 				className='bg-card hover:bg-muted/50 flex cursor-pointer items-center justify-between p-6 transition-colors duration-200'
 				onClick={() => setIsExpanded(!isExpanded)}

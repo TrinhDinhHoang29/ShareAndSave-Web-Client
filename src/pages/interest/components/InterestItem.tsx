@@ -1,15 +1,9 @@
 import clsx from 'clsx'
-import {
-	ChevronDown,
-	Clock,
-	MessageCircle,
-	MessageCircleWarning,
-	User
-} from 'lucide-react'
+import { ChevronDown, Clock, User } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
 
 import { useAlertModalContext } from '@/context/alert-modal-context'
+import { useChatNotification } from '@/context/chat-noti-context'
 import { useUpdateTransactionMutation } from '@/hooks/mutations/use-transaction.mutation'
 import { useListTransactionQuery } from '@/hooks/queries/use-transaction.query'
 import { formatNearlyDateTimeVN } from '@/lib/utils'
@@ -25,6 +19,8 @@ import {
 	IUserInterest
 } from '@/models/interfaces'
 import useAuthStore from '@/stores/authStore'
+
+import ChatButton from './ChatButton'
 
 const ButtonStatus = ({
 	handleClick,
@@ -148,6 +144,26 @@ export const InterestItem = ({
 			cancelButtonText: 'Hủy'
 		})
 	}
+
+	const { followedByNotification } = useChatNotification()
+	const [duplicateFollowedByNotification, setDuplicateFollowedByNotification] =
+		useState(followedByNotification)
+	const [newMessages, setNewMessages] = useState<number>(
+		userInterest.unreadMessageCount || 0
+	)
+	const [isPing, setIsPing] = useState(false)
+
+	useEffect(() => {
+		if (
+			followedByNotification &&
+			followedByNotification.interestID === userInterest.id &&
+			duplicateFollowedByNotification !== followedByNotification
+		) {
+			setNewMessages(prev => prev + 1)
+			setIsPing(true)
+			setDuplicateFollowedByNotification(followedByNotification)
+		}
+	}, [followedByNotification])
 
 	return (
 		<div className='border-border bg-card relative space-y-4 rounded-xl border p-4 shadow-sm transition-shadow duration-200 hover:shadow-md'>
@@ -281,27 +297,15 @@ export const InterestItem = ({
 						</div>
 					)}
 
-					<Link
-						to={`/chat/${userInterest.id}`}
-						className={clsx(
-							'text-primary-foreground rounded-xl p-3 shadow-lg transition-all duration-200 hover:shadow-xl',
-							latestTransaction?.status === ETransactionStatus.PENDING
-								? 'bg-warning'
-								: 'bg-primary'
-						)}
-						aria-label='Chat'
-						title={
-							latestTransaction?.status === ETransactionStatus.PENDING
-								? 'Đang có giao dịch'
-								: 'Chat với đối phương'
+					<ChatButton
+						interestID={userInterest.id}
+						newMessages={newMessages}
+						isPing={isPing}
+						isPending={
+							(latestTransaction?.status.toString() as ETransactionStatus) ===
+							ETransactionStatus.PENDING
 						}
-					>
-						{latestTransaction?.status === ETransactionStatus.PENDING ? (
-							<MessageCircleWarning className='h-5 w-5' />
-						) : (
-							<MessageCircle className='h-5 w-5' />
-						)}
-					</Link>
+					/>
 				</div>
 			</div>
 

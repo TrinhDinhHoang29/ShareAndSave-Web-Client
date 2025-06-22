@@ -1,5 +1,6 @@
+import clsx from 'clsx'
 import { motion } from 'framer-motion'
-import { Calendar, Clock, Heart, Package, User } from 'lucide-react'
+import { Clock, Heart, Package, User } from 'lucide-react'
 import React from 'react'
 
 import { formatNearlyDateTimeVN } from '@/lib/utils'
@@ -10,9 +11,14 @@ import { IPost } from '@/models/interfaces'
 interface PostItemProps {
 	post: IPost
 	onPostClick?: (slug: string) => void
+	className?: string
 }
 
-const PostItem: React.FC<PostItemProps> = ({ post, onPostClick }) => {
+const PostItem: React.FC<PostItemProps> = ({
+	post,
+	onPostClick,
+	className
+}) => {
 	const truncateText = (text: string, maxLength: number) => {
 		return text.length > maxLength ? text.substring(0, maxLength) + '...' : text
 	}
@@ -21,7 +27,10 @@ const PostItem: React.FC<PostItemProps> = ({ post, onPostClick }) => {
 			initial={{ opacity: 0, y: 20 }}
 			animate={{ opacity: 1, y: 0 }}
 			whileHover={{ y: -4, transition: { duration: 0.2 } }}
-			className='group bg-card border-border/50 relative cursor-pointer overflow-hidden rounded-xl border shadow-sm transition-all duration-300 hover:shadow-lg'
+			className={clsx(
+				'group bg-card border-border/50 relative cursor-pointer overflow-hidden rounded-xl border shadow-sm transition-all duration-300 hover:shadow-lg',
+				className
+			)}
 			onClick={() => onPostClick?.(post.slug)}
 		>
 			{/* Header với hình ảnh nếu có */}

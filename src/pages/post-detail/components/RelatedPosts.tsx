@@ -2,17 +2,19 @@ import { File } from 'lucide-react'
 import React, { memo } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import Loading from '@/components/common/Loading'
 import { useListPostQuery } from '@/hooks/queries/use-post-query'
 import { EPostType } from '@/models/enums'
 import { IPost } from '@/models/interfaces'
 
 import PostItemTile from './PostItemTile'
+import PostItemTileSkeleton from './PostItemTileSkeleton'
 
 interface RelatedPostsProps {
 	type: EPostType
 	postID: number // Sử dụng postID để kiểm tra trùng lặp
 }
+
+const quantity = 5
 
 const RelatedPosts: React.FC<RelatedPostsProps> = ({ type, postID }) => {
 	const { data: allPostsResponse, isPending } = useListPostQuery({ type })
@@ -30,7 +32,7 @@ const RelatedPosts: React.FC<RelatedPostsProps> = ({ type, postID }) => {
 	}
 
 	const relatedPosts = allPostsResponse?.posts
-		? getRandomRandomPosts(allPostsResponse.posts, postID, 3)
+		? getRandomRandomPosts(allPostsResponse.posts, postID, quantity)
 		: []
 
 	return (
@@ -41,7 +43,7 @@ const RelatedPosts: React.FC<RelatedPostsProps> = ({ type, postID }) => {
 					<h2 className='text-lg font-medium'>Bài đăng liên quan</h2>
 				</div>
 				{isPending ? (
-					<Loading text='Đang tải...' />
+					<PostItemTileSkeleton quantity={quantity} />
 				) : (
 					<div className='space-y-6'>
 						{relatedPosts.length > 0 ? (

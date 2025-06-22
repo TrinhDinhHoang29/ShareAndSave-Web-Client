@@ -6,7 +6,7 @@ import { FormProvider, useForm } from 'react-hook-form'
 import Loading from '@/components/common/Loading'
 import PrimaryButton from '@/components/common/PrimaryButton'
 import SecondaryButton from '@/components/common/SecondaryButton'
-import { useSendItemMutation } from '@/hooks/mutations/useSendItemMutation'
+import { useCreatePostMutation } from '@/hooks/mutations/use-post.mutation'
 import {
 	IPostActionInfoFormData,
 	IPostActionRequest,
@@ -53,7 +53,7 @@ const PostAction: React.FC = () => {
 		setCurrentStep(isAuthenticated ? 1 : 0)
 	}, [isAuthenticated])
 
-	const mutation = useSendItemMutation({
+	const mutation = useCreatePostMutation({
 		onSuccess: (data: IPostActionResponse) => {
 			console.log(data)
 			setCompletedEmail(formData.personalInfo?.email || '')

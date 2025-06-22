@@ -25,7 +25,8 @@ export enum EPostType {
 export enum EPostSTatus {
 	PENDING = '1',
 	REJECTED = '2',
-	APPROVED = '3'
+	APPROVED = '3',
+	SEAL = '4'
 }
 
 export enum ESortOrder {

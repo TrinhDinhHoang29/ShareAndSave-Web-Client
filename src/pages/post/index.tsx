@@ -12,6 +12,7 @@ import { IListTypeParams } from '@/models/interfaces'
 import { sortOptions, typeOptions } from '@/models/options'
 
 import PostItem from './components/PostItem'
+import PostItemSkeleton from './components/PostItemSkeleton'
 
 // Kiểu hợp nhất với '' cho "Tất cả"
 type PostTypeSelection = '' | EPostType
@@ -43,9 +44,6 @@ const Post = () => {
 	const { data, isPending } = useListPostQuery(params)
 	const posts = data?.posts || []
 	const totalPage = data?.totalPage || 1
-
-	// Skeleton loading array (8 items to match limit)
-	const skeletonItems = Array.from({ length: 6 }, (_, index) => index)
 	const navigate = useNavigate()
 
 	return (
@@ -84,23 +82,7 @@ const Post = () => {
 					>
 						<div className='grid grid-cols-3 gap-6'>
 							{isPending ? (
-								skeletonItems.map(index => (
-									<div
-										key={index}
-										className='bg-card border-border/50 animate-pulse rounded-xl border shadow-sm'
-									>
-										<div className='aspect-video rounded-t-xl bg-gray-300' />
-										<div className='p-6'>
-											<div className='mb-4 h-6 rounded bg-gray-300' />
-											<div className='mb-4 h-4 rounded bg-gray-300' />
-											<div className='mb-4 h-4 w-3/4 rounded bg-gray-300' />
-											<div className='flex justify-between'>
-												<div className='h-4 w-1/3 rounded bg-gray-300' />
-												<div className='h-4 w-1/3 rounded bg-gray-300' />
-											</div>
-										</div>
-									</div>
-								))
+								<PostItemSkeleton quantity={6} />
 							) : posts.length > 0 ? (
 								posts.map(post => (
 									<PostItem

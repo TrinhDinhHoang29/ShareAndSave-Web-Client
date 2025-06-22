@@ -29,8 +29,8 @@ import {
 } from '@/hooks/mutations/use-interest.mutation'
 import { useDetailPostQuery } from '@/hooks/queries/use-post-query'
 import { formatDateTimeVN } from '@/lib/utils'
-import { getTypeInfo } from '@/models/constants'
-import { EPostType } from '@/models/enums'
+import { getStatusConfig, getTypeInfo } from '@/models/constants'
+import { EPostSTatus, EPostType } from '@/models/enums'
 import { IUserInterest } from '@/models/interfaces'
 import useAuthStore from '@/stores/authStore'
 
@@ -180,6 +180,8 @@ const PostDetail: React.FC = () => {
 	}
 
 	const { label, color, Icon } = getTypeInfo(post.type.toString() as EPostType)
+	const statusConfig = getStatusConfig(post.status)
+	const StatusIcon = statusConfig.icon
 	const parsedInfo = parsePostInfo()
 	const showItemsNumber = 5
 
@@ -189,20 +191,41 @@ const PostDetail: React.FC = () => {
 				<div className='col-span-1 md:col-span-2'>
 					<div className='bg-card border-border rounded-xl border p-8 shadow-lg'>
 						{/* Type Badge */}
-						<motion.div
-							initial={{ opacity: 0, y: 20 }}
-							animate={{ opacity: 1, y: 0 }}
-							className='mb-4'
-						>
-							<span
-								className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium ${color}`}
+						<div className='mb-4 flex items-center gap-4'>
+							<motion.div
+								initial={{ opacity: 0, y: 20 }}
+								animate={{ opacity: 1, y: 0 }}
 							>
-								<span>
-									<Icon />
+								<span
+									className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium ${color}`}
+								>
+									<span>
+										<Icon />
+									</span>
+									{label}
 								</span>
-								{label}
-							</span>
-						</motion.div>
+							</motion.div>
+
+							{post.status === Number(EPostSTatus.SEAL) && (
+								<motion.div
+									initial={{ opacity: 0, y: 20 }}
+									animate={{ opacity: 1, y: 0 }}
+								>
+									<span
+										className={clsx(
+											'inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium',
+											statusConfig.bgColor,
+											statusConfig.textColor
+										)}
+									>
+										<span className={statusConfig.iconColor}>
+											<StatusIcon />
+										</span>
+										{statusConfig.label}
+									</span>
+								</motion.div>
+							)}
+						</div>
 
 						{/* Title */}
 						<motion.h1

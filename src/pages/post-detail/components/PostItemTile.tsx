@@ -12,7 +12,7 @@ interface PostItemTileProps {
 }
 
 const PostItemTile: React.FC<PostItemTileProps> = ({ post, onPostClick }) => {
-	const typeInfo = getTypeInfo(post.type.toString() as EPostType)
+	const { label, Icon, color } = getTypeInfo(post.type.toString() as EPostType)
 
 	// Variants cho animation
 	const itemVariants = {
@@ -142,10 +142,10 @@ const PostItemTile: React.FC<PostItemTileProps> = ({ post, onPostClick }) => {
 						}}
 					>
 						<span
-							className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium ${typeInfo.color}`}
+							className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium ${color}`}
 						>
-							<span>{typeInfo.icon}</span>
-							{typeInfo.label}
+							<Icon className='h-4 w-4' />
+							{label}
 						</span>
 					</motion.div>
 				</div>

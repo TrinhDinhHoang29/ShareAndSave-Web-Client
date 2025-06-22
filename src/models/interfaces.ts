@@ -258,6 +258,7 @@ export interface IListTypeParams<T> {
 	order?: ESortOrder
 	type?: T
 	search?: string
+	status?: number
 }
 
 export interface IPostInterestResponse {
@@ -381,4 +382,52 @@ export interface IChatMessagesPanel {
 export interface IOption {
 	value: string
 	label: string
+}
+
+export interface IItemWarehouse {
+	category_name: string
+	claim_item_requests: number
+	description: string
+	item_id: number
+	item_image: string
+	item_name: string
+	quantity: number
+}
+
+export interface IItemWarehouseParams {
+	sort?: 'quantity'
+	order?: ESortOrder
+	limit?: number
+	page?: number
+	category?: number
+	search?: string
+}
+
+export interface IItemWarehouseResponse {
+	itemOldStocks: IItemWarehouse[]
+	totalPage: number
+}
+
+export interface ICampaign {
+	id: number
+	title: string
+	description: string
+	image: string
+	startDate: string
+	endDate: string
+	location: string
+	organizer: string
+	targetItems: number
+	collectedItems: number
+	participants: number
+	status: 'active' | 'upcoming' | 'completed'
+	categories: string[]
+}
+
+export interface IMyPostRequest {
+	description?: string
+	images?: string
+	isRepost?: boolean
+	status?: number
+	title?: string
 }

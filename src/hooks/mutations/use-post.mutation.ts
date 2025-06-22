@@ -5,21 +5,26 @@ import postApi from '@/apis/modules/post.api'
 import { useAlertModalContext } from '@/context/alert-modal-context'
 import {
 	IApiErrorResponse,
+	IMyPostRequest,
 	IPostActionRequest,
 	IPostActionResponse
 } from '@/models/interfaces'
 
-interface UseSendItemMutationOptions {
+interface UseCreatePostMutationOptions {
 	onSuccess?: (data: IPostActionResponse) => void
 	onError?: () => void
 	onSettled?: () => void
 }
 
-export const useSendItemMutation = ({
+interface UseUpdatePostMutationOptions {
+	onSuccess?: () => void
+}
+
+export const useCreatePostMutation = ({
 	onSuccess,
 	onError,
 	onSettled
-}: UseSendItemMutationOptions = {}) => {
+}: UseCreatePostMutationOptions = {}) => {
 	const { showLoading, showError, close } = useAlertModalContext()
 	const abortControllerRef = useRef<AbortController | null>(null)
 
@@ -68,6 +73,66 @@ export const useSendItemMutation = ({
 		onSettled: () => {
 			abortControllerRef.current = null // Clean up
 			onSettled?.()
+		}
+	})
+}
+
+export const useUpdatePostMutation = ({
+	onSuccess
+}: UseUpdatePostMutationOptions = {}) => {
+	const { showSuccess, showError, showLoading, close } = useAlertModalContext()
+	const abortControllerRef = useRef<AbortController | null>(null)
+
+	return useMutation({
+		mutationFn: ({
+			postID,
+			data
+		}: {
+			postID: number
+			data: IMyPostRequest
+		}) => {
+			abortControllerRef.current = new AbortController()
+			return postApi.update(postID, data, abortControllerRef.current.signal)
+		},
+		onMutate: async () => {
+			showLoading({
+				loadingMessage: 'Đang cập nhật...',
+				showCancel: true,
+				onCancel: () => {
+					abortControllerRef.current?.abort()
+					close()
+				}
+			})
+		},
+		onSuccess: async res => {
+			if (res.code === 200) {
+				showSuccess({
+					successButtonText: 'Xác nhận',
+					successMessage: 'Cập nhật bài đăng thành công',
+					successTitle: 'Thông tin bài đăng',
+					onConfirm: close // Đóng modal khi nhấn "Xác nhận" trên success
+				})
+				onSuccess?.()
+			} else {
+				const errorMessage = res.message.split(':')[0].trim()
+				showError({
+					errorButtonText: 'Thử lại',
+					errorMessage: errorMessage,
+					errorTitle: 'Lỗi thông tin bài đăng',
+					onConfirm: close
+				})
+			}
+		},
+		onError: async (error: any) => {
+			const errorMessage = (error as IApiErrorResponse).message
+				.split(':')[0]
+				.trim()
+			showError({
+				errorButtonText: 'Thử lại',
+				errorMessage: errorMessage,
+				errorTitle: 'Lỗi thông tin giao dịch',
+				onConfirm: close
+			})
 		}
 	})
 }

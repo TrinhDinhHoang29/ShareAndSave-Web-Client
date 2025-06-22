@@ -1,4 +1,4 @@
-import { animate, motion, useMotionValue, useTransform } from 'framer-motion'
+import { animate, motion } from 'framer-motion'
 import {
 	ArrowRight,
 	Gift,
