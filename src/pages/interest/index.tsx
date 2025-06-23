@@ -133,9 +133,9 @@ const Interest = () => {
 						}`}
 					>
 						{/* AlertPing cho tab "Đang Quan Tâm" */}
-						{(isFollowingPing || (newMessages && activeTab === 1)) && (
+						{isFollowingPing || (newMessages && activeTab === 1) ? (
 							<AlertPing isPulse={isFollowingPing} />
-						)}
+						) : null}
 						<Eye className='h-4 w-4' />
 						<span>Đang Quan Tâm</span>
 						{activeTab === 1 && (

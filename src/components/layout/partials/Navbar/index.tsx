@@ -1,6 +1,8 @@
 import { motion } from 'framer-motion'
 import {
 	Bell,
+	ChevronDown,
+	ChevronUp,
 	Download,
 	FileText,
 	Heart,
@@ -10,9 +12,10 @@ import {
 	Plus,
 	Search,
 	Sun,
-	TrendingUp
+	TrendingUp,
+	Warehouse
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import { useTheme } from '@/context/theme-context'
@@ -22,7 +25,7 @@ import DropdownProfileMenu from './DropdownProfileMenu'
 const navLinks = [
 	{ to: '/', label: 'Trang chủ', icon: Home },
 	{ to: '/bai-dang', label: 'Bài đăng', icon: FileText },
-	{ to: '/kho-do-cu', label: 'Kho đồ cũ', icon: Package },
+	{ to: '/kho-do-cu', label: 'Kho đồ cũ', icon: Warehouse },
 	{ to: '/quan-tam', label: 'Quan tâm', icon: Heart },
 	{ to: '/bang-xep-hang', label: 'Bảng xếp hạng', icon: TrendingUp }
 ]
@@ -32,25 +35,7 @@ const Navbar = () => {
 	const navigate = useNavigate()
 	const location = useLocation()
 	const [searchQuery, setSearchQuery] = useState('')
-	const [scrollY, setScrollY] = useState(0)
 	const [isVisible, setIsVisible] = useState(true)
-
-	useEffect(() => {
-		const handleScroll = () => {
-			const currentScrollY = window.scrollY
-			if (currentScrollY > scrollY && currentScrollY > 100) {
-				// Scrolling down and past 100px
-				setIsVisible(false)
-			} else if (currentScrollY < scrollY || currentScrollY <= 100) {
-				// Scrolling up or near the top
-				setIsVisible(true)
-			}
-			setScrollY(currentScrollY)
-		}
-
-		window.addEventListener('scroll', handleScroll)
-		return () => window.removeEventListener('scroll', handleScroll)
-	}, [scrollY])
 
 	const handleSearch = (e: any) => {
 		e.preventDefault()
@@ -59,134 +44,166 @@ const Navbar = () => {
 		}
 	}
 
+	const toggleNavbar = () => {
+		setIsVisible(!isVisible)
+	}
+
 	return (
 		<>
-			{/* Main Navbar */}
-			<motion.nav
-				initial={{ y: 0 }}
-				animate={{ y: isVisible ? 0 : -200 }}
-				transition={{
-					duration: 0.3,
-					ease: [0.4, 0, 0.2, 1] // Custom easing for smoother animation
-				}}
-				className='bg-card/95 sticky top-0 z-50 shadow-md backdrop-blur-lg'
+			{/* Hide/Show Button - Fixed position */}
+			<motion.button
+				initial={{ opacity: 0 }}
+				animate={{ opacity: 1 }}
+				onClick={toggleNavbar}
+				className='bg-primary text-primary-foreground fixed top-4 right-4 z-50 flex h-10 w-10 items-center justify-center rounded-full shadow-lg transition-all hover:scale-110 hover:shadow-xl'
+				title={isVisible ? 'Ẩn navbar' : 'Hiện navbar'}
 			>
-				<div className='container mx-auto space-y-2 py-2'>
-					<div className='flex h-16 items-center justify-between'>
-						{/* Logo */}
-						<Link
-							to='/'
-							className='from-primary to-accent flex items-center gap-3 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent transition-transform hover:scale-105'
-						>
-							<div className='from-primary to-accent flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r'>
-								<Package className='text-primary-foreground h-5 w-5' />
-							</div>
-							Share&Save
-						</Link>
+				{isVisible ? (
+					<ChevronUp className='h-5 w-5' />
+				) : (
+					<ChevronDown className='h-5 w-5' />
+				)}
+			</motion.button>
 
-						{/* Search Bar */}
-						<div className='mx-8 hidden max-w-xl flex-1 md:flex'>
-							<form
-								onSubmit={handleSearch}
-								className='relative w-full'
+			{/* Main Navbar */}
+			{isVisible && (
+				<motion.nav
+					initial={{ opacity: 0, height: 0 }}
+					animate={{ opacity: 1, height: 'auto' }}
+					exit={{ opacity: 0, height: 0 }}
+					transition={{
+						duration: 0.3,
+						ease: [0.4, 0, 0.2, 1]
+					}}
+					className='bg-card/95 sticky top-0 z-40 shadow-md backdrop-blur-lg'
+				>
+					<div className='container mx-auto space-y-2 py-2'>
+						<div className='flex h-16 items-center justify-between'>
+							{/* Logo */}
+							<Link
+								to='/'
+								className='from-primary to-accent flex items-center gap-3 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent transition-transform hover:scale-105'
 							>
-								<Search className='text-muted-foreground absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 transform' />
-								<input
-									type='text'
-									value={searchQuery}
-									onChange={e => setSearchQuery(e.target.value)}
-									placeholder='Tìm kiếm đồ cũ, người dùng...'
-									className='bg-input border-border text-foreground placeholder-muted-foreground focus:ring-ring focus:border-ring w-full rounded-full border py-3 pr-4 pl-12 transition-all focus:ring-2 focus:outline-none'
-								/>
-							</form>
-						</div>
+								<div className='from-primary to-accent flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r'>
+									<Package className='text-primary-foreground h-5 w-5' />
+								</div>
+								Share&Save
+							</Link>
 
-						{/* Right Actions */}
-						<div className='flex items-center gap-2'>
-							{/* Icon Buttons */}
-							<div className='flex items-center gap-1'>
-								<button
-									onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-									className='hover:bg-muted rounded-full p-2 transition-colors'
-									title={
-										theme === 'dark' ? 'Chuyển sang sáng' : 'Chuyển sang tối'
-									}
+							{/* Search Bar */}
+							<div className='mx-8 hidden max-w-xl flex-1 md:flex'>
+								<form
+									onSubmit={handleSearch}
+									className='relative w-full'
 								>
-									{theme === 'dark' ? (
-										<Sun className='h-5 w-5' />
-									) : (
-										<Moon className='h-5 w-5' />
-									)}
-								</button>
+									<Search className='text-muted-foreground absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 transform' />
+									<input
+										type='text'
+										value={searchQuery}
+										onChange={e => setSearchQuery(e.target.value)}
+										placeholder='Tìm kiếm đồ cũ, người dùng...'
+										className='bg-input border-border text-foreground placeholder-muted-foreground focus:ring-ring focus:border-ring w-full rounded-full border py-3 pr-4 pl-12 transition-all focus:ring-2 focus:outline-none'
+									/>
+								</form>
+							</div>
 
-								<button
-									onClick={() => navigate('/tai-xuong')}
-									className='hover:bg-muted rounded-full p-2 transition-colors'
-									title='Tải xuống'
-								>
-									<Download className='h-5 w-5' />
-								</button>
+							{/* Right Actions */}
+							<div className='flex items-center gap-2'>
+								{/* Icon Buttons */}
+								<div className='flex items-center gap-1'>
+									<button
+										onClick={() =>
+											setTheme(theme === 'dark' ? 'light' : 'dark')
+										}
+										className='hover:bg-muted rounded-full p-2 transition-colors'
+										title={
+											theme === 'dark' ? 'Chuyển sang sáng' : 'Chuyển sang tối'
+										}
+									>
+										{theme === 'dark' ? (
+											<Sun className='h-5 w-5' />
+										) : (
+											<Moon className='h-5 w-5' />
+										)}
+									</button>
 
-								<button
-									className='hover:bg-muted relative rounded-full p-2 transition-colors'
-									title='Thông báo'
-								>
-									<Bell className='h-5 w-5' />
-									<span className='bg-destructive absolute -top-1 -right-1 h-3 w-3 rounded-full'></span>
-								</button>
+									<button
+										onClick={() => navigate('/tai-xuong')}
+										className='hover:bg-muted rounded-full p-2 transition-colors'
+										title='Tải xuống'
+									>
+										<Download className='h-5 w-5' />
+									</button>
 
-								<DropdownProfileMenu />
+									<button
+										className='hover:bg-muted relative rounded-full p-2 transition-colors'
+										title='Thông báo'
+									>
+										<Bell className='h-5 w-5' />
+										<span className='bg-destructive absolute -top-1 -right-1 h-3 w-3 rounded-full'></span>
+									</button>
+
+									<DropdownProfileMenu />
+								</div>
 							</div>
 						</div>
-					</div>
-					<div className='flex items-center justify-between'>
-						<div className='no-scrollbar flex items-center gap-1 overflow-x-auto py-2'>
-							{navLinks.map(({ to, label, icon: Icon }) => {
-								const isActive = location.pathname === to
-								return (
-									<Link
-										key={to}
-										to={to}
-										className={`flex items-center gap-2 rounded-full px-4 py-2 whitespace-nowrap transition-all ${
-											isActive
-												? 'bg-blue-100 font-medium text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
-												: 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
-										}`}
-									>
-										<Icon className='h-4 w-4' />
-										<span className='hidden sm:inline'>{label}</span>
-									</Link>
-								)
-							})}
+						<div className='flex items-center justify-between'>
+							<div className='no-scrollbar flex items-center gap-1 overflow-x-auto py-2'>
+								{navLinks.map(({ to, label, icon: Icon }) => {
+									const isActive = location.pathname === to
+									return (
+										<Link
+											key={to}
+											to={to}
+											className={`flex items-center gap-2 rounded-full px-4 py-2 whitespace-nowrap transition-all ${
+												isActive
+													? 'bg-blue-100 font-medium text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+													: 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
+											}`}
+										>
+											<Icon className='h-4 w-4' />
+											<span className='hidden sm:inline'>{label}</span>
+										</Link>
+									)
+								})}
+							</div>
+							{/* Create Post Button */}
+							<Link
+								to={'/dang-bai'}
+								className='from-primary to-accent text-primary-foreground hidden items-center gap-2 rounded-full bg-gradient-to-r px-4 py-2 font-medium transition-all hover:scale-105 hover:opacity-90 hover:shadow-lg sm:flex'
+							>
+								<Plus className='h-4 w-4' />
+								Đăng bài
+							</Link>
 						</div>
-						{/* Create Post Button */}
-						<Link
-							to={'/dang-bai'}
-							className='from-primary to-accent text-primary-foreground hidden items-center gap-2 rounded-full bg-gradient-to-r px-4 py-2 font-medium transition-all hover:scale-105 hover:opacity-90 hover:shadow-lg sm:flex'
-						>
-							<Plus className='h-4 w-4' />
-							Đăng bài
-						</Link>
 					</div>
-				</div>
-			</motion.nav>
+				</motion.nav>
+			)}
 
 			{/* Mobile Search */}
-			<div className='sticky top-32 z-30 border-b border-gray-200 bg-white px-4 py-2 md:hidden dark:border-gray-700 dark:bg-gray-900'>
-				<form
-					onSubmit={handleSearch}
-					className='relative'
+			{isVisible && (
+				<motion.div
+					initial={{ opacity: 0, height: 0 }}
+					animate={{ opacity: 1, height: 'auto' }}
+					exit={{ opacity: 0, height: 0 }}
+					transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+					className='sticky top-32 z-30 border-b border-gray-200 bg-white px-4 py-2 md:hidden dark:border-gray-700 dark:bg-gray-900'
 				>
-					<Search className='absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400' />
-					<input
-						type='text'
-						value={searchQuery}
-						onChange={e => setSearchQuery(e.target.value)}
-						placeholder='Tìm kiếm...'
-						className='w-full rounded-full border border-gray-200 bg-gray-50 py-2 pr-4 pl-10 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800'
-					/>
-				</form>
-			</div>
+					<form
+						onSubmit={handleSearch}
+						className='relative'
+					>
+						<Search className='absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400' />
+						<input
+							type='text'
+							value={searchQuery}
+							onChange={e => setSearchQuery(e.target.value)}
+							placeholder='Tìm kiếm...'
+							className='w-full rounded-full border border-gray-200 bg-gray-50 py-2 pr-4 pl-10 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800'
+						/>
+					</form>
+				</motion.div>
+			)}
 		</>
 	)
 }

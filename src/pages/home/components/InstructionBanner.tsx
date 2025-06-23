@@ -190,12 +190,11 @@ export default function HomepageBanner() {
 							className='mb-6 text-4xl leading-tight font-bold lg:text-6xl'
 							variants={itemVariants}
 						>
+							<div className='text-foreground space-x-2'>
+								<span>Chia sẻ</span>
+								<span>Tạo Nên</span>
+							</div>
 							<span className='from-primary via-success to-primary bg-gradient-to-r bg-clip-text text-transparent'>
-								Chia Sẻ
-							</span>{' '}
-							Tạo Nên
-							<br />
-							<span className='from-secondary via-muted-foreground to-secondary bg-gradient-to-r bg-clip-text text-transparent'>
 								Giá Trị Mới
 							</span>
 						</motion.h1>
@@ -204,7 +203,8 @@ export default function HomepageBanner() {
 							className='text-muted-foreground mb-8 text-center text-lg leading-relaxed lg:text-xl'
 							variants={itemVariants}
 						>
-							Nền tảng kết nối cộng đồng chia sẻ đồ cũ và tìm kiếm đồ thất lạc.
+							Nền tảng kết nối cộng đồng chia sẻ <strong>đồ cũ</strong> và tìm
+							kiếm <strong>đồ thất lạc</strong>.
 							<br />
 							Mỗi món đồ được chia sẻ là một cơ hội để giúp đỡ chúng tôi tạo ra
 							nhiều chiến dịch để giúp đỡ mọi người.

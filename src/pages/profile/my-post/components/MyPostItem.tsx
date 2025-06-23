@@ -54,6 +54,7 @@ const MyPostItem: FC<MyPostItemProps> = ({
 	}
 
 	const handleRepost = () => {
+		console.log(post.id)
 		onRepost(post.id)
 	}
 

@@ -105,31 +105,60 @@ const MyPost = () => {
 	return (
 		<div className='container mx-auto py-12'>
 			<div className='mb-6 flex items-center justify-between gap-2'>
-				<input
-					type='text'
-					value={search}
-					onChange={e => setSearch(e.target.value)}
-					placeholder='Tìm kiếm bài đăng của tôi...'
-					className='bg-card text-foreground focus:ring-primary w-1/2 rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:outline-none'
-				/>
-				<CustomSelect
-					value={order}
-					onChange={value => setOrder(value as ESortOrder)}
-					options={sortOptions}
-					className='flex-1'
-				/>
-				<CustomSelect
-					value={selectedType}
-					onChange={value => setSelectedType(value as PostTypeSelection)}
-					options={typeOptions}
-					className='flex-1'
-				/>
-				<CustomSelect
-					value={selectedStatus}
-					onChange={value => setSelectedStatus(value as PostStatusSelection)}
-					options={statusOptions}
-					className='flex-1'
-				/>
+				<div className='w-1/2'>
+					<label
+						htmlFor='searchInput'
+						className='text-secondary mb-1 block text-sm font-medium'
+					>
+						Tìm kiếm
+					</label>
+					<input
+						id='searchInput'
+						type='text'
+						value={search}
+						onChange={e => setSearch(e.target.value)}
+						placeholder='Tìm kiếm bài đăng, tiêu đề...'
+						className='bg-card text-foreground focus:ring-primary w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:outline-none'
+					/>
+				</div>
+
+				<div className='flex-1'>
+					<label
+						htmlFor='searchInput'
+						className='text-secondary mb-1 block text-sm font-medium'
+					>
+						Sắp xếp
+					</label>
+					<CustomSelect
+						value={order}
+						onChange={value => setOrder(value as ESortOrder)}
+						options={sortOptions}
+						className='w-full flex-1'
+					/>
+				</div>
+				<div className='flex-1'>
+					<label className='text-secondary mb-1 block text-sm font-medium'>
+						Loại bài đăng
+					</label>
+					<CustomSelect
+						value={selectedType}
+						onChange={value => setSelectedType(value as PostTypeSelection)}
+						options={typeOptions}
+						className='w-full flex-1'
+					/>
+				</div>
+
+				<div className='flex-1'>
+					<label className='text-secondary mb-1 block text-sm font-medium'>
+						Trạng thái
+					</label>
+					<CustomSelect
+						value={selectedStatus}
+						onChange={value => setSelectedStatus(value as PostStatusSelection)}
+						options={statusOptions}
+						className='flex-1'
+					/>
+				</div>
 			</div>
 
 			<div className='relative space-y-6'>

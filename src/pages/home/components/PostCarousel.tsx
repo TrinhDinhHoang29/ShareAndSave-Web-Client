@@ -35,7 +35,7 @@ const PostCarousel: React.FC = () => {
 							key={post.id}
 							className='h-full'
 							post={post}
-							onPostClick={slug => navigate('/bai-dang' + '/' + slug)}
+							onPostClick={id => navigate('/bai-dang' + '/' + id)}
 						/>
 					))}
 				</Carousel>

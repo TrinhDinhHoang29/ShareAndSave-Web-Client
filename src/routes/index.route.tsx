@@ -19,6 +19,7 @@ const LoginSession = lazy(() => import('@/pages/login-session'))
 const Dowload = lazy(() => import('@/pages/dowload'))
 const EditProfile = lazy(() => import('@/pages/profile/edit-profile'))
 const Leaderboard = lazy(() => import('@/pages/leader-board'))
+const ItemWarehouse = lazy(() => import('@/pages/item-warehouse'))
 
 // Error Boundary Component
 const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
@@ -88,6 +89,33 @@ function AppRouter() {
 									<PageTitle title='Danh sách bài đăng' />
 									<ErrorBoundary>
 										<Post />
+									</ErrorBoundary>
+								</>
+							)
+						}
+					]
+				},
+				{
+					path: 'kho-do-cu',
+					children: [
+						{
+							path: ':slug',
+							element: (
+								<>
+									<PageTitle title='Chi tiết bài đăng' />
+									<ErrorBoundary>
+										<PostDetail />
+									</ErrorBoundary>
+								</>
+							)
+						},
+						{
+							path: '',
+							element: (
+								<>
+									<PageTitle title='Danh sách kho đồ cũ' />
+									<ErrorBoundary>
+										<ItemWarehouse />
 									</ErrorBoundary>
 								</>
 							)

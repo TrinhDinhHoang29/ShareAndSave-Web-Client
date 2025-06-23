@@ -270,7 +270,7 @@ const PostDetail: React.FC = () => {
 											<img
 												src={post.images[currentImageIndex]}
 												alt={`${post.title} - Ảnh ${currentImageIndex + 1}`}
-												className='h-full w-full cursor-pointer object-contain'
+												className='bg-muted h-full w-full cursor-pointer object-contain'
 												onClick={() => setIsImageModalOpen(true)}
 											/>
 
@@ -312,7 +312,7 @@ const PostDetail: React.FC = () => {
 														<img
 															src={image}
 															alt={`Thumbnail ${index + 1}`}
-															className='h-full w-full object-contain'
+															className='bg-muted h-full w-full object-contain'
 														/>
 													</button>
 												))}
@@ -472,7 +472,7 @@ const PostDetail: React.FC = () => {
 															<img
 																src={item.image}
 																alt={item.name}
-																className='h-full w-full object-contain'
+																className='bg-muted h-full w-full object-contain'
 															/>
 														) : (
 															<div className='flex h-full w-full items-center justify-center'>
@@ -572,7 +572,7 @@ const PostDetail: React.FC = () => {
 															<img
 																src={interest.userAvatar}
 																alt={interest.userName}
-																className='h-full w-full object-contain'
+																className='bg-muted h-full w-full object-contain'
 															/>
 														) : (
 															<div className='flex h-full w-full items-center justify-center'>
@@ -631,7 +631,7 @@ const PostDetail: React.FC = () => {
 											)}
 										>
 											<ArrowLeftRight className='h-5 w-5' />
-											Tạo giao dịch
+											Trò chuyện - Tạo giao dịch
 										</button>
 									</motion.div>
 								)}
@@ -733,10 +733,10 @@ const PostDetail: React.FC = () => {
 											initial={{ opacity: 0 }}
 											animate={{ opacity: 1 }}
 											exit={{ opacity: 0 }}
-											className='fixed inset-0 z-40 flex items-center justify-center bg-black/90 p-4'
+											className='fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4'
 											onClick={() => setIsImageModalOpen(false)}
 										>
-											<button className='bg-destructive absolute top-5 right-5 rounded-md p-2 text-white transition-colors hover:bg-red-500 hover:text-gray-300'>
+											<button className='bg-destructive absolute top-5 right-5 z-50 rounded-md p-2 text-white transition-colors hover:bg-red-500 hover:text-gray-300'>
 												<X className='h-8 w-8' />
 											</button>
 											<motion.div
@@ -749,7 +749,7 @@ const PostDetail: React.FC = () => {
 												<img
 													src={post.images[currentImageIndex]}
 													alt={`${post.title} - Ảnh ${currentImageIndex + 1}`}
-													className='max-h-[500px] max-w-full rounded-lg object-contain'
+													className='bg-muted max-h-[500px] max-w-full rounded-lg object-contain'
 												/>
 											</motion.div>
 											{post.images.length > 1 && (

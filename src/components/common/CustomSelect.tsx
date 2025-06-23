@@ -2,15 +2,12 @@ import clsx from 'clsx'
 import { ChevronDown } from 'lucide-react'
 import React from 'react'
 
-interface Option {
-	value: string | number
-	label: string
-}
+import { IOption } from '@/models/interfaces'
 
 interface CustomSelectProps {
 	value: string | number
 	onChange: (value: string | number) => void
-	options: Option[]
+	options: IOption[]
 	className?: string
 }
 

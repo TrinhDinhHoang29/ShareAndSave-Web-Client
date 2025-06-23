@@ -380,18 +380,20 @@ export interface IChatMessagesPanel {
 }
 
 export interface IOption {
-	value: string
+	value: string | number
 	label: string
 }
 
 export interface IItemWarehouse {
-	category_name: string
-	claim_item_requests: number
-	description: string
-	item_id: number
-	item_image: string
-	item_name: string
+	categoryName: string
+	claimItemRequests?: number
+	description?: string
+	itemID: number
+	itemImage: string
+	itemName: string
 	quantity: number
+	curentQuantity?: number
+	meQuantity?: number
 }
 
 export interface IItemWarehouseParams {
@@ -399,7 +401,7 @@ export interface IItemWarehouseParams {
 	order?: ESortOrder
 	limit?: number
 	page?: number
-	category?: number
+	categoryID?: number
 	search?: string
 }
 
@@ -430,4 +432,10 @@ export interface IMyPostRequest {
 	isRepost?: boolean
 	status?: number
 	title?: string
+}
+
+export interface IItemWarehouseRequest {
+	itemID: number
+	quantity?: number
+	newQuantity?: number
 }

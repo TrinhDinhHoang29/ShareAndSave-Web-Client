@@ -22,6 +22,11 @@ export const sortOptions = [
 	{ value: ESortOrder.ASC, label: 'Cũ nhất' }
 ]
 
+export const sortQuantityOptions = [
+	{ value: ESortOrder.DESC, label: 'Giảm dần' },
+	{ value: ESortOrder.ASC, label: 'Tăng dần' }
+]
+
 export const methodOptions = [
 	{
 		value: EMethod.IN_PERSON,

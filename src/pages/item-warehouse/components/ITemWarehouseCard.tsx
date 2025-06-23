@@ -1,22 +1,32 @@
 import clsx from 'clsx'
 import { motion } from 'framer-motion'
+import { Box, Check, File, Minus, Plus } from 'lucide-react'
 import React, { useState } from 'react'
 
 import { IItemWarehouse } from '@/models/interfaces'
 
 interface ItemWarehouseCardProps {
 	item: IItemWarehouse
-	onClick?: (item: IItemWarehouse) => void
+	onSelect?: (itemId: number, quantity: number) => void
+	onDeselect?: (itemId: number) => void
+	selectedQuantity?: number
+	isSelected?: boolean
 	className?: string
+	selectionMode?: boolean
 }
 
 const ItemWarehouseCard: React.FC<ItemWarehouseCardProps> = ({
 	item,
-	onClick,
-	className
+	onSelect,
+	onDeselect,
+	selectedQuantity = 0,
+	isSelected = false,
+	className,
+	selectionMode = false
 }) => {
 	const [isExpanded, setIsExpanded] = useState(false)
 	const [imageError, setImageError] = useState(false)
+	const [localQuantity, setLocalQuantity] = useState(selectedQuantity || 1)
 
 	const handleToggleDescription = (e: React.MouseEvent) => {
 		e.stopPropagation()
@@ -24,7 +34,23 @@ const ItemWarehouseCard: React.FC<ItemWarehouseCardProps> = ({
 	}
 
 	const handleCardClick = () => {
-		onClick?.(item)
+		if (!selectionMode || item.meQuantity) return
+
+		if (isSelected) {
+			onDeselect?.(item.itemID)
+		} else {
+			onSelect?.(item.itemID, localQuantity)
+		}
+	}
+
+	const handleQuantityChange = (newQuantity: number, e: React.MouseEvent) => {
+		e.stopPropagation()
+		if (newQuantity < 1 || newQuantity > item.quantity) return
+
+		setLocalQuantity(newQuantity)
+		if (isSelected) {
+			onSelect?.(item.itemID, newQuantity)
+		}
 	}
 
 	const truncateText = (text: string, maxLength: number = 100) => {
@@ -36,20 +62,39 @@ const ItemWarehouseCard: React.FC<ItemWarehouseCardProps> = ({
 		<motion.div
 			initial={{ opacity: 0, y: 20 }}
 			animate={{ opacity: 1, y: 0 }}
-			whileHover={{ y: -4, transition: { duration: 0.2 } }}
+			whileHover={{ y: selectionMode ? -2 : -4, transition: { duration: 0.2 } }}
 			className={clsx(
-				'bg-card border-border group cursor-pointer overflow-hidden rounded-lg border shadow-sm transition-all duration-300 hover:shadow-md',
+				'bg-card group relative overflow-hidden rounded-lg border shadow-sm transition-all duration-300',
+				selectionMode && 'cursor-pointer hover:shadow-md',
+				isSelected && 'ring-primary border-primary ring-2',
+				selectionMode && item.meQuantity ? 'border-error/80' : 'border-border',
 				className
 			)}
 			onClick={handleCardClick}
 		>
+			{/* Selection Indicator */}
+			{selectionMode && !item.meQuantity && (
+				<div className='absolute top-3 left-3 z-20'>
+					<div
+						className={clsx(
+							'flex h-6 w-6 items-center justify-center rounded-full border-2 shadow-sm transition-all duration-200',
+							isSelected
+								? 'bg-primary border-primary text-primary-foreground shadow-primary/25'
+								: 'bg-card border-muted-foreground/30 group-hover:border-primary group-hover:bg-primary/10'
+						)}
+					>
+						{isSelected && <Check className='h-3 w-3 stroke-[3]' />}
+					</div>
+				</div>
+			)}
+
 			{/* Image Section */}
 			<div className='bg-muted relative h-48 overflow-hidden'>
 				{!imageError ? (
 					<img
-						src={item.item_image}
-						alt={item.item_name}
-						className='h-full w-full object-cover transition-transform duration-300 group-hover:scale-105'
+						src={item.itemImage}
+						alt={item.itemName}
+						className='bg-muted h-full w-full object-contain transition-transform duration-300 group-hover:scale-105'
 						onError={() => setImageError(true)}
 					/>
 				) : (
@@ -75,17 +120,24 @@ const ItemWarehouseCard: React.FC<ItemWarehouseCardProps> = ({
 					</div>
 				)}
 
+				{item.meQuantity && (
+					<div className='absolute top-3 left-3 z-10'>
+						<span className='bg-error/80 text-primary-foreground rounded-full px-2 py-1 text-xs font-medium'>
+							Đã gửi yêu cầu
+						</span>
+					</div>
+				)}
 				{/* Category Badge */}
-				<div className='absolute top-3 left-3'>
+				<div className='absolute top-3 right-3 z-10'>
 					<span className='bg-primary text-primary-foreground rounded-full px-2 py-1 text-xs font-medium'>
-						{item.category_name}
+						{item.categoryName}
 					</span>
 				</div>
 
-				{/* Quantity Badge */}
-				<div className='absolute top-3 right-3'>
+				{/* Available Quantity Badge */}
+				<div className='absolute right-3 bottom-3 z-10'>
 					<span className='bg-card/90 text-card-foreground border-border rounded-full border px-2 py-1 text-xs font-medium backdrop-blur-sm'>
-						SL: {item.quantity}
+						Còn: {item.quantity}
 					</span>
 				</div>
 			</div>
@@ -94,28 +146,48 @@ const ItemWarehouseCard: React.FC<ItemWarehouseCardProps> = ({
 			<div className='space-y-3 p-4'>
 				{/* Item Name */}
 				<h3 className='text-card-foreground group-hover:text-primary line-clamp-2 text-lg font-semibold transition-colors'>
-					{item.item_name}
+					{item.itemName}
 				</h3>
 
 				{/* Stats */}
 				<div className='text-muted-foreground flex items-center justify-between text-sm'>
 					<div className='flex items-center gap-1'>
-						<svg
-							className='h-4 w-4'
-							fill='none'
-							stroke='currentColor'
-							viewBox='0 0 24 24'
-						>
-							<path
-								strokeLinecap='round'
-								strokeLinejoin='round'
-								strokeWidth={1.5}
-								d='M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'
-							/>
-						</svg>
-						<span>{item.claim_item_requests} yêu cầu</span>
+						<File className='h-4 w-4' />
+						<span>{item.claimItemRequests} yêu cầu</span>
 					</div>
+					{item.meQuantity && (
+						<div className='flex items-center gap-1'>
+							<span>Bạn đã yêu cầu: {item.meQuantity}</span>
+							<Box className='h-4 w-4' />
+						</div>
+					)}
 				</div>
+
+				{/* Quantity Selector - Only show when selected and in selection mode */}
+				{selectionMode && isSelected && (
+					<div className='bg-muted flex items-center justify-between rounded-lg p-2'>
+						<span className='text-sm font-medium'>Số lượng:</span>
+						<div className='flex items-center gap-2'>
+							<button
+								onClick={e => handleQuantityChange(localQuantity - 1, e)}
+								disabled={localQuantity <= 1}
+								className='bg-background border-border hover:bg-muted flex h-8 w-8 items-center justify-center rounded-full border transition-colors disabled:cursor-not-allowed disabled:opacity-50'
+							>
+								<Minus className='h-4 w-4' />
+							</button>
+							<span className='w-8 text-center font-medium'>
+								{localQuantity}
+							</span>
+							<button
+								onClick={e => handleQuantityChange(localQuantity + 1, e)}
+								disabled={localQuantity >= item.quantity}
+								className='bg-background border-border hover:bg-muted flex h-8 w-8 items-center justify-center rounded-full border transition-colors disabled:cursor-not-allowed disabled:opacity-50'
+							>
+								<Plus className='h-4 w-4' />
+							</button>
+						</div>
+					</div>
+				)}
 
 				{/* Description */}
 				<div className='space-y-2'>
@@ -126,10 +198,12 @@ const ItemWarehouseCard: React.FC<ItemWarehouseCardProps> = ({
 						initial={false}
 						animate={{ height: 'auto' }}
 					>
-						{isExpanded ? item.description : truncateText(item.description)}
+						{isExpanded
+							? item.description
+							: truncateText(item.description || '')}
 					</motion.p>
 
-					{item.description.length > 100 && (
+					{item.description && item.description.length > 100 && (
 						<button
 							onClick={handleToggleDescription}
 							className='text-primary hover:text-primary/80 text-xs font-medium transition-colors'
@@ -142,60 +216,5 @@ const ItemWarehouseCard: React.FC<ItemWarehouseCardProps> = ({
 		</motion.div>
 	)
 }
+
 export default ItemWarehouseCard
-
-// // Demo Component
-// const IItemWarehouseDemo = () => {
-//   const sampleItems: IItemWarehouse[] = [
-//     {
-//       item_id: 1,
-//       item_name: "Laptop Dell Inspiron 15 3000",
-//       category_name: "Máy tính",
-//       quantity: 5,
-//       claim_item_requests: 12,
-//       description: "Laptop Dell Inspiron 15 3000 với bộ vi xử lý Intel Core i5, RAM 8GB, ổ cứng SSD 256GB. Máy còn hoạt động tốt, phù hợp cho công việc văn phòng và học tập. Đã qua sử dụng nhưng vẫn trong tình trạng khá tốt.",
-//       item_image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=300&fit=crop"
-//     },
-//     {
-//       item_id: 2,
-//       item_name: "Bàn làm việc gỗ",
-//       category_name: "Nội thất",
-//       quantity: 3,
-//       claim_item_requests: 8,
-//       description: "Bàn làm việc bằng gỗ tự nhiên, kích thước 120x60cm, có ngăn kéo tiện lợi.",
-//       item_image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=300&fit=crop"
-//     },
-//     {
-//       item_id: 3,
-//       item_name: "Máy in Canon LBP6030",
-//       category_name: "Thiết bị",
-//       quantity: 2,
-//       claim_item_requests: 15,
-//       description: "Máy in laser Canon LBP6030, in đen trắng, tốc độ in nhanh, tiết kiệm mực. Phù hợp cho văn phòng nhỏ hoặc sử dụng cá nhân. Máy đã qua sử dụng nhưng vẫn hoạt động ổn định và in được chất lượng tốt.",
-//       item_image: "broken-image-url"
-//     }
-//   ];
-
-//   const handleItemClick = (item: IItemWarehouse) => {
-//     console.log('Clicked item:', item.item_name);
-//   };
-
-//   return (
-//     <div className="min-h-screen bg-background p-6">
-//       <div className="container mx-auto">
-//         <h1 className="text-3xl font-bold text-foreground mb-8">Kho hàng cũ</h1>
-//         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-//           {sampleItems.map((item) => (
-//             <ItemWarehouseCard
-//               key={item.item_id}
-//               item={item}
-//               onClick={handleItemClick}
-//             />
-//           ))}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default IItemWarehouseDemo;
