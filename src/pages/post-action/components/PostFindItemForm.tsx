@@ -1,10 +1,12 @@
 import { Gift } from 'lucide-react'
-import { Controller, FieldError, useFormContext } from 'react-hook-form'
+import { Controller, useFormContext } from 'react-hook-form'
 
 import DatePicker from '@/components/common/DatePicker'
 import ImageUpload from '@/components/common/ImageUpload'
 import InputText from '@/components/common/InputText'
 import { PostInfo } from '@/models/types'
+
+import ItemManager from './ItemManager'
 
 interface PostFindItemFormProps {
 	isTransitioning: boolean
@@ -48,20 +50,13 @@ const PostFindItemForm: React.FC<PostFindItemFormProps> = ({
 						Ví dụ: 'Tìm điện thoại iPhone 12 bị mất'
 					</p>
 				</div>
-				<div>
-					<InputText
-						name='description'
-						label='Mô tả món đồ *'
-						type='textarea'
-						placeholder='Nhập mô tả món đồ'
-						register={register}
-						error={errors.description}
-					/>
-					<p className='text-muted-foreground mt-1 text-sm'>
-						Ví dụ: 'Điện thoại iPhone 12, màu đen, làm mất ở bến xe vào ngày
-						25/05'
-					</p>
-				</div>
+				<ItemManager
+					newItemsFieldName='newItems'
+					oldItemsFieldName='oldItems'
+					label='Món đồ'
+					description='Bấm vào dấu "+" để thêm món đồ'
+					animationDelay={0.2}
+				/>
 				<div>
 					<DatePicker
 						name='lostDate'
@@ -83,18 +78,6 @@ const PostFindItemForm: React.FC<PostFindItemFormProps> = ({
 					/>
 					<p className='text-muted-foreground mt-1 text-sm'>
 						Ví dụ: 'Bến xe Miền Đông, TP.HCM'
-					</p>
-				</div>
-				<div>
-					<InputText
-						name='category'
-						label='Loại đồ'
-						placeholder='Nhập loại đồ'
-						register={register}
-						error={errors.category}
-					/>
-					<p className='text-muted-foreground mt-1 text-sm'>
-						Ví dụ: 'Điện thoại'
 					</p>
 				</div>
 				<div>
@@ -130,6 +113,20 @@ const PostFindItemForm: React.FC<PostFindItemFormProps> = ({
 					/>
 					<p className='text-muted-foreground mt-1 text-sm'>
 						Tải lên hình ảnh của món đồ (nếu có)
+					</p>
+				</div>
+				<div>
+					<InputText
+						name='description'
+						label='Mô tả món đồ *'
+						type='textarea'
+						placeholder='Nhập mô tả món đồ'
+						register={register}
+						error={errors.description}
+					/>
+					<p className='text-muted-foreground mt-1 text-sm'>
+						Ví dụ: 'Điện thoại iPhone 12, màu đen, làm mất ở bến xe vào ngày
+						25/05'
 					</p>
 				</div>
 			</div>

@@ -6,7 +6,14 @@ import { useAlertModalContext } from '@/context/alert-modal-context'
 import { IApiErrorResponse, IUser } from '@/models/interfaces'
 import useAuthStore from '@/stores/authStore'
 
-interface useLoginMutaionOptions {
+interface useLoginMutationOptions {
+	onSuccess?: () => void
+	onError?: (message: string) => void
+	onSettled?: () => void
+	onMutate?: () => void
+}
+
+interface useRegisterMutaionOptions {
 	onSuccess?: () => void
 	onError?: (message: string) => void
 	onSettled?: () => void
@@ -18,18 +25,49 @@ interface UseUpdateUserMutationOptions {
 	onSettled?: () => void
 }
 
-export const useLoginMutaion = ({
+export const useLoginMutation = ({
 	onSuccess,
 	onError,
-	onSettled
-}: useLoginMutaionOptions = {}) => {
+	onSettled,
+	onMutate
+}: useLoginMutationOptions = {}) => {
 	const { login } = useAuthStore()
 
 	return useMutation({
 		mutationFn: authApi.login,
+		onMutate: () => {
+			onMutate?.()
+		},
 		onSuccess: res => {
-			if (res.code === 200) {
+			if (res.code === 200 || res.code === 201) {
 				login(res.data)
+				onSuccess?.()
+			} else {
+				const errorMessage = res.message
+				const cleanedMessage = errorMessage.split(':')[0].trim()
+				onError?.(cleanedMessage)
+			}
+		},
+		onError: (error: any) => {
+			const errorMessage = (error as IApiErrorResponse).message
+			const cleanedMessage = errorMessage.split(':')[0].trim()
+			onError?.(cleanedMessage)
+		},
+		onSettled: () => {
+			onSettled?.()
+		}
+	})
+}
+
+export const useRegisterMutation = ({
+	onSuccess,
+	onError,
+	onSettled
+}: useRegisterMutaionOptions = {}) => {
+	return useMutation({
+		mutationFn: authApi.register,
+		onSuccess: res => {
+			if (res.code === 200 || res.code === 201) {
 				onSuccess?.()
 			} else {
 				const errorMessage = res.message

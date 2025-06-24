@@ -20,13 +20,14 @@ export const useListItemWarehouseQuery = (params: IItemWarehouseParams) => {
 	})
 }
 
-export const useMyItemWarehouseQuery = () => {
+export const useMyItemWarehouseQuery = (isAuthenticated: boolean) => {
 	return useQuery<IItemWarehouse[]>({
 		queryKey: ['my-item-warehouses'], // Key để cache, dựa trên params
 		queryFn: async () => {
 			const res = await itemWarehouseApi.myItemWarehouse()
 			return res.data.claimRequests
-		}
+		},
+		enabled: isAuthenticated
 	})
 }
 

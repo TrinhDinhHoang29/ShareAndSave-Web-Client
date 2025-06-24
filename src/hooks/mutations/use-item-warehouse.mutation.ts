@@ -27,9 +27,8 @@ export const useCreateItemWarehouseMutation = ({
 			if (res.code === 200 || res.code === 201) {
 				showSuccess({
 					successButtonText: 'Xác nhận',
-					successMessage:
-						'Đăng ký nhận đồ thành công. Vui lòng đợi thông báo để nhận phiếu hẹn.',
-					successTitle: 'Thông tin đăng ký nhận đồ',
+					successMessage: 'Vui lòng đợi thông báo để nhận phiếu hẹn.',
+					successTitle: 'Đăng ký nhận đồ thành công',
 					onConfirm: close
 				})
 				onSuccess?.()
@@ -39,7 +38,7 @@ export const useCreateItemWarehouseMutation = ({
 				showError({
 					errorButtonText: 'Thử lại',
 					errorMessage: cleanedMessage,
-					errorTitle: 'Lỗi thông tin giao dịch',
+					errorTitle: 'Lỗi đăng ký nhận đồ',
 					onConfirm: close
 				})
 			}
@@ -50,7 +49,7 @@ export const useCreateItemWarehouseMutation = ({
 			showError({
 				errorButtonText: 'Thử lại',
 				errorMessage: cleanedMessage,
-				errorTitle: 'Lỗi thông tin giao dịch',
+				errorTitle: 'Lỗi đăng ký nhận đồ',
 				onConfirm: close
 			})
 		}
@@ -143,8 +142,7 @@ export const useDeleteItemWarehouseMutation = ({
 			if (res.code === 200 || res.code === 201) {
 				showSuccess({
 					successButtonText: 'Xác nhận',
-					successMessage: 'Xóa thành công!',
-					successTitle: 'Thông tin đăng ký nhận đồ',
+					successTitle: 'Xóa thành công!',
 					onConfirm: close
 				})
 				onSuccess?.()

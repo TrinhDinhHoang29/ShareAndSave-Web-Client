@@ -57,7 +57,10 @@ const Chat = () => {
 
 	const { user } = useAuthStore()
 	const senderID = user?.id
-	const isAuthor = senderID === postDetailInterestData?.authorID
+	const isAuthor = useMemo(() => {
+		if (!postDetailInterestData || !senderID) return false
+		return senderID === postDetailInterestData.authorID
+	}, [postDetailInterestData?.authorID, senderID])
 	const receiver: IReceiver = isAuthor
 		? {
 				id: postDetailInterestData?.interests[0]?.userID || 0,
@@ -87,6 +90,24 @@ const Chat = () => {
 					interestID
 				}
 			}
+			socketRef.current.send(JSON.stringify(msg))
+		}
+	}, [interestID])
+
+	const sendTransaction = useCallback(() => {
+		if (
+			socketRef.current?.readyState === WebSocket.OPEN &&
+			interestID &&
+			receiver
+		) {
+			const msg = {
+				event: 'send_transaction',
+				data: {
+					interestID,
+					receiverID: receiver.id
+				}
+			}
+			console.log('đã send')
 			socketRef.current.send(JSON.stringify(msg))
 		}
 	}, [interestID])
@@ -127,7 +148,6 @@ const Chat = () => {
 
 			socketRef.current.onmessage = event => {
 				try {
-					console.log(event.data)
 					const data = JSON.parse(event.data)
 					if (data.event === 'send_message_response' && data.data.message) {
 						const messageResponse: ISocketMessageResponse = data.data
@@ -142,6 +162,8 @@ const Chat = () => {
 						setSocketMessageResponse({
 							status: 'error'
 						})
+					} else if (data.event === 'send_transaction_response') {
+						transactionDataRefetch()
 					}
 				} catch (error) {
 					console.error('❌ Parse error:', error)
@@ -343,6 +365,7 @@ const Chat = () => {
 			setTransactionStatus(ETransactionStatus.PENDING)
 			setSelectedItems([])
 			transactionDataRefetch()
+			sendTransaction()
 		}
 	})
 
@@ -356,6 +379,7 @@ const Chat = () => {
 			) {
 				postDetailDataRefetch()
 			}
+			sendTransaction()
 		}
 	})
 
@@ -426,7 +450,6 @@ const Chat = () => {
 	}
 
 	const handleApplyItemTransactions = (index: number) => {
-		console.log(index)
 		if (transactionData) {
 			const transactionItems = transactions[index].items
 			const updatedCurrentQuantityTransactionItems = transactionItems.map(

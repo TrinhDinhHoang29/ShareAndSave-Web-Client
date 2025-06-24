@@ -6,6 +6,7 @@ import { FormProvider, useForm } from 'react-hook-form'
 import Loading from '@/components/common/Loading'
 import PrimaryButton from '@/components/common/PrimaryButton'
 import SecondaryButton from '@/components/common/SecondaryButton'
+import { useAuthDialog } from '@/context/auth-dialog-context'
 import { useCreatePostMutation } from '@/hooks/mutations/use-post.mutation'
 import {
 	IPostActionInfoFormData,
@@ -18,7 +19,12 @@ import {
 	postInfoSchema,
 	postTypeSchema
 } from '@/models/schema'
-import { PersonalInfo, PostInfo, PostType } from '@/models/types'
+import {
+	PersonalInfo,
+	PostInfo,
+	PostType,
+	RegisterFormData
+} from '@/models/types'
 import useAuthStore from '@/stores/authStore'
 
 import AutoLoginRedirect from './components/AutoLoginRedirect'
@@ -49,9 +55,11 @@ const PostAction: React.FC = () => {
 		isAuthenticated ? 1 : 0
 	)
 
+	const { openRegisterWithData, isRegisterByPost } = useAuthDialog()
+
 	useEffect(() => {
-		setCurrentStep(isAuthenticated ? 1 : 0)
-	}, [isAuthenticated])
+		if (!isRegisterByPost) setCurrentStep(isAuthenticated ? 1 : 0)
+	}, [isAuthenticated, isRegisterByPost])
 
 	const mutation = useCreatePostMutation({
 		onSuccess: (data: IPostActionResponse) => {
@@ -137,6 +145,19 @@ const PostAction: React.FC = () => {
 	const handleSubmit = async () => {
 		const isValid = await postInfoForm.trigger()
 		if (isValid) {
+			if (!isAuthenticated) {
+				// Nếu chưa đăng nhập, mở dialog đăng ký với thông tin đã nhập
+				const userInfo: RegisterFormData = {
+					email: formData.personalInfo.email,
+					fullName: formData.personalInfo.fullName,
+					phoneNumber: formData.personalInfo.phoneNumber,
+					password: '',
+					confirmPassword: ''
+				}
+				openRegisterWithData(userInfo)
+				return
+			}
+
 			const finalData: IPostActionInfoFormData = {
 				...formData,
 				postInfo: postInfoForm.getValues()
@@ -197,7 +218,7 @@ const PostAction: React.FC = () => {
 					image: item.image
 				}))
 			}
-			// console.log(convertedData)
+
 			mutation.mutate(convertedData)
 		}
 	}

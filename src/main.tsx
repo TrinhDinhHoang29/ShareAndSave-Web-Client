@@ -2,7 +2,6 @@
 import '@/index.css'
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { StrictMode } from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 
@@ -10,6 +9,7 @@ import App from '@/App'
 import { FontProvider } from '@/context/font-context'
 import { ThemeProvider } from '@/context/theme-context'
 
+import ScrollToTop from './components/common/ScrollToTop'
 import { AlertModalProvider } from './context/alert-modal-context'
 import { AuthDialogProvider } from './context/auth-dialog-context'
 import { ChatNotificationProvider } from './context/chat-noti-context'
@@ -30,15 +30,16 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 			storageKey='vite-ui-theme'
 		>
 			<FontProvider>
-				<AuthDialogProvider>
-					<AlertModalProvider>
+				<AlertModalProvider>
+					<AuthDialogProvider>
 						<ChatNotificationProvider>
 							<BrowserRouter>
+								<ScrollToTop />
 								<App />
 							</BrowserRouter>
 						</ChatNotificationProvider>
-					</AlertModalProvider>
-				</AuthDialogProvider>
+					</AuthDialogProvider>
+				</AlertModalProvider>
 			</FontProvider>
 		</ThemeProvider>
 	</QueryClientProvider>

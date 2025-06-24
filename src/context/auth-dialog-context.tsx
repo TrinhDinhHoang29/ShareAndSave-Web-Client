@@ -1,16 +1,20 @@
 // context/auth-dialog-context.tsx
 import React, { createContext, ReactNode, useContext, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 
+import { useLoginMutation } from '@/hooks/mutations/use-auth.mutation'
+import { RegisterFormData } from '@/models/types'
 import AuthLayoutDialog from '@/pages/(auth)/authLayoutDialog'
 import LoginDialog from '@/pages/(auth)/loginDialog'
 import RegisterDialog from '@/pages/(auth)/registerDialog'
+
+import { useAlertModalContext } from './alert-modal-context'
 
 interface DialogOptions {
 	type: 'login' | 'register'
 	title: string
 	headColor: string
 	subTitle: string
+	defaultData?: RegisterFormData
 }
 
 interface AuthDialogContextType {
@@ -19,7 +23,9 @@ interface AuthDialogContextType {
 	openDialog: (options: Partial<DialogOptions>) => void
 	closeDialog: () => void
 	switchToLogin: () => void
-	switchToRegister: () => void
+	switchToRegister: (defaultData?: RegisterFormData) => void
+	openRegisterWithData: (data: RegisterFormData) => void
+	isRegisterByPost: boolean
 }
 
 const AuthDialogContext = createContext<AuthDialogContextType | undefined>(
@@ -37,8 +43,31 @@ export const AuthDialogProvider: React.FC<{ children: ReactNode }> = ({
 	children
 }) => {
 	const [isOpen, setIsOpen] = useState(false)
+	const [isRegisterByPost, setIsRegisterByPost] = useState(false)
 	const [dialogOptions, setDialogOptions] =
 		useState<DialogOptions>(defaultDialogOptions)
+	const { showLoading, showSuccess } = useAlertModalContext()
+	const { mutate } = useLoginMutation({
+		onMutate: () => {
+			closeDialog()
+			showLoading({
+				loadingMessage: 'Đang tiến hành đăng nhập...',
+				showCancel: true,
+				onCancel: () => {
+					close()
+				}
+			})
+		},
+		onSuccess: () => {
+			setIsRegisterByPost(true)
+			showSuccess({
+				successTitle: 'Tạo tài khoản thành công',
+				successMessage:
+					'Hệ thống đã thực hiện đăng nhập tự động. Bây giờ bạn có thể tiến hành đăng bài',
+				successButtonText: 'Đóng'
+			})
+		}
+	})
 
 	const openDialog = (options: Partial<DialogOptions> = {}) => {
 		setDialogOptions(prev => ({ ...prev, ...options }))
@@ -59,13 +88,26 @@ export const AuthDialogProvider: React.FC<{ children: ReactNode }> = ({
 		})
 	}
 
-	const switchToRegister = () => {
-		setDialogOptions({
+	const switchToRegister = (defaultData?: RegisterFormData) => {
+		setDialogOptions(prev => ({
+			...prev,
 			type: 'register',
 			title: 'Tạo tài khoản mới',
 			headColor: 'bg-background',
-			subTitle: 'Điền thông tin để sử dụng dịch vụ của bạn'
+			subTitle: 'Điền thông tin để sử dụng dịch vụ của bạn',
+			defaultData
+		}))
+	}
+
+	const openRegisterWithData = (data: RegisterFormData) => {
+		setDialogOptions({
+			type: 'register',
+			title: 'Hoàn tất tạo tài khoản',
+			headColor: 'bg-background',
+			subTitle: 'Thêm mật khẩu để hoàn tất việc tạo tài khoản',
+			defaultData: data
 		})
+		setIsOpen(true)
 	}
 
 	const renderDialogComponent = {
@@ -80,7 +122,19 @@ export const AuthDialogProvider: React.FC<{ children: ReactNode }> = ({
 		),
 		register: (
 			<RegisterDialog
-				onRegisterSuccess={closeDialog}
+				defaultData={dialogOptions.defaultData}
+				onRegisterSuccess={(
+					isRegisterByPost: boolean,
+					data: RegisterFormData
+				) => {
+					if (isRegisterByPost) {
+						mutate({
+							email: data.email,
+							password: data.password,
+							device: 'web'
+						})
+					}
+				}}
 				onLogin={switchToLogin}
 			/>
 		)
@@ -89,12 +143,14 @@ export const AuthDialogProvider: React.FC<{ children: ReactNode }> = ({
 	return (
 		<AuthDialogContext.Provider
 			value={{
+				isRegisterByPost,
 				isOpen,
 				dialogOptions,
 				openDialog,
 				closeDialog,
 				switchToLogin,
-				switchToRegister
+				switchToRegister,
+				openRegisterWithData
 			}}
 		>
 			{children}

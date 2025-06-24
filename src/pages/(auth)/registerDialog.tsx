@@ -5,53 +5,48 @@ import React from 'react'
 import { useForm } from 'react-hook-form'
 
 import InputText from '@/components/common/InputText'
+import { useRegisterMutation } from '@/hooks/mutations/use-auth.mutation'
 import { registerSchema } from '@/models/schema'
 import { RegisterFormData } from '@/models/types'
 
 interface RegisterDialogProps {
-	onRegisterSuccess: () => void
+	defaultData?: RegisterFormData
+	onRegisterSuccess: (isRegisterByPost: boolean, data: RegisterFormData) => void
 	onLogin: () => void
 }
 
 const RegisterDialog: React.FC<RegisterDialogProps> = ({
 	onRegisterSuccess,
-	onLogin
+	onLogin,
+	defaultData
 }) => {
 	// const { api, login } = useAuth()
-	const [isLoading, setIsLoading] = React.useState(false)
+	const { mutate, isPending } = useRegisterMutation({
+		onSuccess: () => {
+			const isRegisterByPost = !!defaultData
+			const data = getValues()
+			onRegisterSuccess(isRegisterByPost, data)
+		}
+	})
 
 	const {
 		register,
 		handleSubmit,
 		formState: { errors, isValid },
 		reset,
-		watch
+		watch,
+		getValues
 	} = useForm<RegisterFormData>({
 		resolver: zodResolver(registerSchema),
-		mode: 'onChange'
+		mode: 'onChange',
+		defaultValues: defaultData
 	})
 
 	const password = watch('password')
 
 	const onSubmit = async (data: RegisterFormData) => {
-		setIsLoading(true)
-		// try {
-		//   const response = await api.post('/register', {
-		//     fullName: data.fullName,
-		//     phoneNumber: data.phoneNumber,
-		//     email: data.email,
-		//     password: data.password,
-		//   })
-		//   const { accessToken, refreshToken, user } = response.data
-		//   login(accessToken, refreshToken, user)
-		//   onRegisterSuccess()
-		//   reset()
-		// } catch (error) {
-		//   console.error('Register error:', error)
-		//   // Optionally show error message to user
-		// } finally {
-		//   setIsLoading(false)
-		// }
+		const { confirmPassword, ...rest } = data
+		mutate(rest)
 	}
 
 	const handleClose = () => {
@@ -226,14 +221,14 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({
 					whileHover={{ scale: 1.02 }}
 					whileTap={{ scale: 0.98 }}
 					type='submit'
-					disabled={!isValid || isLoading}
+					disabled={!isValid || isPending}
 					className={`w-full rounded-xl py-3 font-semibold text-white transition-all duration-200 ${
-						isValid && !isLoading
+						isValid && !isPending
 							? 'bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl'
 							: 'bg-muted cursor-not-allowed'
 					}`}
 				>
-					{isLoading ? (
+					{isPending ? (
 						<div className='flex items-center justify-center'>
 							<div className='mr-2 h-5 w-5 animate-spin rounded-full border-b-2 border-white'></div>
 							Đang tạo tài khoản...

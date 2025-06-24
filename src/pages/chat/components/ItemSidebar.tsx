@@ -213,7 +213,7 @@ const ItemSidebar = ({
 										>
 											{availableQuantity > 0
 												? `Còn ${availableQuantity}`
-												: 'Hết hàng'}
+												: 'hết đồ'}
 										</span>
 									</div>
 								</div>

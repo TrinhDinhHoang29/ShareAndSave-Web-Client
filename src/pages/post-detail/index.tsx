@@ -412,15 +412,6 @@ const PostDetail: React.FC = () => {
 														</span>
 													</div>
 													<div className='flex items-center gap-2'>
-														<Tag className='text-primary h-4 w-4' />
-														<span className='text-sm font-medium'>
-															Loại đồ vật:
-														</span>
-														<span className='text-muted-foreground text-sm'>
-															{(parsedInfo as LostItemInfo).category}
-														</span>
-													</div>
-													<div className='flex items-center gap-2'>
 														<Gift className='text-primary h-4 w-4' />
 														<span className='text-sm font-medium'>
 															Phần thưởng:
@@ -499,7 +490,7 @@ const PostDetail: React.FC = () => {
 																</span>
 															) : (
 																<span className='rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-700'>
-																	Hết hàng
+																	hết đồ
 																</span>
 															)}
 														</div>

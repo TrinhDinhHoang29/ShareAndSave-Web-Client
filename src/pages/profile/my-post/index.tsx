@@ -11,6 +11,7 @@ import useDebounce from '@/hooks/use-debounce'
 import { EPostSTatus, EPostType, ESortOrder } from '@/models/enums'
 import { IListTypeParams, IPost } from '@/models/interfaces'
 import { sortOptions, typeOptions } from '@/models/options'
+import Heading from '@/pages/home/components/Heading'
 
 import MyPostDetailDialog from './components/MyPostDetailDialog'
 import MyPostItem from './components/MyPostItem'
@@ -103,8 +104,9 @@ const MyPost = () => {
 	}
 
 	return (
-		<div className='container mx-auto py-12'>
-			<div className='mb-6 flex items-center justify-between gap-2'>
+		<div className='container mx-auto space-y-6 py-12'>
+			<Heading title='Bài đăng của tôi' />
+			<div className='flex items-center justify-between gap-2'>
 				<div className='w-1/2'>
 					<label
 						htmlFor='searchInput'

@@ -24,10 +24,8 @@ const PostForm: React.FC<PostFormProps> = ({ isTransitioning }) => {
 				<div className='bg-primary/10 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full'>
 					<Gift className='text-primary h-8 w-8' />
 				</div>
-				<h3 className='text-foreground mb-2 text-2xl font-bold'>Tìm đồ</h3>
-				<p className='text-muted-foreground'>
-					Nhập thông tin bài đăng để tìm đồ
-				</p>
+				<h3 className='text-foreground mb-2 text-2xl font-bold'>Tự do</h3>
+				<p className='text-muted-foreground'>Nhập thông tin bài đăng</p>
 			</div>
 
 			<div className='space-y-4'>
@@ -46,7 +44,7 @@ const PostForm: React.FC<PostFormProps> = ({ isTransitioning }) => {
 				<div>
 					<InputText
 						name='description'
-						label='Mô tả món đồ *'
+						label='Mô tả *'
 						type='textarea'
 						placeholder='Nhập mô tả món đồ'
 						register={register}

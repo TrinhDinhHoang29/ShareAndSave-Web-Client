@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 
 import { useListMessageQuery } from '@/hooks/queries/use-chat.query'
 import { useInfiniteScroll } from '@/hooks/use-infinite-scroll'
@@ -21,7 +21,6 @@ const ChatMessagesPanel = ({
 	onReconnect
 }: IChatMessagesPanel) => {
 	const isInitialLoad = useRef(true)
-
 	// Custom hooks
 	const {
 		scrollContainerRef,
@@ -32,6 +31,16 @@ const ChatMessagesPanel = ({
 		unreadCount
 	} = useScrollManagement()
 
+	const stableSocketInfo = useMemo(
+		() => socketInfo,
+		[
+			socketInfo.interestID,
+			socketInfo.senderID,
+			socketInfo.userID,
+			socketInfo.isOwner
+		]
+	)
+
 	const {
 		message,
 		setMessage,
@@ -39,7 +48,7 @@ const ChatMessagesPanel = ({
 		handleSend,
 		updateMessageStatus
 	} = useMessageHandling(
-		socketInfo,
+		stableSocketInfo,
 		socket,
 		scrollToBottom,
 		incrementUnreadCount,
@@ -77,26 +86,45 @@ const ChatMessagesPanel = ({
 			.map(m => ({
 				id: m.id,
 				receiver:
-					socketInfo.senderID === m.senderID
+					stableSocketInfo.senderID === m.senderID
 						? ('user' as const)
 						: ('other' as const),
 				message: m.message,
 				time: m.createdAt,
 				status:
-					socketInfo.senderID === m.senderID
+					stableSocketInfo.senderID === m.senderID
 						? EMessageStatus.SENT
 						: EMessageStatus.RECEIVED
 			}))
 			.reverse()
-	}, [messagesData?.pages, socketInfo.senderID])
+	}, [messagesData?.pages, stableSocketInfo.senderID])
 
 	// Simplified message deduplication
 	const allMessages = useMemo(() => {
 		if (!apiMessages.length && !realtimeMessages.length) return []
 
-		const apiIds = new Set(apiMessages.map(m => m.id))
-		const uniqueRealtime = realtimeMessages.filter(m => !apiIds.has(m.id))
-		return [...apiMessages, ...uniqueRealtime]
+		// Tạo map từ API messages
+		const apiMessagesMap = new Map<string | number, IMessage>()
+		apiMessages.forEach(msg => {
+			apiMessagesMap.set(msg.id, msg)
+		})
+
+		// Filter realtime messages, chỉ giữ những tin nhắn chưa có trong API
+		const uniqueRealtimeMessages = realtimeMessages.filter(msg => {
+			// Nếu tin nhắn đã có trong API, bỏ qua
+			if (apiMessagesMap.has(msg.id)) {
+				return false
+			}
+			return true
+		})
+
+		// Kết hợp và sắp xếp theo thời gian
+		const combined = [...apiMessages, ...uniqueRealtimeMessages]
+		return combined.sort((a, b) => {
+			const timeA = new Date(a.time).getTime()
+			const timeB = new Date(b.time).getTime()
+			return timeA - timeB
+		})
 	}, [apiMessages, realtimeMessages])
 
 	// Effects
@@ -221,4 +249,4 @@ const ChatMessagesPanel = ({
 	)
 }
 
-export default ChatMessagesPanel
+export default React.memo(ChatMessagesPanel)

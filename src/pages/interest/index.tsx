@@ -14,6 +14,7 @@ import { EInterestType, ESortOrder } from '@/models/enums'
 import { IListTypeParams } from '@/models/interfaces'
 import { sortOptions } from '@/models/options'
 
+import Heading from '../home/components/Heading'
 import AlertPing from './components/AlertPing'
 import { PostItem } from './components/FollowedByPost'
 import { InterestedPost } from './components/InterestedPost'
@@ -91,21 +92,17 @@ const Interest = () => {
 	const handleTabChange = (tabType: EInterestType) => {
 		setActiveTab(tabType)
 	}
-	console.log(isFollowingPing || (newMessages && activeTab === 1))
 
 	return (
-		<div className='container mx-auto py-12'>
-			<div className='mb-8'>
-				<h1 className='text-foreground font-manrope mb-2 text-3xl font-bold'>
-					Danh sách bài đăng
-				</h1>
-				<p className='text-muted-foreground'>
-					Quản lý và theo dõi các quan tâm từ người dùng
-				</p>
-			</div>
+		<div className='container mx-auto space-y-6 py-12'>
+			<Heading
+				title='Bài đăng quan tâm'
+				subtitle='Quản lý và theo dõi các quan tâm từ người dùng'
+				className='mb-8'
+			/>
 
 			{/* Search và Sort */}
-			<div className='mb-6 flex items-center justify-between gap-4'>
+			<div className='flex items-center justify-between gap-4'>
 				<input
 					type='text'
 					value={search}
@@ -158,9 +155,9 @@ const Interest = () => {
 								: 'text-muted-foreground hover:bg-muted hover:text-foreground border'
 						}`}
 					>
-						{(isFollowedByPing || (newMessages && activeTab === 2)) && (
+						{isFollowedByPing || (newMessages && activeTab === 2) ? (
 							<AlertPing isPulse={isFollowedByPing} />
-						)}
+						) : null}
 						<CheckCircle className='h-4 w-4' />
 						<span>Được Quan Tâm</span>
 						{activeTab === 2 && (

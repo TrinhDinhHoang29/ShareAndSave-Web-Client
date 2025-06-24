@@ -203,6 +203,13 @@ export interface ILoginRequest {
 	password: string
 }
 
+export interface IRegisterRequest {
+	email: string
+	fullName: string
+	password: string
+	phoneNumber: string
+}
+
 export interface ILoginResponse {
 	jwt: string
 	refreshToken: string
@@ -438,4 +445,14 @@ export interface IItemWarehouseRequest {
 	itemID: number
 	quantity?: number
 	newQuantity?: number
+}
+
+export interface IItemRequest {
+	itemID: number
+	name: string
+	categoryID: number
+	categoryName: string
+	quantity: number
+	image?: string
+	althernativeImage?: string
 }

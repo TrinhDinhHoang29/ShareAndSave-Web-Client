@@ -11,11 +11,13 @@ import { EPostType, ESortOrder } from '@/models/enums'
 import { IListTypeParams } from '@/models/interfaces'
 import { sortOptions, typeOptions } from '@/models/options'
 
+import Heading from '../home/components/Heading'
 import PostItem from './components/PostItem'
 import PostItemSkeleton from './components/PostItemSkeleton'
 
 // Kiểu hợp nhất với '' cho "Tất cả"
 type PostTypeSelection = '' | EPostType
+const limit = 9
 
 const Post = () => {
 	const [selectedType, setSelectedType] = useState<PostTypeSelection>('') // Mặc định là "Tất cả"
@@ -33,7 +35,7 @@ const Post = () => {
 		() => ({
 			type: (selectedType as EPostType) || undefined, // Nếu rỗng, không gửi type
 			page: currentPage,
-			limit: 6, // Giới hạn 6 item mỗi trang
+			limit, // Giới hạn 6 item mỗi trang
 			sort: 'createdAt', // Sắp xếp theo createdAt
 			order, // ASC hoặc DESC
 			search: debouncedSearch || undefined // Chỉ gửi search nếu có giá trị
@@ -47,8 +49,9 @@ const Post = () => {
 	const navigate = useNavigate()
 
 	return (
-		<div className='container mx-auto py-12'>
-			<div className='mb-6 flex items-center justify-between gap-2'>
+		<div className='container mx-auto space-y-6 py-12'>
+			<Heading title='Bài đăng' />
+			<div className='flex items-center justify-between gap-2'>
 				<div className='w-2/3'>
 					<label
 						htmlFor='searchInput'
@@ -101,7 +104,7 @@ const Post = () => {
 					>
 						<div className='grid grid-cols-3 gap-6'>
 							{isPending ? (
-								<PostItemSkeleton quantity={6} />
+								<PostItemSkeleton quantity={limit} />
 							) : posts.length > 0 ? (
 								posts.map(post => (
 									<PostItem

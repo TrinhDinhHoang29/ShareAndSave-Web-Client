@@ -21,6 +21,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useTheme } from '@/context/theme-context'
 
 import DropdownProfileMenu from './DropdownProfileMenu'
+import SearchDropdown from './SearchDropdown'
 
 const navLinks = [
 	{ to: '/', label: 'Trang chủ', icon: Home },
@@ -92,19 +93,7 @@ const Navbar = () => {
 
 							{/* Search Bar */}
 							<div className='mx-8 hidden max-w-xl flex-1 md:flex'>
-								<form
-									onSubmit={handleSearch}
-									className='relative w-full'
-								>
-									<Search className='text-muted-foreground absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 transform' />
-									<input
-										type='text'
-										value={searchQuery}
-										onChange={e => setSearchQuery(e.target.value)}
-										placeholder='Tìm kiếm đồ cũ, người dùng...'
-										className='bg-input border-border text-foreground placeholder-muted-foreground focus:ring-ring focus:border-ring w-full rounded-full border py-3 pr-4 pl-12 transition-all focus:ring-2 focus:outline-none'
-									/>
-								</form>
+								<SearchDropdown />
 							</div>
 
 							{/* Right Actions */}

@@ -6,6 +6,8 @@ import ImageUpload from '@/components/common/ImageUpload'
 import InputText from '@/components/common/InputText'
 import { PostInfo } from '@/models/types'
 
+import ItemManager from './ItemManager'
+
 interface PostSendLostItemFormProps {
 	isTransitioning: boolean
 }
@@ -48,19 +50,13 @@ const PostSendLostItemForm: React.FC<PostSendLostItemFormProps> = ({
 						Ví dụ: 'Nhặt được ví da màu đen'
 					</p>
 				</div>
-				<div>
-					<InputText
-						name='description'
-						label='Mô tả món đồ *'
-						type='textarea'
-						placeholder='Nhập mô tả món đồ'
-						register={register}
-						error={errors.description}
-					/>
-					<p className='text-muted-foreground mt-1 text-sm'>
-						Ví dụ: 'Ví da màu đen, nhặt được ở công viên vào ngày 20/05'
-					</p>
-				</div>
+				<ItemManager
+					newItemsFieldName='newItems'
+					oldItemsFieldName='oldItems'
+					label='Món đồ'
+					description='Bấm vào dấu "+" để thêm món đồ'
+					animationDelay={0.2}
+				/>
 				<div>
 					<DatePicker
 						name='foundDate'
@@ -85,16 +81,6 @@ const PostSendLostItemForm: React.FC<PostSendLostItemFormProps> = ({
 					</p>
 				</div>
 				<div>
-					<InputText
-						name='category'
-						label='Loại đồ vật'
-						placeholder='Nhập loại đồ vật'
-						register={register}
-						error={errors.category}
-					/>
-					<p className='text-muted-foreground mt-1 text-sm'>Ví dụ: 'Ví'</p>
-				</div>
-				<div>
 					<Controller
 						name='images'
 						control={control}
@@ -115,6 +101,19 @@ const PostSendLostItemForm: React.FC<PostSendLostItemFormProps> = ({
 					/>
 					<p className='text-muted-foreground mt-1 text-sm'>
 						Tải lên hình ảnh của món đồ (nếu có)
+					</p>
+				</div>
+				<div>
+					<InputText
+						name='description'
+						label='Mô tả món đồ *'
+						type='textarea'
+						placeholder='Nhập mô tả món đồ'
+						register={register}
+						error={errors.description}
+					/>
+					<p className='text-muted-foreground mt-1 text-sm'>
+						Ví dụ: 'Ví da màu đen, nhặt được ở công viên vào ngày 20/05'
 					</p>
 				</div>
 			</div>

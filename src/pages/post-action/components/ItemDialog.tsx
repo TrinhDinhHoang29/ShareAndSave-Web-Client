@@ -86,8 +86,6 @@ const ItemDialog: React.FC<ItemDialogProps> = ({
 	})
 
 	const [selectedItemId, setSelectedItemId] = useState<number | null>(null)
-	const [selectedSuggestion, setSelectedSuggestion] =
-		useState<IItemSuggestion | null>(null)
 	const name = watch('name')
 	const debouncedName = useDebounce(name, 300)
 
@@ -104,10 +102,8 @@ const ItemDialog: React.FC<ItemDialogProps> = ({
 			setValue('name', suggestion.name)
 			setValue('categoryID', suggestion.categoryID)
 			setSelectedItemId(suggestion.id)
-			setSelectedSuggestion(suggestion)
 		} else {
 			setSelectedItemId(null)
-			setSelectedSuggestion(null)
 			setValue('categoryID', 0)
 		}
 	}
@@ -141,7 +137,6 @@ const ItemDialog: React.FC<ItemDialogProps> = ({
 		// Reset form and close dialog
 		reset()
 		setSelectedItemId(null)
-		setSelectedSuggestion(null)
 		onClose() // Đóng dialog ngay sau submit
 	}
 
@@ -150,7 +145,6 @@ const ItemDialog: React.FC<ItemDialogProps> = ({
 		if (!isOpen) {
 			reset()
 			setSelectedItemId(null)
-			setSelectedSuggestion(null)
 		}
 	}, [isOpen, reset])
 

@@ -33,7 +33,6 @@ export const useMessageHandling = (
 			}
 
 			setTimeout(() => scrollToBottom(true, true), 100)
-
 			// Direct state update without batching
 			setRealtimeMessages(prev => [...prev, newMessage])
 

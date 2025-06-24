@@ -2,6 +2,7 @@ import {
 	IApiResponse,
 	ILoginRequest,
 	ILoginResponse,
+	IRegisterRequest,
 	IUser
 } from '@/models/interfaces'
 
@@ -13,7 +14,8 @@ const authEndpoints = {
 	logout: 'client/logout',
 	refreshToken: 'refresh-token',
 	getMe: 'client/get-me',
-	update: 'clients'
+	update: 'clients',
+	register: 'clients'
 }
 
 const authApi = {
@@ -21,6 +23,16 @@ const authApi = {
 		// eslint-disable-next-line no-useless-catch
 		try {
 			return await axiosPublic.post(authEndpoints.login, data)
+		} catch (error) {
+			throw error
+		}
+	},
+	async register(
+		data: IRegisterRequest
+	): Promise<IApiResponse<{ client: IUser }>> {
+		// eslint-disable-next-line no-useless-catch
+		try {
+			return await axiosPublic.post(authEndpoints.register, data)
 		} catch (error) {
 			throw error
 		}
