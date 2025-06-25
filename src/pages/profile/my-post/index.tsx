@@ -5,7 +5,11 @@ import { useNavigate } from 'react-router-dom'
 
 import CustomSelect from '@/components/common/CustomSelect'
 import Pagination from '@/components/common/Pagination'
-import { useUpdatePostMutation } from '@/hooks/mutations/use-post.mutation'
+import { useAlertModalContext } from '@/context/alert-modal-context'
+import {
+	useDeletePostMutation,
+	useUpdatePostMutation
+} from '@/hooks/mutations/use-post.mutation'
 import { useListMyPostQuery } from '@/hooks/queries/use-post-query'
 import useDebounce from '@/hooks/use-debounce'
 import { EPostSTatus, EPostType, ESortOrder } from '@/models/enums'
@@ -40,6 +44,7 @@ const MyPost = () => {
 	const [order, setOrder] = useState<ESortOrder>(ESortOrder.DESC) // Mặc định là mới nhất
 	const [selectedPost, setSelectedPost] = useState<IPost | null>(null)
 	const [isDialogOpen, setIsDialogOpen] = useState(false)
+	const { showInfo, showConfirm } = useAlertModalContext()
 
 	const debouncedSearch = useDebounce(search, 500)
 
@@ -66,6 +71,12 @@ const MyPost = () => {
 			refetch()
 		}
 	})
+	const { mutate: deletePostMutation } = useDeletePostMutation({
+		onSuccess: () => {
+			refetch()
+		}
+	})
+
 	const posts = data?.posts || []
 	const totalPage = data?.totalPage || 1
 	const navigate = useNavigate()
@@ -90,12 +101,33 @@ const MyPost = () => {
 		})
 	}
 
-	const handleRepost = (postID: number) => {
-		updatePostMutation({
-			postID,
-			data: {
-				isRepost: true
-			}
+	const handleRepost = (postID: number, status: EPostSTatus) => {
+		if (status === EPostSTatus.SEAL) {
+			showInfo({
+				infoButtonText: 'Đã rõ',
+				infoMessage:
+					'Bài đăng hiện tại đang khóa. Vui lòng mở khóa để tiến hành đăng lại',
+				infoTitle: 'Thông tin bài đăng'
+			})
+		} else {
+			updatePostMutation({
+				postID,
+				data: {
+					isRepost: true
+				}
+			})
+		}
+	}
+
+	const handleDelete = (postID: number) => {
+		showConfirm({
+			confirmButtonText: 'Xác nhận',
+			confirmMessage: 'Hành động này không thể hoàn tác',
+			confirmTitle: 'Xác nhận xóa bài',
+			onConfirm: () => {
+				deletePostMutation(postID)
+			},
+			cancelButtonText: 'Hủy'
 		})
 	}
 
@@ -185,6 +217,7 @@ const MyPost = () => {
 										onUpdateStatus={handleUpdateStatus}
 										onRepost={handleRepost}
 										onGoToPost={handleGoToPost}
+										onDelete={handleDelete}
 									/>
 								))
 							) : (

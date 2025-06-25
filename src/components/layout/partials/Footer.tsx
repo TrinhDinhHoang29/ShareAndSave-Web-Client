@@ -1,4 +1,4 @@
-import { Clock, Heart, Mail, MapPin, Package, Phone } from 'lucide-react'
+import { Clock, Heart, Mail, MapPin, Phone } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 const Footer = () => {
@@ -15,9 +15,11 @@ const Footer = () => {
 							to='/'
 							className='group mb-4 flex items-center gap-3 text-xl font-bold'
 						>
-							<div className='from-primary to-accent flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r transition-transform group-hover:scale-110'>
-								<Package className='text-primary-foreground h-5 w-5' />
-							</div>
+							<img
+								src='https://caothang.edu.vn/tuyensinh/templates/images/logo.png'
+								alt='logo_caothang'
+								className='h-8 w-8 object-contain'
+							/>
 							<span className='from-primary to-accent bg-gradient-to-r bg-clip-text text-transparent'>
 								Share&Save
 							</span>

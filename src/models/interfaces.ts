@@ -1,6 +1,7 @@
 import { LucideIcon } from 'lucide-react'
 
 import {
+	EAppointmentStatus,
 	EMessageStatus,
 	EPostSTatus,
 	EPostType,
@@ -455,4 +456,36 @@ export interface IItemRequest {
 	quantity: number
 	image?: string
 	althernativeImage?: string
+}
+
+export interface IAppointmentItem {
+	id: number
+	appointmentID: number
+	itemID: number
+	itemName: string
+	itemImage: string
+	categoryName: string
+	actualQuantity: number
+	missingQuantity: number
+}
+
+export interface IAppointment {
+	id: number
+	userID: number
+	userName: string
+	startTime: string
+	endTime: string
+	status: number
+	appointmentItems: IAppointmentItem[]
+}
+
+export interface IAppointmentResponse {
+	appointments: IAppointment[]
+	totalPage: number
+}
+
+export interface IAppointmentRequest {
+	endTime?: string
+	startTime?: string
+	status: EAppointmentStatus
 }

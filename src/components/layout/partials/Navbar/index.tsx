@@ -4,16 +4,11 @@ import {
 	ChevronDown,
 	ChevronUp,
 	Download,
-	FileText,
-	Heart,
-	Home,
+	ExternalLink,
 	Moon,
-	Package,
 	Plus,
 	Search,
-	Sun,
-	TrendingUp,
-	Warehouse
+	Sun
 } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
@@ -24,11 +19,11 @@ import DropdownProfileMenu from './DropdownProfileMenu'
 import SearchDropdown from './SearchDropdown'
 
 const navLinks = [
-	{ to: '/', label: 'Trang chủ', icon: Home },
-	{ to: '/bai-dang', label: 'Bài đăng', icon: FileText },
-	{ to: '/kho-do-cu', label: 'Kho đồ cũ', icon: Warehouse },
-	{ to: '/quan-tam', label: 'Quan tâm', icon: Heart },
-	{ to: '/bang-xep-hang', label: 'Bảng xếp hạng', icon: TrendingUp }
+	{ to: '/', label: 'Trang chủ' },
+	{ to: '/bai-dang', label: 'Bài đăng' },
+	{ to: '/kho-do-cu', label: 'Kho đồ cũ' },
+	{ to: '/quan-tam', label: 'Quan tâm' },
+	{ to: '/bang-xep-hang', label: 'Bảng xếp hạng' }
 ]
 
 const Navbar = () => {
@@ -51,20 +46,45 @@ const Navbar = () => {
 
 	return (
 		<>
-			{/* Hide/Show Button - Fixed position */}
-			<motion.button
-				initial={{ opacity: 0 }}
-				animate={{ opacity: 1 }}
-				onClick={toggleNavbar}
-				className='bg-primary text-primary-foreground fixed top-4 right-4 z-50 flex h-10 w-10 items-center justify-center rounded-full shadow-lg transition-all hover:scale-110 hover:shadow-xl'
-				title={isVisible ? 'Ẩn navbar' : 'Hiện navbar'}
-			>
-				{isVisible ? (
-					<ChevronUp className='h-5 w-5' />
-				) : (
+			{/* Collapsed state - Show toggle button */}
+			{!isVisible && (
+				<motion.button
+					initial={{ opacity: 0, y: -10 }}
+					animate={{ opacity: 1, y: 0 }}
+					onClick={toggleNavbar}
+					className='bg-primary text-primary-foreground fixed top-0 right-5 z-50 flex h-8 w-16 items-center justify-center rounded-b-lg shadow-lg transition-all hover:h-10 hover:shadow-xl'
+					title='Hiện navbar'
+				>
 					<ChevronDown className='h-5 w-5' />
-				)}
-			</motion.button>
+				</motion.button>
+			)}
+
+			{/* School Title Bar */}
+			{isVisible && (
+				<motion.div
+					initial={{ opacity: 0, y: -20 }}
+					animate={{ opacity: 1, y: 0 }}
+					exit={{ opacity: 0, y: -20 }}
+					transition={{ duration: 0.3 }}
+					className='from-primary to-primary/80 bg-gradient-to-r text-white'
+				>
+					<div className='container mx-auto px-4 py-2'>
+						<div className='flex items-center justify-center'>
+							<a
+								href='https://caothang.edu.vn/'
+								target='_blank'
+								rel='noopener noreferrer'
+								className='flex items-center gap-2 text-center transition-all hover:opacity-80'
+							>
+								<span className='text-sm font-medium md:text-base'>
+									Trường Cao Đẳng Kĩ Thuật Cao Thắng
+								</span>
+								<ExternalLink className='h-3 w-3 md:h-4 md:w-4' />
+							</a>
+						</div>
+					</div>
+				</motion.div>
+			)}
 
 			{/* Main Navbar */}
 			{isVisible && (
@@ -85,9 +105,11 @@ const Navbar = () => {
 								to='/'
 								className='from-primary to-accent flex items-center gap-3 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent transition-transform hover:scale-105'
 							>
-								<div className='from-primary to-accent flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r'>
-									<Package className='text-primary-foreground h-5 w-5' />
-								</div>
+								<img
+									src='https://caothang.edu.vn/tuyensinh/templates/images/logo.png'
+									alt='logo_caothang'
+									className='h-8 w-8 object-contain'
+								/>
 								Share&Save
 							</Link>
 
@@ -138,33 +160,50 @@ const Navbar = () => {
 						</div>
 						<div className='flex items-center justify-between'>
 							<div className='no-scrollbar flex items-center gap-1 overflow-x-auto py-2'>
-								{navLinks.map(({ to, label, icon: Icon }) => {
+								{navLinks.map(({ to, label }) => {
 									const isActive = location.pathname === to
 									return (
 										<Link
 											key={to}
 											to={to}
-											className={`flex items-center gap-2 rounded-full px-4 py-2 whitespace-nowrap transition-all ${
+											className={`rounded-full px-4 py-2 whitespace-nowrap transition-all ${
 												isActive
 													? 'bg-blue-100 font-medium text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
 													: 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
 											}`}
 										>
-											<Icon className='h-4 w-4' />
 											<span className='hidden sm:inline'>{label}</span>
 										</Link>
 									)
 								})}
 							</div>
 							{/* Create Post Button */}
-							<Link
-								to={'/dang-bai'}
-								className='from-primary to-accent text-primary-foreground hidden items-center gap-2 rounded-full bg-gradient-to-r px-4 py-2 font-medium transition-all hover:scale-105 hover:opacity-90 hover:shadow-lg sm:flex'
-							>
-								<Plus className='h-4 w-4' />
-								Đăng bài
-							</Link>
+							<div className='flex items-center gap-2'>
+								<a
+									target='_blank'
+									rel='noopener noreferrer'
+									href='https://caothang.edu.vn/'
+									className='from-info to-accent hidden items-center gap-2 rounded-full bg-gradient-to-r px-4 py-2 font-medium text-white transition-all hover:scale-105 hover:opacity-90 hover:shadow-lg sm:flex'
+								>
+									<ExternalLink className='h-4 w-4' />
+									Về Trường
+								</a>
+								<Link
+									to={'/dang-bai'}
+									className='from-primary to-accent text-primary-foreground hidden items-center gap-2 rounded-full bg-gradient-to-r px-4 py-2 font-medium transition-all hover:scale-105 hover:opacity-90 hover:shadow-lg sm:flex'
+								>
+									<Plus className='h-4 w-4' />
+									Đăng bài
+								</Link>
+							</div>
 						</div>
+						<button
+							onClick={toggleNavbar}
+							className='hover:bg-muted/80 absolute right-5 bottom-0 ml-2 flex h-6 w-8 items-center justify-center rounded-t-md border border-b-0 border-gray-300 bg-gray-100 transition-all hover:h-7 dark:border-gray-600 dark:bg-gray-700'
+							title='Ẩn navbar'
+						>
+							<ChevronUp className='h-4 w-4' />
+						</button>
 					</div>
 				</motion.nav>
 			)}
@@ -193,6 +232,7 @@ const Navbar = () => {
 					</form>
 				</motion.div>
 			)}
+			{/* Navbar Toggle Button - Curtain style */}
 		</>
 	)
 }

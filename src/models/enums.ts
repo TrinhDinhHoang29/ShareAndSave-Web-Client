@@ -63,3 +63,8 @@ export enum EMethod {
 	IN_PERSON = 'Gặp trực tiếp',
 	SHIP = 'Giao hàng'
 }
+
+export enum EAppointmentStatus {
+	APPROVED = 1,
+	REJECTED = 2
+}

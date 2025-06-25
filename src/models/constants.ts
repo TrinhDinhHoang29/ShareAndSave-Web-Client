@@ -8,8 +8,17 @@ import {
 	Lock,
 	Search,
 	ShieldX,
+	X,
 	XCircle
 } from 'lucide-react'
+
+import Banner_1 from '@/assets/images/1.jpg'
+import Banner_2 from '@/assets/images/2.jpg'
+import Banner_3 from '@/assets/images/3.jpg'
+import Sub_Banner_1 from '@/assets/images/sub_1.jpg'
+import Sub_Banner_2 from '@/assets/images/sub_2.jpg'
+import Sub_Banner_3 from '@/assets/images/sub_3.jpg'
+import Sub_Banner_4 from '@/assets/images/sub_4.jpg'
 
 import { EPostSTatus, EPostType, ETransactionStatus } from './enums'
 
@@ -151,6 +160,22 @@ export const getTransactionStatusConfig = (
 	return configs[status]
 }
 
+export const getStatusAppointment = (status: number) => {
+	const statusMap = {
+		1: {
+			label: 'Đã xác nhận',
+			color: 'bg-info/10 text-info border-info/20',
+			icon: CheckCircle
+		},
+		2: {
+			label: 'Đã hủy',
+			color: 'bg-error/10 text-error border-error/20',
+			icon: X
+		}
+	}
+	return statusMap[status as keyof typeof statusMap] || statusMap[1]
+}
+
 export const LIMIT_MESSAGE = 30
 export const SCROLL_THRESHOLD = 100
 export const SCROLL_TIMEOUT = 300
@@ -181,3 +206,88 @@ export const getConfirmContentTransactionStatus = (
 			}
 	}
 }
+
+export const getStatusPostTypeConfig = (type: EPostType, quantity: number) => {
+	// Không xử lý cho type OTHER
+	if (type === EPostType.OTHER) {
+		return {}
+	}
+
+	const isComplete = quantity === 0
+
+	switch (type) {
+		case EPostType.GIVE_AWAY_OLD_ITEM:
+			return {
+				label: isComplete ? 'Đã tặng hết' : 'Đang cho tặng',
+				color: isComplete
+					? 'bg-success text-secondary-foreground'
+					: 'bg-warning text-white',
+				Icon: isComplete ? CheckCircle : Clock,
+				animationClass: isComplete ? '' : 'animate-pulse'
+			}
+
+		case EPostType.FOUND_ITEM:
+			return {
+				label: isComplete ? 'Đã trả lại' : 'Đang tìm chủ',
+				color: isComplete
+					? 'bg-success text-secondary-foreground'
+					: 'bg-info text-white',
+				Icon: isComplete ? CheckCircle : Search,
+				animationClass: isComplete ? '' : 'animate-move'
+			}
+
+		case EPostType.SEEK_LOSE_ITEM:
+			return {
+				label: isComplete ? 'Đã tìm thấy' : 'Đang tìm kiếm',
+				color: isComplete
+					? 'bg-success text-secondary-foreground'
+					: 'bg-secondary text-secondary-foreground',
+				Icon: isComplete ? CheckCircle : HelpCircle,
+				animationClass: isComplete ? '' : 'animate-bounce'
+			}
+
+		default:
+			return {}
+	}
+}
+
+export const BANNER_CAROUSEL_SOURCE = [
+	{
+		url: Banner_1,
+		name: 'Banner 1',
+		link: '#'
+	},
+	{
+		url: Banner_2,
+		name: 'Banner 2',
+		link: '#'
+	},
+	{
+		url: Banner_3,
+		name: 'Banner 3',
+		link: '#'
+	}
+]
+
+export const SUB_BANNER_SOURCE = [
+	{
+		url: Sub_Banner_1,
+		name: 'Lắp đặt hệ thống điện và mạng internet cho 20 laptop tại phòng máy tính "Tri thức mới"',
+		link: '#'
+	},
+	{
+		url: Sub_Banner_2,
+		name: 'Giúp đỡ các bạn nhỏ học tập và cho sách vở',
+		link: '#'
+	},
+	{
+		url: Sub_Banner_3,
+		name: 'Cho tặng bánh kẹo cho các bạn vùng xa',
+		link: '#'
+	},
+	{
+		url: Sub_Banner_4,
+		name: 'Cho tặng bàn cho các gia đình có hoàn cảnh khó khăn',
+		link: '#'
+	}
+]

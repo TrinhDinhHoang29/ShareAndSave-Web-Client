@@ -1,4 +1,5 @@
 import {
+	Calendar,
 	ChevronRight,
 	ClipboardList,
 	Key,
@@ -46,6 +47,11 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
 			label: 'Bài đăng của tôi',
 			icon: <ClipboardList className='h-4 w-4' />,
 			onClick: () => navigate('ho-so/bai-dang-cua-toi')
+		},
+		{
+			label: 'Lịch hẹn',
+			icon: <Calendar className='h-4 w-4' />,
+			onClick: () => navigate('ho-so/lich-hen')
 		},
 		{
 			label: 'Đăng xuất',

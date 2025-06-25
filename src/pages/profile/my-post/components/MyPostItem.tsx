@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { Calendar, Lock, Package, RefreshCw, Unlock } from 'lucide-react'
+import { Calendar, Lock, Package, RefreshCw, Unlock, X } from 'lucide-react'
 import { FC } from 'react'
 
 import { useAlertModalContext } from '@/context/alert-modal-context'
@@ -12,8 +12,9 @@ interface MyPostItemProps {
 	post: IPost
 	onPostClick: () => void
 	onUpdateStatus: (postID: number, type: EPostSTatus) => void
-	onRepost: (postID: number) => void
+	onRepost: (postID: number, status: EPostSTatus) => void
 	onGoToPost: (slug: string) => void
+	onDelete: (postID: number) => void
 }
 
 const MyPostItem: FC<MyPostItemProps> = ({
@@ -21,7 +22,8 @@ const MyPostItem: FC<MyPostItemProps> = ({
 	onPostClick,
 	onUpdateStatus,
 	onRepost,
-	onGoToPost
+	onGoToPost,
+	onDelete
 }) => {
 	const statusConfig = getStatusConfig(post.status)
 	const StatusIcon = statusConfig.icon
@@ -54,17 +56,20 @@ const MyPostItem: FC<MyPostItemProps> = ({
 	}
 
 	const handleRepost = () => {
-		console.log(post.id)
-		onRepost(post.id)
+		onRepost(post.id, post.status.toString() as EPostSTatus)
+	}
+
+	const handleDelete = () => {
+		onDelete(post.id)
 	}
 
 	return (
 		<div className='bg-card border-border group relative overflow-hidden rounded-lg border shadow-sm transition-all duration-300 hover:shadow-md'>
 			{/* Layout ngang: Ảnh bên trái, nội dung bên phải */}
-			<div className='flex'>
+			<div className='flex h-36'>
 				{/* Phần ảnh - chiếm 1/3 chiều rộng */}
 				<button
-					className='relative h-36 w-36 flex-shrink-0 overflow-hidden'
+					className='relative h-full w-36 flex-shrink-0 overflow-hidden'
 					onClick={e => {
 						e.stopPropagation()
 						if (isApproved) {
@@ -135,41 +140,49 @@ const MyPostItem: FC<MyPostItemProps> = ({
 					</div>
 
 					{/* Actions dựa theo status */}
-					{isApproved && (
-						<div className='flex gap-1.5'>
-							<button
-								onClick={() =>
-									handleUpdateStatus(
-										(post.status.toString() as EPostSTatus) ===
-											EPostSTatus.APPROVED
-											? EPostSTatus.SEAL
-											: EPostSTatus.APPROVED
-									)
-								}
-								className='bg-secondary text-secondary-foreground hover:bg-secondary/80 flex flex-1 items-center justify-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium transition-colors'
-							>
-								{(post.status.toString() as EPostSTatus) ===
-								EPostSTatus.APPROVED ? (
-									<Lock className='h-3 w-3' />
-								) : (
-									<Unlock className='h-3 w-3' />
-								)}
-								{(post.status.toString() as EPostSTatus) ===
-								EPostSTatus.APPROVED
-									? 'Khóa'
-									: 'Mở khóa'}
-							</button>
-							<button
-								onClick={handleRepost}
-								className='bg-primary text-primary-foreground hover:bg-primary/90 flex flex-1 items-center justify-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium transition-colors'
-							>
-								<RefreshCw className='h-3 w-3' />
-								Đăng lại
-							</button>
-						</div>
-					)}
+					<div className='flex gap-1.5'>
+						{isApproved && (
+							<>
+								<button
+									onClick={() =>
+										handleUpdateStatus(
+											(post.status.toString() as EPostSTatus) ===
+												EPostSTatus.APPROVED
+												? EPostSTatus.SEAL
+												: EPostSTatus.APPROVED
+										)
+									}
+									className='bg-secondary text-secondary-foreground hover:bg-secondary/80 flex flex-1 items-center justify-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium transition-colors'
+								>
+									{(post.status.toString() as EPostSTatus) ===
+									EPostSTatus.APPROVED ? (
+										<Lock className='h-3 w-3' />
+									) : (
+										<Unlock className='h-3 w-3' />
+									)}
+									{(post.status.toString() as EPostSTatus) ===
+									EPostSTatus.APPROVED
+										? 'Khóa'
+										: 'Mở khóa'}
+								</button>
+								<button
+									onClick={handleRepost}
+									className='bg-primary text-primary-foreground hover:bg-primary/90 flex flex-1 items-center justify-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium transition-colors'
+								>
+									<RefreshCw className='h-3 w-3' />
+									Đăng lại
+								</button>
+							</>
+						)}
+					</div>
 				</div>
 			</div>
+			<button
+				onClick={handleDelete}
+				className='hover:bg-background text-error/90 hover:text-error absolute top-3 right-1 flex-shrink-0 rounded p-1 transition-colors'
+			>
+				<X className='h-4 w-4' />
+			</button>
 		</div>
 	)
 }

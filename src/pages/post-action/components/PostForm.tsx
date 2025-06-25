@@ -1,4 +1,4 @@
-import { Gift } from 'lucide-react'
+import { Users } from 'lucide-react'
 import { Controller, useFormContext } from 'react-hook-form'
 
 import ImageUpload from '@/components/common/ImageUpload'
@@ -22,7 +22,7 @@ const PostForm: React.FC<PostFormProps> = ({ isTransitioning }) => {
 		>
 			<div className='mb-8 text-center'>
 				<div className='bg-primary/10 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full'>
-					<Gift className='text-primary h-8 w-8' />
+					<Users className='text-primary h-8 w-8' />
 				</div>
 				<h3 className='text-foreground mb-2 text-2xl font-bold'>Tự do</h3>
 				<p className='text-muted-foreground'>Nhập thông tin bài đăng</p>

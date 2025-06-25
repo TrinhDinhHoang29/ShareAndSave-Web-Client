@@ -8,7 +8,10 @@ export const personalInfoSchema = z.object({
 })
 
 export const postInfoSchema = z.object({
-	images: z.array(z.string()).optional(),
+	images: z
+		.array(z.string())
+		.min(1, 'Vui lòng chọn ít nhất 1 ảnh')
+		.refine(val => val && val.length > 0, 'Vui lòng chọn ít nhất 1 ảnh'),
 	description: z.string(),
 	lostDate: z.string().optional(),
 	lostLocation: z.string().optional(),
@@ -26,19 +29,16 @@ export const postInfoSchema = z.object({
 				categoryID: z.number(),
 				name: z.string().min(1, 'Tên không được để trống'),
 				categoryName: z.string(),
-				image: z
-					.string()
-					.optional()
-					.refine(
-						val => {
-							if (!val) return true
-							const isWebp = val.includes('image/webp') || val.endsWith('.webp')
-							return !isWebp
-						},
-						{
-							message: 'Không chấp nhận ảnh định dạng .webp'
-						}
-					),
+				image: z.string().refine(
+					val => {
+						if (!val) return true
+						const isWebp = val.includes('image/webp') || val.endsWith('.webp')
+						return !isWebp
+					},
+					{
+						message: 'Không chấp nhận ảnh định dạng .webp'
+					}
+				),
 				alternativeImage: z.string().optional()
 			})
 		)
@@ -51,19 +51,16 @@ export const postInfoSchema = z.object({
 				categoryName: z.string(),
 				categoryID: z.number(),
 				name: z.string().min(1, 'Tên không được để trống'),
-				image: z
-					.string()
-					.optional()
-					.refine(
-						val => {
-							if (!val) return true
-							const isWebp = val.includes('image/webp') || val.endsWith('.webp')
-							return !isWebp
-						},
-						{
-							message: 'Không chấp nhận ảnh định dạng .webp'
-						}
-					),
+				image: z.string().refine(
+					val => {
+						if (!val) return true
+						const isWebp = val.includes('image/webp') || val.endsWith('.webp')
+						return !isWebp
+					},
+					{
+						message: 'Không chấp nhận ảnh định dạng .webp'
+					}
+				),
 				alternativeImage: z.string().optional()
 			})
 		)

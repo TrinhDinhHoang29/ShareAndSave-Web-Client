@@ -110,7 +110,7 @@ const ImageUpload = ({
 					<img
 						src={image}
 						alt='Preview'
-						className='bg-muted max-h-[500px] max-w-full rounded-lg bg-white object-contain shadow-2xl'
+						className='bg-muted max-h-[500px] max-w-full rounded-lg object-contain shadow-2xl'
 					/>
 				</div>
 				<button

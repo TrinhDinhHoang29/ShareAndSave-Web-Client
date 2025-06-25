@@ -6,8 +6,8 @@ import { useNavigate } from 'react-router-dom'
 
 import { useListPostQuery } from '@/hooks/queries/use-post-query'
 import { EPostType, ESortOrder } from '@/models/enums'
-import PostItemTile from '@/pages/post-detail/components/PostItemTile'
-import PostItemTileSkeleton from '@/pages/post-detail/components/PostItemTileSkeleton'
+import PostItem from '@/pages/post/components/PostItem'
+import PostItemSkeleton from '@/pages/post/components/PostItemSkeleton'
 
 const limit = 6
 
@@ -24,10 +24,10 @@ const PostOldItems: React.FC = () => {
 	return (
 		<div className='grid grid-cols-3 gap-6'>
 			{isLoading ? (
-				<PostItemTileSkeleton quantity={limit} />
+				<PostItemSkeleton quantity={limit} />
 			) : posts && posts.length > 0 ? (
 				posts.map(post => (
-					<PostItemTile
+					<PostItem
 						key={post.id}
 						post={post}
 						onPostClick={slug => navigate('/bai-dang' + '/' + slug)}
@@ -36,7 +36,7 @@ const PostOldItems: React.FC = () => {
 			) : (
 				<div className='flex flex-col items-center justify-center py-20 text-center'>
 					<FileText className='mb-4 h-16 w-16 text-gray-300' />
-					<p className='text-lg text-gray-500'>Không có bài viết nào</p>
+					<p className='text-secondary text-lg'>Không có bài viết nào</p>
 				</div>
 			)}
 		</div>

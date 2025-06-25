@@ -20,6 +20,7 @@ const Dowload = lazy(() => import('@/pages/dowload'))
 const EditProfile = lazy(() => import('@/pages/profile/edit-profile'))
 const Leaderboard = lazy(() => import('@/pages/leader-board'))
 const ItemWarehouse = lazy(() => import('@/pages/item-warehouse'))
+const Appointment = lazy(() => import('@/pages/appointment'))
 
 // Error Boundary Component
 const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
@@ -183,32 +184,43 @@ function AppRouter() {
 						{
 							path: 'chinh-sua-thong-tin',
 							element: (
-								<>
+								<PrivateRoute>
 									<PageTitle title='Chỉnh sửa thông tin' />
 									<ErrorBoundary>
 										<EditProfile />
 									</ErrorBoundary>
-								</>
+								</PrivateRoute>
 							)
 						},
 						{
 							path: 'doi-mat-khau',
 							element: (
-								<>
+								<PrivateRoute>
 									<PageTitle title='Đổi mật khẩu' />
 									<div>Đổi mật khẩu</div>
-								</>
+								</PrivateRoute>
 							)
 						},
 						{
 							path: 'bai-dang-cua-toi',
 							element: (
-								<>
+								<PrivateRoute>
 									<PageTitle title='Bài đăng của tôi' />
 									<ErrorBoundary>
 										<MyPost />
 									</ErrorBoundary>
-								</>
+								</PrivateRoute>
+							)
+						},
+						{
+							path: 'lich-hen',
+							element: (
+								<PrivateRoute>
+									<PageTitle title='Lịch hẹn' />
+									<ErrorBoundary>
+										<Appointment />
+									</ErrorBoundary>
+								</PrivateRoute>
 							)
 						}
 					]

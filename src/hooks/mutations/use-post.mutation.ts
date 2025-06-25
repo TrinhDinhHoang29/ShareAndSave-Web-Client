@@ -20,6 +20,10 @@ interface UseUpdatePostMutationOptions {
 	onSuccess?: () => void
 }
 
+interface UseDeletePostMutationOptions {
+	onSuccess?: () => void
+}
+
 export const useCreatePostMutation = ({
 	onSuccess,
 	onError,
@@ -109,6 +113,60 @@ export const useUpdatePostMutation = ({
 				showSuccess({
 					successButtonText: 'Xác nhận',
 					successMessage: 'Cập nhật bài đăng thành công',
+					successTitle: 'Thông tin bài đăng',
+					onConfirm: close // Đóng modal khi nhấn "Xác nhận" trên success
+				})
+				onSuccess?.()
+			} else {
+				const errorMessage = res.message.split(':')[0].trim()
+				showError({
+					errorButtonText: 'Thử lại',
+					errorMessage: errorMessage,
+					errorTitle: 'Lỗi thông tin bài đăng',
+					onConfirm: close
+				})
+			}
+		},
+		onError: async (error: any) => {
+			const errorMessage = (error as IApiErrorResponse).message
+				.split(':')[0]
+				.trim()
+			showError({
+				errorButtonText: 'Thử lại',
+				errorMessage: errorMessage,
+				errorTitle: 'Lỗi thông tin giao dịch',
+				onConfirm: close
+			})
+		}
+	})
+}
+
+export const useDeletePostMutation = ({
+	onSuccess
+}: UseDeletePostMutationOptions = {}) => {
+	const { showSuccess, showError, showLoading, close } = useAlertModalContext()
+	const abortControllerRef = useRef<AbortController | null>(null)
+
+	return useMutation({
+		mutationFn: (postID: number) => {
+			abortControllerRef.current = new AbortController()
+			return postApi.delete(postID, abortControllerRef.current.signal)
+		},
+		onMutate: async () => {
+			showLoading({
+				loadingMessage: 'Đang tiến hành xóa...',
+				showCancel: true,
+				onCancel: () => {
+					abortControllerRef.current?.abort()
+					close()
+				}
+			})
+		},
+		onSuccess: async res => {
+			if (res.code === 200) {
+				showSuccess({
+					successButtonText: 'Xác nhận',
+					successMessage: 'Xóa bài đăng thành công',
 					successTitle: 'Thông tin bài đăng',
 					onConfirm: close // Đóng modal khi nhấn "Xác nhận" trên success
 				})

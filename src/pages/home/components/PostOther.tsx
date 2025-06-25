@@ -11,12 +11,12 @@ import PostItemTileSkeleton from '@/pages/post-detail/components/PostItemTileSke
 
 const limit = 6
 
-const PostSeekLostItem: React.FC = () => {
+const PostOther: React.FC = () => {
 	const { data, isLoading } = useListPostQuery({
 		limit,
 		sort: 'createdAt',
 		order: ESortOrder.DESC,
-		type: EPostType.SEEK_LOSE_ITEM
+		type: EPostType.OTHER
 	})
 	const navigate = useNavigate()
 	const posts = data?.posts
@@ -36,11 +36,11 @@ const PostSeekLostItem: React.FC = () => {
 			) : (
 				<div className='flex flex-col items-center justify-center py-20 text-center'>
 					<FileText className='mb-4 h-16 w-16 text-gray-300' />
-					<p className='text-lg text-gray-500'>Không có bài viết nào</p>
+					<p className='text-secondary text-lg'>Không có bài viết nào</p>
 				</div>
 			)}
 		</div>
 	)
 }
 
-export default PostSeekLostItem
+export default PostOther

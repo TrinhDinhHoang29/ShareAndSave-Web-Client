@@ -71,6 +71,14 @@ const postApi = {
 		return axiosPrivate.patch(postEndpoints.post + '/' + postID, data, {
 			signal
 		})
+	},
+	async delete(
+		postID: number,
+		signal?: AbortSignal
+	): Promise<IApiResponse<string>> {
+		return axiosPrivate.delete(postEndpoints.post + '/' + postID, {
+			signal
+		})
 	}
 }
 

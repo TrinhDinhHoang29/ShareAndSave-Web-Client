@@ -7,19 +7,37 @@ import { ReactNode } from 'react'
 import Slider from 'react-slick'
 
 // Custom arrow components
-const PrevArrow = ({ onClick }: { onClick?: () => void }) => (
+const PrevArrow = ({
+	onClick,
+	leftDistance = '-left-10'
+}: {
+	onClick?: () => void
+	leftDistance?: string
+}) => (
 	<button
 		onClick={onClick}
-		className='bg-primary/90 hover:bg-primary absolute top-1/2 -left-10 z-10 -translate-y-1/2 rounded-full p-2 shadow-lg transition-all hover:shadow-xl'
+		className={clsx(
+			'bg-primary/20 hover:bg-primary/50 absolute top-1/2 z-10 -translate-y-1/2 rounded-full p-2 shadow-lg transition-all hover:shadow-xl',
+			leftDistance
+		)}
 	>
 		<ChevronLeft className='text-primary-foreground h-6 w-6' />
 	</button>
 )
 
-const NextArrow = ({ onClick }: { onClick?: () => void }) => (
+const NextArrow = ({
+	onClick,
+	rightDistance = '-right-10'
+}: {
+	onClick?: () => void
+	rightDistance?: string
+}) => (
 	<button
 		onClick={onClick}
-		className='bg-primary/90 hover:bg-primary absolute top-1/2 -right-10 z-10 -translate-y-1/2 rounded-full p-2 shadow-lg transition-all hover:shadow-xl'
+		className={clsx(
+			'bg-primary/20 hover:bg-primary/50 absolute top-1/2 z-10 -translate-y-1/2 rounded-full p-2 shadow-lg transition-all hover:shadow-xl',
+			rightDistance
+		)}
 	>
 		<ChevronRight className='text-primary-foreground h-6 w-6' />
 	</button>
@@ -46,6 +64,9 @@ interface CarouselProps {
 			dots?: boolean
 		}
 	}>
+	distance?: string
+	leftDistance?: string
+	rightDistance?: string
 }
 
 const Carousel = ({
@@ -59,7 +80,10 @@ const Carousel = ({
 	arrows = true,
 	dots = false,
 	className = '',
+	distance = 'px-3',
 	itemHeight = '450px',
+	leftDistance = '-left-10',
+	rightDistance = '-right-10',
 	responsive = [
 		{
 			breakpoint: 1024,
@@ -86,8 +110,8 @@ const Carousel = ({
 		autoplay,
 		autoplaySpeed,
 		dots,
-		prevArrow: arrows ? <PrevArrow /> : undefined,
-		nextArrow: arrows ? <NextArrow /> : undefined,
+		prevArrow: arrows ? <PrevArrow leftDistance={leftDistance} /> : undefined,
+		nextArrow: arrows ? <NextArrow rightDistance={rightDistance} /> : undefined,
 		arrows,
 		adaptiveHeight: false,
 		responsive
@@ -101,7 +125,7 @@ const Carousel = ({
 				{children.map((child, index) => (
 					<div
 						key={index}
-						className={clsx('px-3', itemHeight)}
+						className={clsx(distance, itemHeight)}
 					>
 						{child}
 					</div>

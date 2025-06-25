@@ -27,7 +27,6 @@ import {
 } from '@/models/types'
 import useAuthStore from '@/stores/authStore'
 
-import AutoLoginRedirect from './components/AutoLoginRedirect'
 import Instruction from './components/Instruction'
 import MyThank from './components/MyThank' // Không lazy
 import PersonalInfoForm from './components/PersonalInfoForm' // Không lazy
@@ -49,7 +48,6 @@ const PostAction: React.FC = () => {
 	const [formData, setFormData] = useState<IPostActionInfoFormData>(Object)
 	const [isCompleted, setIsCompleted] = useState<boolean>(false)
 	const [completedEmail, setCompletedEmail] = useState<string>('')
-	const [postResponse, setPostResponse] = useState<IPostActionResponse>(Object)
 	const { isAuthenticated } = useAuthStore()
 	const [currentStep, setCurrentStep] = useState<number>(() =>
 		isAuthenticated ? 1 : 0
@@ -66,7 +64,6 @@ const PostAction: React.FC = () => {
 			console.log(data)
 			setCompletedEmail(formData.personalInfo?.email || '')
 			setIsCompleted(true)
-			setPostResponse(data)
 		}
 	})
 
@@ -88,7 +85,7 @@ const PostAction: React.FC = () => {
 
 	const postInfoForm = useForm<PostInfo>({
 		resolver: zodResolver(postInfoSchema),
-		defaultValues: formData.postInfo || { description: '', image: [] }
+		defaultValues: formData.postInfo || { description: '', images: [] }
 	})
 
 	const handleNext = async () => {
@@ -134,7 +131,7 @@ const PostAction: React.FC = () => {
 	const resetForm = () => {
 		personalForm.reset()
 		postTypeForm.reset({ type: '1' })
-		postInfoForm.reset({ description: '' })
+		postInfoForm.reset({ description: '', images: [] })
 		setFormData(Object)
 		setCurrentStep(isAuthenticated ? 1 : 0)
 		setIsCompleted(false)
@@ -225,13 +222,11 @@ const PostAction: React.FC = () => {
 
 	const renderCurrentForm = () => {
 		if (isCompleted) {
-			return isAuthenticated ? (
+			return (
 				<MyThank
 					onReset={resetForm}
 					email={completedEmail}
 				/>
-			) : (
-				<AutoLoginRedirect info={postResponse} />
 			)
 		}
 

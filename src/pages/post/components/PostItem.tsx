@@ -4,7 +4,7 @@ import { Clock, Heart, Package, User } from 'lucide-react'
 import React from 'react'
 
 import { formatNearlyDateTimeVN } from '@/lib/utils'
-import { getTypeInfo } from '@/models/constants'
+import { getStatusPostTypeConfig, getTypeInfo } from '@/models/constants'
 import { EPostType } from '@/models/enums'
 import { IPost } from '@/models/interfaces'
 
@@ -22,6 +22,10 @@ const PostItem: React.FC<PostItemProps> = ({
 	const truncateText = (text: string, maxLength: number) => {
 		return text.length > maxLength ? text.substring(0, maxLength) + '...' : text
 	}
+	const { color, label } = getStatusPostTypeConfig(
+		post.type.toString() as EPostType,
+		post.currentItemCount
+	)
 	return (
 		<motion.article
 			initial={{ opacity: 0, y: 20 }}
@@ -45,22 +49,14 @@ const PostItem: React.FC<PostItemProps> = ({
 						}}
 					/>
 					{/* Hiển thị số lượng ảnh nếu có nhiều hơn 1 */}
-					{post.images.length > 1 && (
-						<div className='absolute top-3 right-3 flex items-center gap-1 rounded-full bg-black/70 px-2 py-1 text-xs font-medium text-white'>
-							<svg
-								className='h-3 w-3'
-								fill='currentColor'
-								viewBox='0 0 20 20'
-							>
-								<path
-									fillRule='evenodd'
-									d='M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z'
-									clipRule='evenodd'
-								/>
-							</svg>
-							{post.images.length}
-						</div>
-					)}
+					<div
+						className={clsx(
+							'absolute top-3 right-3 flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium',
+							color
+						)}
+					>
+						{label}
+					</div>
 				</div>
 			)}
 

@@ -163,6 +163,11 @@ const Chat = () => {
 							status: 'error'
 						})
 					} else if (data.event === 'send_transaction_response') {
+						console.log(event.data)
+						if (!isAuthor) {
+							setTransactionStatus(ETransactionStatus.DEFAULT)
+							setTransactionItems([])
+						}
 						transactionDataRefetch()
 					}
 				} catch (error) {
