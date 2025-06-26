@@ -143,7 +143,7 @@ export const getTransactionStatusConfig = (
 			border: 'border-success border-solid border-2'
 		},
 		[ETransactionStatus.CANCELLED]: {
-			label: isAuthor ? 'Đã từ chối' : 'Đã bị từ chối',
+			label: isAuthor ? 'Từ chối' : 'Bị từ chối',
 			Icon: XCircle,
 			background: 'bg-red-100 hover:bg-red-200',
 			textColor: 'text-error',

@@ -17,6 +17,7 @@ export const PostItem = ({ post }: { post: IPostInterest }) => {
 	const navigate = useNavigate()
 	const { followedByNotification } = useChatNotification()
 	const [isPing, setIsPing] = useState(false)
+
 	useEffect(() => {
 		if (
 			followedByNotification &&
@@ -31,7 +32,7 @@ export const PostItem = ({ post }: { post: IPostInterest }) => {
 	return (
 		<div
 			className={clsx(
-				'bg-card/80 overflow-hidden rounded-2xl border shadow-lg backdrop-blur-sm transition-shadow duration-200 hover:shadow-xl',
+				'bg-card/80 rounded-2xl border shadow-lg backdrop-blur-sm transition-shadow duration-200 hover:shadow-xl',
 				isPing ? 'border-error' : 'border-border'
 			)}
 		>
@@ -98,7 +99,7 @@ export const PostItem = ({ post }: { post: IPostInterest }) => {
 						animate={{ height: 'auto', opacity: 1 }}
 						exit={{ height: 0, opacity: 0 }}
 						transition={{ duration: 0.2 }}
-						className='border-border bg-muted/50 border-t'
+						className='border-border bg-muted/50 relative max-h-96 overflow-y-auto border-t' // Thêm relative, max-height và cuộn
 					>
 						<div className='p-6'>
 							{post.interests.length > 0 ? (

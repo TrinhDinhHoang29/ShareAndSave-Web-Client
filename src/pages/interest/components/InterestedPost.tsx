@@ -1,4 +1,4 @@
-import { Clock, FileText, Heart, User } from 'lucide-react'
+import { ArrowRightLeft, Clock, FileText, Heart, User } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
@@ -12,10 +12,12 @@ import ChatButton from './ChatButton'
 
 export const InterestedPost = ({
 	post,
-	onDeleteInterest
+	onDeleteInterest,
+	onViewTransaction
 }: {
 	post: IPostInterest
 	onDeleteInterest: (postID: number) => void
+	onViewTransaction: (postID: number, interestID: number) => void
 }) => {
 	const { label, Icon, color } = getTypeInfo(post.type.toString() as EPostType)
 	const { followingNotification } = useChatNotification()
@@ -84,7 +86,14 @@ export const InterestedPost = ({
 						>
 							<FileText className='text-muted-foreground h-5 w-5' />
 						</Link>
-
+						<button
+							className={`text-secondary-foreground bg-secondary rounded-xl p-3 shadow-lg transition-all duration-200 hover:shadow-xl`}
+							onClick={() => onViewTransaction(post.id, post.interests[0].id)}
+							aria-label='Xem danh sách giao dịch'
+							title='Xem danh sách giao dịch'
+						>
+							<ArrowRightLeft className='h-5 w-5' />
+						</button>
 						<button
 							className={`text-primary-foreground bg-destructive rounded-xl p-3 shadow-lg transition-all duration-200 hover:shadow-xl`}
 							onClick={() => onDeleteInterest(post.id)}

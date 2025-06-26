@@ -18,6 +18,7 @@ import Heading from '../home/components/Heading'
 import AlertPing from './components/AlertPing'
 import { PostItem } from './components/FollowedByPost'
 import { InterestedPost } from './components/InterestedPost'
+import { TransactionViewDialog } from './components/TransactionViewDialog'
 
 const Interest = () => {
 	const [activeTab, setActiveTab] = useState<EInterestType>(1)
@@ -26,11 +27,18 @@ const Interest = () => {
 	const [order, setOrder] = useState<ESortOrder>(ESortOrder.DESC)
 	const [isFollowedByPing, setIsFollowedByPing] = useState(false)
 	const [isFollowingPing, setIsFollowingPing] = useState(false)
+	const [isOpenDialog, setIsOpenDialog] = useState(false)
+	const [selectedPostID, setSelectedPostID] = useState<number>(0)
+	const [selectedInterestID, setSelectedInterestID] = useState<number>(0)
 
 	const { followedByNotification, followingNotification } =
 		useChatNotification()
 
 	const debouncedSearch = useDebounce(search, 500)
+
+	useEffect(() => {
+		setCurrentPage(1) // Reset to first page when search change
+	}, [debouncedSearch, activeTab])
 
 	const params: IListTypeParams<EInterestType> = useMemo(
 		() => ({
@@ -91,6 +99,12 @@ const Interest = () => {
 	// Hàm để reset ping khi chuyển tab
 	const handleTabChange = (tabType: EInterestType) => {
 		setActiveTab(tabType)
+	}
+
+	const handleViewTransaction = (postID: number, interestID: number) => {
+		setSelectedPostID(postID)
+		setSelectedInterestID(interestID)
+		setIsOpenDialog(true)
 	}
 
 	return (
@@ -197,6 +211,7 @@ const Interest = () => {
 							listPostInterest.map(post =>
 								post.interests.length > 0 && activeTab === 1 ? (
 									<InterestedPost
+										onViewTransaction={handleViewTransaction}
 										key={`${post.id}-${activeTab}`}
 										post={post}
 										onDeleteInterest={handleDeleteInterest}
@@ -234,6 +249,12 @@ const Interest = () => {
 					/>
 				)}
 			</div>
+			<TransactionViewDialog
+				isOpen={isOpenDialog}
+				onClose={() => setIsOpenDialog(false)}
+				postID={selectedPostID}
+				interestID={selectedInterestID}
+			/>
 		</div>
 	)
 }

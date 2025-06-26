@@ -30,7 +30,7 @@ const Home = () => {
 					className='flex items-center'
 				>
 					<Link
-						to='dang-bai'
+						to={'dang-bai' + '/' + selectedLostITemType}
 						className='bg-primary text-primary-foreground rounded-md p-2 underline underline-offset-1'
 					>
 						<Plus />
@@ -68,7 +68,7 @@ const Home = () => {
 					className='flex items-center'
 				>
 					<Link
-						to='dang-bai'
+						to={'dang-bai' + '/' + EPostType.GIVE_AWAY_OLD_ITEM}
 						className='bg-primary text-primary-foreground rounded-md p-2 underline underline-offset-1'
 					>
 						<Plus />

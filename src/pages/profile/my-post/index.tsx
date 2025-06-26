@@ -106,7 +106,7 @@ const MyPost = () => {
 			showInfo({
 				infoButtonText: 'Đã rõ',
 				infoMessage:
-					'Bài đăng hiện tại đang khóa. Vui lòng mở khóa để tiến hành đăng lại',
+					'Bài đăng hiện tại đang khóa. Vui lòng mở khóa để tiến hành ghim bài đăng.',
 				infoTitle: 'Thông tin bài đăng'
 			})
 		} else {

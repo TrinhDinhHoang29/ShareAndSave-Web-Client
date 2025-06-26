@@ -21,20 +21,28 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import Loading from '@/components/common/Loading'
+import TriangleCornerBadge from '@/components/common/TriangleCornerBadge'
 import { useAlertModalContext } from '@/context/alert-modal-context'
 import { useAuthDialog } from '@/context/auth-dialog-context'
 import {
 	useCreateInterestMutation,
 	useDeleteInterestMutation
 } from '@/hooks/mutations/use-interest.mutation'
+import { useCreateTransactionMutation } from '@/hooks/mutations/use-transaction.mutation'
 import { useDetailPostQuery } from '@/hooks/queries/use-post-query'
+import { useInterestListDialog } from '@/hooks/useInterestListDialog'
 import { formatDateTimeVN } from '@/lib/utils'
-import { getStatusConfig, getTypeInfo } from '@/models/constants'
+import {
+	getStatusConfig,
+	getStatusPostTypeConfig,
+	getTypeInfo
+} from '@/models/constants'
 import { EPostSTatus, EPostType } from '@/models/enums'
 import { IUserInterest } from '@/models/interfaces'
 import useAuthStore from '@/stores/authStore'
 
 import RelatedPosts from './components/RelatedPosts'
+import TransactionInterestDialog from './components/TransactionInterestDialog'
 
 // Info types based on post type
 interface FoundItemInfo {
@@ -51,15 +59,33 @@ interface LostItemInfo {
 }
 
 const PostDetail: React.FC = () => {
+	const {
+		isOpen,
+		openDialog: openInterestDialog,
+		closeDialog,
+		DialogComponent
+	} = useInterestListDialog()
 	const [currentImageIndex, setCurrentImageIndex] = useState(0)
 	const [isImageModalOpen, setIsImageModalOpen] = useState(false)
 	const [interestID, setInterestID] = useState(0)
 	const [showAllItems, setShowAllItems] = useState(false)
 	const queryClient = useQueryClient()
-	const { showInfo } = useAlertModalContext()
+	const { showSuccess, showInfo } = useAlertModalContext()
 	const { user, isAuthenticated } = useAuthStore()
 	const { openDialog } = useAuthDialog()
 	const navigate = useNavigate()
+	const [isDialogOpen, setIsDialogOpen] = useState(false)
+	const { mutate } = useCreateTransactionMutation({
+		onSuccess: () => {
+			showSuccess({
+				successTitle: 'Giao dịch thành công',
+				successMessage:
+					'Bạn có thể xem danh sách giao dịch trong trò chuyện hoặc trong danh sách quan tâm.',
+				successButtonText: 'Đóng'
+			})
+			setIsDialogOpen(false)
+		}
+	})
 
 	const params = useParams()
 	const slug = params.slug
@@ -86,6 +112,7 @@ const PostDetail: React.FC = () => {
 			}
 			post?.interests.push(newUserInterest)
 			queryClient.invalidateQueries({ queryKey: ['postInterests'] })
+			setIsDialogOpen(true)
 		}
 	})
 	const {
@@ -120,6 +147,11 @@ const PostDetail: React.FC = () => {
 	const sumQuantityItems = useMemo(() => {
 		return post?.items?.reduce((acc, cur) => acc + (cur.quantity || 0), 0) || 0
 	}, [post])
+
+	const { color: statusColor, label: statusLabel } = getStatusPostTypeConfig(
+		post?.type.toString() as EPostType,
+		sumCurrentQuantityItems
+	)
 
 	const handleChat = () => {
 		if (interestID) {
@@ -189,7 +221,8 @@ const PostDetail: React.FC = () => {
 		<>
 			<div className='container mx-auto grid w-full grid-cols-1 gap-6 py-12 md:grid-cols-3'>
 				<div className='col-span-1 md:col-span-2'>
-					<div className='bg-card border-border rounded-xl border p-8 shadow-lg'>
+					<div className='bg-card border-border relative rounded-xl border p-8 shadow-lg'>
+						{user?.id === post.authorID && <TriangleCornerBadge />}
 						{/* Type Badge */}
 						<div className='mb-4 flex items-center gap-4'>
 							<motion.div
@@ -197,7 +230,7 @@ const PostDetail: React.FC = () => {
 								animate={{ opacity: 1, y: 0 }}
 							>
 								<span
-									className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium ${color}`}
+									className={`inline-flex h-8 items-center gap-2 rounded-full px-3 py-1 text-sm font-medium ${color}`}
 								>
 									<span>
 										<Icon />
@@ -205,7 +238,6 @@ const PostDetail: React.FC = () => {
 									{label}
 								</span>
 							</motion.div>
-
 							{post.status === Number(EPostSTatus.SEAL) && (
 								<motion.div
 									initial={{ opacity: 0, y: 20 }}
@@ -213,7 +245,7 @@ const PostDetail: React.FC = () => {
 								>
 									<span
 										className={clsx(
-											'inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium',
+											'inline-flex h-8 items-center gap-2 rounded-full px-3 py-1 text-sm font-medium',
 											statusConfig.bgColor,
 											statusConfig.textColor
 										)}
@@ -225,6 +257,19 @@ const PostDetail: React.FC = () => {
 									</span>
 								</motion.div>
 							)}
+							<motion.div
+								initial={{ opacity: 0, y: 20 }}
+								animate={{ opacity: 1, y: 0 }}
+							>
+								<span
+									className={clsx(
+										'inline-flex h-8 items-center rounded-full px-3 text-sm font-medium',
+										statusColor
+									)}
+								>
+									{statusLabel}
+								</span>
+							</motion.div>
 						</div>
 
 						{/* Title */}
@@ -550,6 +595,12 @@ const PostDetail: React.FC = () => {
 											<Users className='h-5 w-5' />
 											Những người quan tâm ({post.interests.length})
 										</h2>
+										<button
+											className='bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-3 py-1 transition-colors'
+											onClick={openInterestDialog}
+										>
+											Quản lý
+										</button>
 									</div>
 									{post.interests && post.interests.length > 0 && (
 										<div className='glass grid grid-cols-8 rounded-xl p-6'>
@@ -779,19 +830,35 @@ const PostDetail: React.FC = () => {
 					/>
 				</div>
 			</div>
+			<TransactionInterestDialog
+				isOpen={isDialogOpen}
+				onClose={() => setIsDialogOpen(false)}
+				items={post.items}
+				onCreateTransaction={(items, method) => {
+					mutate({
+						data: {
+							interestID,
+							items: items.map(item => ({
+								postItemID: item.postItemID,
+								quantity: item.quantity
+							})),
+							method // Add method here
+						}
+					})
+				}}
+				title='Tạo giao dịch mới'
+				description='Chọn vật phẩm bạn muốn trao đổi'
+			/>
+			<DialogComponent
+				isOpen={isOpen}
+				onClose={closeDialog}
+				interests={post.interests}
+				postID={post.id}
+				authorID={post.authorID}
+				title='Quản lý quan tâm' // Optional
+			/>
 		</>
 	)
 }
 
 export default PostDetail
-
-// <div className="min-h-screen bg-background">
-
-//   <div className="container mx-auto px-4 py-8">
-//     <div className="max-w-4xl mx-auto">
-
-{
-	/* Image Modal */
-}
-
-// </div>

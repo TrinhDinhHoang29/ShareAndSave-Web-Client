@@ -15,6 +15,7 @@ import { sortOptions } from '@/models/options'
 import Heading from '../home/components/Heading'
 import { AppointmentDialog } from './components/AppointmentDialog'
 import AppointmentItem from './components/AppointmentItem'
+import AppointmentItemSkeleton from './components/AppointmentItemSkeleton'
 
 // Kiểu hợp nhất với '' cho "Tất cả"
 type PostTypeSelection = '' | EPostType
@@ -130,8 +131,7 @@ const Appointment = () => {
 					>
 						<div className='grid grid-cols-3 gap-6'>
 							{isPending ? (
-								// <PostItemSkeleton quantity={limit} />
-								<div></div>
+								<AppointmentItemSkeleton quantity={limit} />
 							) : appointments.length > 0 ? (
 								appointments.map(appointment => (
 									<AppointmentItem

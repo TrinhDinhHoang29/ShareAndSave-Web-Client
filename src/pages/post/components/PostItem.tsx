@@ -3,10 +3,12 @@ import { motion } from 'framer-motion'
 import { Clock, Heart, Package, User } from 'lucide-react'
 import React from 'react'
 
+import TriangleCornerBadge from '@/components/common/TriangleCornerBadge'
 import { formatNearlyDateTimeVN } from '@/lib/utils'
 import { getStatusPostTypeConfig, getTypeInfo } from '@/models/constants'
 import { EPostType } from '@/models/enums'
 import { IPost } from '@/models/interfaces'
+import useAuthStore from '@/stores/authStore'
 
 interface PostItemProps {
 	post: IPost
@@ -26,6 +28,9 @@ const PostItem: React.FC<PostItemProps> = ({
 		post.type.toString() as EPostType,
 		post.currentItemCount
 	)
+	const { user } = useAuthStore()
+
+	const isMyPost = user?.id === post.authorID
 	return (
 		<motion.article
 			initial={{ opacity: 0, y: 20 }}
@@ -51,12 +56,14 @@ const PostItem: React.FC<PostItemProps> = ({
 					{/* Hiển thị số lượng ảnh nếu có nhiều hơn 1 */}
 					<div
 						className={clsx(
-							'absolute top-3 right-3 flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium',
-							color
+							'absolute top-3 flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium',
+							color,
+							isMyPost ? 'left-3' : 'right-3'
 						)}
 					>
 						{label}
 					</div>
+					{isMyPost && <TriangleCornerBadge />}
 				</div>
 			)}
 

@@ -40,7 +40,7 @@ export const useCreateTransactionMutation = ({
 		},
 		onSuccess: res => {
 			if (res.code === 200) {
-				close()
+				// close()
 				onSuccess?.(res.data.transaction)
 			} else {
 				const errorMessage = res.message

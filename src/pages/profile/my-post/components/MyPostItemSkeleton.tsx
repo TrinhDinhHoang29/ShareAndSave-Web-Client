@@ -13,9 +13,9 @@ const MyPostItemSkeleton: FC<MyPostItemSkeletonProps> = ({ quantity }) => {
 					className='bg-card border-border animate-pulse overflow-hidden rounded-lg border shadow-sm'
 				>
 					{/* Layout ngang: Ảnh bên trái, nội dung bên phải */}
-					<div className='flex'>
+					<div className='flex h-36'>
 						{/* Phần ảnh skeleton - chiếm 1/3 chiều rộng */}
-						<div className='h-32 w-32 flex-shrink-0'>
+						<div className='h-full w-32 flex-shrink-0'>
 							<div className='bg-muted h-full w-full'></div>
 						</div>
 

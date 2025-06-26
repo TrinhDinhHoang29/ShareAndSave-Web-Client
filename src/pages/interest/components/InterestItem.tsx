@@ -1,7 +1,9 @@
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import clsx from 'clsx'
 import { ChevronDown, Clock, User } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 
+import Loading from '@/components/common/Loading'
 import { useAlertModalContext } from '@/context/alert-modal-context'
 import { useChatNotification } from '@/context/chat-noti-context'
 import { useUpdateTransactionMutation } from '@/hooks/mutations/use-transaction.mutation'
@@ -11,7 +13,7 @@ import {
 	getConfirmContentTransactionStatus,
 	getTransactionStatusConfig
 } from '@/models/constants'
-import { ESortOrder, ETransactionStatus } from '@/models/enums'
+import { EMethod, ESortOrder, ETransactionStatus } from '@/models/enums'
 import {
 	ITransaction,
 	ITransactionParams,
@@ -24,60 +26,82 @@ import ChatButton from './ChatButton'
 
 const ButtonStatus = ({
 	handleClick,
-	type
+	type,
+	close
 }: {
 	handleClick: () => void
 	type: ETransactionStatus
+	close: () => void
 }) => {
 	const { Icon, background, textColor, label } = getTransactionStatusConfig(
 		true,
 		type
 	)
+
+	const onClick = () => {
+		handleClick()
+		close()
+	}
+
 	return (
-		<button
-			onClick={handleClick}
-			className={clsx(
-				'flex w-full items-center space-x-2 px-4 py-2 text-sm font-medium transition-colors',
-				background,
-				textColor
-			)}
-		>
-			<div className='flex h-8 w-8 items-center justify-center rounded-full'>
-				<Icon className='h-4 w-4' />
-			</div>
-			<span>{label}</span>
-		</button>
+		<MenuItem>
+			<button
+				onClick={onClick}
+				className={clsx(
+					'flex w-full items-center space-x-2 px-4 py-2 text-sm font-medium transition-colors data-[focus]:bg-gray-50',
+					background,
+					textColor
+				)}
+			>
+				<div className='flex h-8 w-8 items-center justify-center rounded-full'>
+					<Icon className='h-4 w-4' />
+				</div>
+				<span>{label}</span>
+			</button>
+		</MenuItem>
 	)
 }
 
 export const InterestItem = ({
 	userInterest,
 	postID,
-	authorID
+	authorID,
+	isQuick = false,
+	updateTransactionStatus
 }: {
 	userInterest: IUserInterest
 	postID: number
 	authorID: number
+	isQuick?: boolean
+	updateTransactionStatus?: (
+		interestID: number,
+		status: ETransactionStatus,
+		method: EMethod
+	) => void
 }) => {
-	const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 	const { user } = useAuthStore()
 	const { showConfirm } = useAlertModalContext()
 	const [latestTransaction, setLatestTransaction] =
 		useState<ITransaction | null>(null)
+	const userInterstStable = useMemo(() => userInterest, [userInterest])
 
 	const params: ITransactionParams = useMemo(
 		() => ({
 			postID,
 			searchBy: 'interestID',
-			searchValue: userInterest.id.toString(),
+			searchValue: userInterstStable.id.toString(),
 			sort: 'createdAt',
 			page: 1,
 			order: ESortOrder.DESC
 		}),
-		[postID, userInterest]
+		[postID, userInterstStable]
 	)
 
-	const { data: transactionData } = useListTransactionQuery(params)
+	const {
+		data: transactionData,
+		isPending,
+		refetch
+	} = useListTransactionQuery(params)
 	const transactions = useMemo(() => {
 		return transactionData?.pages.flatMap(page => page.transactions) || []
 	}, [transactionData])
@@ -85,6 +109,11 @@ export const InterestItem = ({
 	useEffect(() => {
 		if (transactions && transactions.length > 0) {
 			setLatestTransaction(transactions[0])
+			updateTransactionStatus?.(
+				userInterstStable.id,
+				transactions[0].status.toString() as ETransactionStatus,
+				transactions[0].method?.toString() as EMethod
+			)
 		}
 	}, [transactions])
 
@@ -116,30 +145,34 @@ export const InterestItem = ({
 	}, [latestTransaction])
 
 	const { mutate: updateTransactionMutation } = useUpdateTransactionMutation({
-		onSuccess: (status: ETransactionStatus) => {
+		onSuccess: () => {
 			if (latestTransaction) {
-				setLatestTransaction({
-					...latestTransaction,
-					status
-				})
+				refetch()
 			}
 		}
 	})
 
 	const handleConfirmTransaction = async (status: ETransactionStatus) => {
 		const content = getConfirmContentTransactionStatus(status)
+		const handle = () => {
+			const transactionRequest: ITransactionRequest = {
+				status: Number(status)
+			}
+			updateTransactionMutation({
+				transactionID: latestTransaction?.id || 0,
+				data: transactionRequest
+			})
+		}
+		if (isQuick) {
+			handle()
+			return
+		}
 		showConfirm({
 			confirmButtonText: 'Xác nhận',
 			confirmMessage: content.message,
 			confirmTitle: content.title,
 			onConfirm: async () => {
-				const transactionRequest: ITransactionRequest = {
-					status: Number(status)
-				}
-				updateTransactionMutation({
-					transactionID: latestTransaction?.id || 0,
-					data: transactionRequest
-				})
+				handle()
 			},
 			cancelButtonText: 'Hủy'
 		})
@@ -149,14 +182,14 @@ export const InterestItem = ({
 	const [duplicateFollowedByNotification, setDuplicateFollowedByNotification] =
 		useState(followedByNotification)
 	const [newMessages, setNewMessages] = useState<number>(
-		userInterest.unreadMessageCount || 0
+		userInterstStable.unreadMessageCount || 0
 	)
 	const [isPing, setIsPing] = useState(false)
 
 	useEffect(() => {
 		if (
 			followedByNotification &&
-			followedByNotification.interestID === userInterest.id &&
+			followedByNotification.interestID === userInterstStable.id &&
 			duplicateFollowedByNotification !== followedByNotification
 		) {
 			setNewMessages(prev => prev + 1)
@@ -165,155 +198,156 @@ export const InterestItem = ({
 		}
 	}, [followedByNotification])
 
+	const canUpdateStatus =
+		(latestTransaction?.status.toString() as ETransactionStatus) ===
+			ETransactionStatus.SUCCESS ||
+		(latestTransaction?.status.toString() as ETransactionStatus) ===
+			ETransactionStatus.PENDING
+
 	return (
 		<div className='border-border bg-card relative space-y-4 rounded-xl border p-4 shadow-sm transition-shadow duration-200 hover:shadow-md'>
-			<div className='flex items-center justify-between'>
-				<div className='flex items-center space-x-4'>
-					<div className='flex h-12 w-12 items-center justify-center rounded-full bg-gray-200'>
-						{userInterest?.userAvatar ? (
-							<img
-								src={userInterest?.userAvatar}
-								alt={`${userInterest?.userName} avatar`}
-								className='h-full w-full rounded-full object-cover'
-							/>
-						) : (
-							<User className='text-secondary h-5 w-5' />
-						)}
-					</div>
-					<div className='flex-1 space-y-1'>
-						{latestTransaction?.method && (
-							<span
-								className={`bg-primary text-primary-foreground inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium`}
-							>
-								{latestTransaction.method}
-							</span>
-						)}
+			{isPending ? (
+				<Loading />
+			) : (
+				<>
+					<div className='flex items-center justify-between'>
+						<div className='flex w-2/3 items-center space-x-4'>
+							<div className='flex h-12 w-12 items-center justify-center rounded-full bg-gray-200'>
+								{userInterstStable?.userAvatar ? (
+									<img
+										src={userInterstStable?.userAvatar}
+										alt={`${userInterstStable?.userName} avatar`}
+										className='h-full w-full rounded-full object-cover'
+									/>
+								) : (
+									<User className='text-secondary h-5 w-5' />
+								)}
+							</div>
+							<div className='flex-1 space-y-1'>
+								{latestTransaction?.method && (
+									<span
+										className={`bg-primary text-primary-foreground inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium`}
+									>
+										{latestTransaction.method}
+									</span>
+								)}
 
-						<div className='flex items-center gap-2'>
-							<p className='text-foreground font-semibold'>
-								{userInterest.userName}
-							</p>
-							<div className='text-muted-foreground flex items-center text-sm'>
-								<Clock className='mr-1 h-3 w-3' />
-								<span>{formatNearlyDateTimeVN(userInterest.createdAt)}</span>
+								<div className='flex items-center gap-2'>
+									<p className='text-foreground font-semibold'>
+										{userInterstStable.userName}
+									</p>
+									<div className='text-muted-foreground flex items-center text-sm'>
+										<Clock className='mr-1 h-3 w-3' />
+										<span>
+											{formatNearlyDateTimeVN(userInterstStable.updatedAt)}
+										</span>
+									</div>
+								</div>
+
+								{itemsText && (
+									<div className='text-muted-foreground text-sm'>
+										<span className='line-clamp-2 space-x-2 overflow-hidden'>
+											{/* <span className="font-medium mr-1">Yêu cầu:</span> */}
+											{itemsText}
+										</span>
+									</div>
+								)}
 							</div>
 						</div>
 
-						{itemsText && (
-							<div className='text-muted-foreground text-sm'>
-								<span className='font-medium'>Yêu cầu:</span> {itemsText}
-							</div>
-						)}
-					</div>
-				</div>
-
-				{/* Right section - Actions */}
-				<div className='flex items-center gap-2'>
-					{transactionStatusConfig && (
-						<div className='relative'>
-							{(latestTransaction?.status.toString() as ETransactionStatus) ===
-								ETransactionStatus.SUCCESS ||
-							(latestTransaction?.status.toString() as ETransactionStatus) ===
-								ETransactionStatus.PENDING ? (
-								<button
-									onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-									className={clsx(
-										'flex items-center space-x-1 rounded-full px-3 py-1.5 text-sm transition-colors',
-										transactionStatusConfig?.background,
-										transactionStatusConfig?.textColor
-									)}
-								>
-									<span>{transactionStatusConfig?.label}</span>
-									<ChevronDown
-										className={clsx('h-4 w-4 transition-transform', {
-											'rotate-180': isDropdownOpen
-										})}
-									/>
-								</button>
-							) : (
-								<button
-									className={clsx(
-										'flex items-center space-x-1 rounded-full px-3 py-1.5 text-sm transition-colors',
-										transactionStatusConfig?.background,
-										transactionStatusConfig?.textColor
-									)}
-								>
-									<span>{transactionStatusConfig?.label}</span>
-								</button>
-							)}
-
-							{isDropdownOpen && (
+						{/* Right section - Actions */}
+						<div className='flex flex-1 items-center justify-end gap-2'>
+							{transactionStatusConfig && (
 								<>
-									{/* Background overlay */}
-									<div
-										className='fixed inset-0 z-10'
-										onClick={() => setIsDropdownOpen(false)}
-									/>
+									{canUpdateStatus ? (
+										<Menu
+											as='div'
+											className='relative'
+										>
+											<MenuButton
+												className={clsx(
+													'flex items-center space-x-1 rounded-full px-3 py-1.5 text-sm transition-colors hover:opacity-80 data-[open]:opacity-80',
+													transactionStatusConfig?.background,
+													transactionStatusConfig?.textColor
+												)}
+											>
+												<span>{transactionStatusConfig?.label}</span>
+												<ChevronDown className='h-4 w-4 transition-transform data-[open]:rotate-180' />
+											</MenuButton>
 
-									{/* Dropdown menu */}
-									<div className='absolute top-full right-0 z-20 mt-2 w-48 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl'>
-										<div className='divide-y divide-gray-100'>
-											{latestTransaction &&
-												(latestTransaction.status.toString() as ETransactionStatus) ===
-													ETransactionStatus.PENDING && (
-													<>
+											<MenuItems className='absolute top-full right-0 z-20 mt-2 w-48 origin-top-right overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl data-[closed]:scale-95 data-[closed]:opacity-0 data-[enter]:duration-100 data-[enter]:ease-out data-[leave]:duration-75 data-[leave]:ease-in'>
+												{latestTransaction &&
+													(latestTransaction.status.toString() as ETransactionStatus) ===
+														ETransactionStatus.PENDING && (
+														<>
+															<ButtonStatus
+																handleClick={() =>
+																	handleConfirmTransaction(
+																		ETransactionStatus.SUCCESS
+																	)
+																}
+																type={ETransactionStatus.SUCCESS}
+																close={() => {}}
+															/>
+															<ButtonStatus
+																handleClick={() =>
+																	handleConfirmTransaction(
+																		ETransactionStatus.CANCELLED
+																	)
+																}
+																type={ETransactionStatus.CANCELLED}
+																close={() => {}}
+															/>
+														</>
+													)}
+												{latestTransaction &&
+													(latestTransaction.status.toString() as ETransactionStatus) ===
+														ETransactionStatus.SUCCESS && (
 														<ButtonStatus
-															handleClick={() => {
+															handleClick={() =>
 																handleConfirmTransaction(
-																	ETransactionStatus.SUCCESS
+																	ETransactionStatus.REJECTED
 																)
-																setIsDropdownOpen(false)
-															}}
-															type={ETransactionStatus.SUCCESS}
+															}
+															type={ETransactionStatus.REJECTED}
+															close={() => {}}
 														/>
-														<ButtonStatus
-															handleClick={() => {
-																handleConfirmTransaction(
-																	ETransactionStatus.CANCELLED
-																)
-																setIsDropdownOpen(false)
-															}}
-															type={ETransactionStatus.CANCELLED}
-														/>
-													</>
-												)}
-											{latestTransaction &&
-												(latestTransaction.status.toString() as ETransactionStatus) ===
-													ETransactionStatus.SUCCESS && (
-													<ButtonStatus
-														handleClick={() => {
-															handleConfirmTransaction(
-																ETransactionStatus.REJECTED
-															)
-															setIsDropdownOpen(false)
-														}}
-														type={ETransactionStatus.REJECTED}
-													/>
-												)}
-										</div>
-									</div>
+													)}
+											</MenuItems>
+										</Menu>
+									) : (
+										<button
+											className={clsx(
+												'flex items-center space-x-1 rounded-full px-3 py-1.5 text-sm transition-colors',
+												transactionStatusConfig?.background,
+												transactionStatusConfig?.textColor
+											)}
+										>
+											<span>{transactionStatusConfig?.label}</span>
+										</button>
+									)}
 								</>
 							)}
+
+							<ChatButton
+								interestID={userInterstStable.id}
+								newMessages={newMessages}
+								isPing={isPing}
+								isPending={
+									(latestTransaction?.status.toString() as ETransactionStatus) ===
+									ETransactionStatus.PENDING
+								}
+							/>
 						</div>
+					</div>
+
+					{userInterstStable.newMessage && (
+						<p className='text-muted-foreground bg-muted/50 line-clamp-2 rounded-lg px-4 py-2 text-sm leading-relaxed'>
+							{authorID === user?.id ? 'Bạn' : 'Đối phương'}:{' '}
+							{userInterstStable.newMessage}
+						</p>
 					)}
-
-					<ChatButton
-						interestID={userInterest.id}
-						newMessages={newMessages}
-						isPing={isPing}
-						isPending={
-							(latestTransaction?.status.toString() as ETransactionStatus) ===
-							ETransactionStatus.PENDING
-						}
-					/>
-				</div>
-			</div>
-
-			{userInterest.newMessage && (
-				<p className='text-muted-foreground bg-muted/50 line-clamp-2 rounded-lg px-4 py-2 text-sm leading-relaxed'>
-					{authorID === user?.id ? 'Bạn' : 'Đối phương'}:{' '}
-					{userInterest.newMessage}
-				</p>
+				</>
 			)}
 		</div>
 	)

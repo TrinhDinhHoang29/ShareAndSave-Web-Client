@@ -2,9 +2,11 @@ import { motion } from 'framer-motion'
 import { Heart, Package } from 'lucide-react'
 import React from 'react'
 
+import TriangleCornerBadge from '@/components/common/TriangleCornerBadge'
 import { getTypeInfo } from '@/models/constants'
 import { EPostType } from '@/models/enums'
 import { IPost } from '@/models/interfaces'
+import useAuthStore from '@/stores/authStore'
 
 interface PostItemTileProps {
 	post: IPost
@@ -30,6 +32,10 @@ const PostItemTile: React.FC<PostItemTileProps> = ({ post, onPostClick }) => {
 		hover: { scale: 1.05, transition: { duration: 0.3 } }
 	}
 
+	const { user } = useAuthStore()
+
+	const isMyPost = user?.id === post.authorID
+
 	return (
 		<motion.div
 			variants={itemVariants}
@@ -40,6 +46,7 @@ const PostItemTile: React.FC<PostItemTileProps> = ({ post, onPostClick }) => {
 			className='bg-card border-border relative cursor-pointer overflow-hidden rounded-xl border shadow-sm transition-all duration-200 hover:shadow-md'
 			onClick={() => onPostClick?.(post.slug)}
 		>
+			{isMyPost && <TriangleCornerBadge position='left' />}
 			<div className='flex'>
 				{/* Image Section - Left Side */}
 				<motion.div

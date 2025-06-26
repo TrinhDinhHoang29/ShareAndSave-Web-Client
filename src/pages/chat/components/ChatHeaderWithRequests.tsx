@@ -14,6 +14,7 @@ import {
 	Package,
 	Pencil,
 	Plus,
+	RefreshCcw,
 	User,
 	X
 } from 'lucide-react'
@@ -51,6 +52,7 @@ interface Props {
 	isFetchingNextPage?: boolean
 	sentinelRef?: (node: HTMLElement | null) => void
 	setSelectedMethod: (method: EMethod) => void
+	onRefetch: () => void
 }
 
 const ChatHeaderWithRequests = ({
@@ -76,7 +78,8 @@ const ChatHeaderWithRequests = ({
 	hasNextPage = false,
 	isFetchingNextPage = false,
 	sentinelRef,
-	setSelectedMethod
+	setSelectedMethod,
+	onRefetch
 }: Props) => {
 	transactionStatus = transactionStatus.toString() as ETransactionStatus
 	const currentItem = transactionItems[currentRequestIndex]
@@ -158,6 +161,13 @@ const ChatHeaderWithRequests = ({
 								</div>
 							) : null}
 						</div>
+						<button
+							title='Tải lại giao dịch'
+							onClick={onRefetch}
+							className='bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200'
+						>
+							<RefreshCcw className='h-5 w-5' />
+						</button>
 					</div>
 				</div>
 

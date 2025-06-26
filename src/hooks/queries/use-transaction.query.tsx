@@ -31,7 +31,8 @@ export const useListTransactionQuery = (params: ITransactionParams) => {
 			return undefined
 		},
 		initialPageParam: 1,
-		enabled: !!params.postID && !!params.searchValue
+		enabled: !!params.postID && !!params.searchValue,
+		staleTime: 5 * 60 * 1000 // Dữ liệu tươi trong 5 phút
 	})
 }
 

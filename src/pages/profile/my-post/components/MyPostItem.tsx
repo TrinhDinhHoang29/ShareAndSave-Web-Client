@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { Calendar, Lock, Package, RefreshCw, Unlock, X } from 'lucide-react'
+import { Calendar, Lock, Package, Pin, Unlock, X } from 'lucide-react'
 import { FC } from 'react'
 
 import { useAlertModalContext } from '@/context/alert-modal-context'
@@ -169,8 +169,8 @@ const MyPostItem: FC<MyPostItemProps> = ({
 									onClick={handleRepost}
 									className='bg-primary text-primary-foreground hover:bg-primary/90 flex flex-1 items-center justify-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium transition-colors'
 								>
-									<RefreshCw className='h-3 w-3' />
-									Đăng lại
+									<Pin className='h-3 w-3' />
+									Ghim
 								</button>
 							</>
 						)}

@@ -1,4 +1,4 @@
-import { Gift, Package, Search, Star, Users } from 'lucide-react'
+import { Gift, HandHelping, Search, Star, Users } from 'lucide-react'
 import { useFormContext } from 'react-hook-form'
 
 import { EPostType } from '@/models/enums'
@@ -22,7 +22,7 @@ const PostTypeForm: React.FC<PostTypeFormProps> = ({ isTransitioning }) => {
 			value: EPostType.GIVE_AWAY_OLD_ITEM, // Đổi thành number
 			title: 'Gửi đồ cũ',
 			description: 'Đồ đã qua sử dụng nhưng vẫn còn giá trị',
-			icon: <Package size={20} />
+			icon: <HandHelping size={20} />
 		},
 		{
 			value: EPostType.FOUND_ITEM,

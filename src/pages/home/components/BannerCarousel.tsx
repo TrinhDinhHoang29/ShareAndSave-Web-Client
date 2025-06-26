@@ -11,7 +11,7 @@ const BannerCarousel: React.FC = () => {
 		<div className='relative'>
 			<Carousel
 				distance='px-0'
-				autoplay={false}
+				autoplay={true}
 				itemHeight='h-[600px]'
 				slidesToShow={1}
 				leftDistance='left-5'

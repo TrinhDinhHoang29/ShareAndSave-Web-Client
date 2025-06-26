@@ -124,7 +124,7 @@ function AppRouter() {
 					]
 				},
 				{
-					path: 'dang-bai',
+					path: 'dang-bai/:type?',
 					element: (
 						<>
 							<PageTitle title='Đăng bài' />

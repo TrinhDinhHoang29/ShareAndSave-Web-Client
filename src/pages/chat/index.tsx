@@ -17,6 +17,7 @@ import { EMethod, ESortOrder, ETransactionStatus } from '@/models/enums'
 import {
 	IReceiver,
 	ISocketMessageResponse,
+	ITransaction,
 	ITransactionItem,
 	ITransactionParams,
 	ITransactionRequest
@@ -31,7 +32,7 @@ const Chat = () => {
 	const params = useParams()
 	const interestID = Number(params.interestID)
 	const navigate = useNavigate()
-	const { showInfo, showConfirm, close } = useAlertModalContext()
+	const { showInfo, showConfirm, close, showSuccess } = useAlertModalContext()
 
 	useEffect(() => {
 		if (isNaN(interestID)) {
@@ -324,7 +325,7 @@ const Chat = () => {
 		refetch: transactionDataRefetch
 	} = useListTransactionQuery(transactionParams)
 
-	const transactions = useMemo(() => {
+	const transactions: ITransaction[] = useMemo(() => {
 		return transactionData?.pages.flatMap(page => page.transactions) || []
 	}, [transactionData])
 
@@ -367,6 +368,12 @@ const Chat = () => {
 		isPending: isCreateTransactionPending
 	} = useCreateTransactionMutation({
 		onSuccess: () => {
+			showSuccess({
+				successTitle: 'Giao dịch thành công',
+				successMessage:
+					'Bạn có thể xem danh sách giao dịch trong trò chuyện hoặc trong danh sách quan tâm.',
+				successButtonText: 'Đóng'
+			})
 			setTransactionStatus(ETransactionStatus.PENDING)
 			setSelectedItems([])
 			transactionDataRefetch()
@@ -418,7 +425,6 @@ const Chat = () => {
 					'Hành động này không thể hoàn tác và người đăng sẽ thấy được các món đồ bạn yêu cầu',
 				confirmTitle: 'Xác nhận tạo giao dịch?',
 				onConfirm: () => {
-					close()
 					const transactionRequest: ITransactionRequest = {
 						interestID,
 						items: transactionItems.map(item => ({
@@ -475,6 +481,25 @@ const Chat = () => {
 		}
 	}
 
+	const handleTransactionDataRefetch = async () => {
+		await transactionDataRefetch()
+		await postDetailDataRefetch()
+		setSelectedItems([])
+		setCurrentRequestIndex(0)
+	}
+
+	useEffect(() => {
+		if (
+			transactions &&
+			transactions.length > 0 &&
+			(transactions[0].status.toString() as ETransactionStatus) !==
+				ETransactionStatus.PENDING
+		) {
+			setTransactionStatus(ETransactionStatus.DEFAULT)
+			setTransactionItems([])
+		}
+	}, [transactions])
+
 	return (
 		<>
 			{isPostDetailInterestDataPending ? (
@@ -490,6 +515,7 @@ const Chat = () => {
 					<div className='flex w-full overflow-hidden rounded-2xl shadow-md'>
 						<div className='flex w-full flex-1 flex-col'>
 							<ChatHeaderWithRequests
+								onRefetch={handleTransactionDataRefetch}
 								setSelectedMethod={(method: EMethod) =>
 									setSelectedMethod(method)
 								}

@@ -2,12 +2,14 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { ChevronRight, Package, Send, Star, User } from 'lucide-react'
 import React, { lazy, Suspense, useEffect, useState } from 'react' // Thêm Suspense và lazy
 import { FormProvider, useForm } from 'react-hook-form'
+import { useParams } from 'react-router-dom'
 
 import Loading from '@/components/common/Loading'
 import PrimaryButton from '@/components/common/PrimaryButton'
 import SecondaryButton from '@/components/common/SecondaryButton'
 import { useAuthDialog } from '@/context/auth-dialog-context'
 import { useCreatePostMutation } from '@/hooks/mutations/use-post.mutation'
+import { EPostType } from '@/models/enums'
 import {
 	IPostActionInfoFormData,
 	IPostActionRequest,
@@ -43,6 +45,12 @@ const PostSendLostItemForm = lazy(
 const PostFindItemForm = lazy(() => import('./components/PostFindItemForm'))
 const PostForm = lazy(() => import('./components/PostForm'))
 
+function isValidPostType(value: string | undefined): value is EPostType {
+	return (
+		value !== undefined && Object.values(EPostType).includes(value as EPostType)
+	)
+}
+
 const PostAction: React.FC = () => {
 	const [isTransitioning, setIsTransitioning] = useState<boolean>(false)
 	const [formData, setFormData] = useState<IPostActionInfoFormData>(Object)
@@ -52,6 +60,10 @@ const PostAction: React.FC = () => {
 	const [currentStep, setCurrentStep] = useState<number>(() =>
 		isAuthenticated ? 1 : 0
 	)
+	const params = useParams()
+	const type = isValidPostType(params.type)
+		? params.type
+		: EPostType.GIVE_AWAY_OLD_ITEM
 
 	const { openRegisterWithData, isRegisterByPost } = useAuthDialog()
 
@@ -80,7 +92,7 @@ const PostAction: React.FC = () => {
 
 	const postTypeForm = useForm<PostType>({
 		resolver: zodResolver(postTypeSchema),
-		defaultValues: formData.postType || { type: '1' }
+		defaultValues: formData.postType || { type: type.toString() }
 	})
 
 	const postInfoForm = useForm<PostInfo>({

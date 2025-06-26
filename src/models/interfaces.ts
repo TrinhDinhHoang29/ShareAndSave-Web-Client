@@ -176,10 +176,13 @@ export interface IUserInterest {
 	userID: number
 	userName: string
 	createdAt: string
+	updatedAt: string
 	unreadMessageCount?: number
 	messageFromID?: number
 	newMessage?: string
 	newMessageIsRead?: number
+	transactionStatus?: ETransactionStatus
+	method?: string
 }
 
 export interface IPostInterest {
