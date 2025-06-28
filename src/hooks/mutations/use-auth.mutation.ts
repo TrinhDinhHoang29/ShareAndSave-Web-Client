@@ -3,7 +3,11 @@ import { useRef } from 'react'
 
 import authApi from '@/apis/modules/auth.api'
 import { useAlertModalContext } from '@/context/alert-modal-context'
-import { IApiErrorResponse, IUser } from '@/models/interfaces'
+import {
+	IApiErrorResponse,
+	IUser,
+	IVerifySignupError
+} from '@/models/interfaces'
 import useAuthStore from '@/stores/authStore'
 
 interface useLoginMutationOptions {
@@ -16,6 +20,19 @@ interface useLoginMutationOptions {
 interface useRegisterMutaionOptions {
 	onSuccess?: () => void
 	onError?: (message: string) => void
+	onSettled?: () => void
+	onMutate?: () => void
+}
+
+interface useVerifyOTPMutaionOptions {
+	onSuccess?: (verifyOTP: string) => void
+	onError?: (message: string) => void
+	onSettled?: () => void
+}
+
+interface useVerifySignupMutaionOptions {
+	onSuccess?: () => void
+	onError?: (error: IVerifySignupError) => void
 	onSettled?: () => void
 }
 
@@ -62,10 +79,123 @@ export const useLoginMutation = ({
 export const useRegisterMutation = ({
 	onSuccess,
 	onError,
-	onSettled
+	onSettled,
+	onMutate
 }: useRegisterMutaionOptions = {}) => {
 	return useMutation({
 		mutationFn: authApi.register,
+		onMutate: () => {
+			onMutate?.()
+		},
+		onSuccess: res => {
+			if (res.code === 200 || res.code === 201) {
+				onSuccess?.()
+			} else {
+				const errorMessage = res.message
+				const cleanedMessage = errorMessage.split(':')[0].trim()
+				onError?.(cleanedMessage)
+			}
+		},
+		onError: (error: any) => {
+			const errorMessage = (error as IApiErrorResponse).message
+			const cleanedMessage = errorMessage.split(':')[0].trim()
+			onError?.(cleanedMessage)
+		},
+		onSettled: () => {
+			onSettled?.()
+		}
+	})
+}
+
+export const useSendOTPMutation = ({
+	onSuccess,
+	onError,
+	onSettled
+}: useRegisterMutaionOptions = {}) => {
+	return useMutation({
+		mutationFn: authApi.sendOTP,
+		onSuccess: res => {
+			if (res.code === 200 || res.code === 201) {
+				onSuccess?.()
+			} else {
+				const errorMessage = res.message
+				const cleanedMessage = errorMessage.split(':')[0].trim()
+				onError?.(cleanedMessage)
+			}
+		},
+		onError: (error: any) => {
+			const errorMessage = (error as IApiErrorResponse).message
+			const cleanedMessage = errorMessage.split(':')[0].trim()
+			onError?.(cleanedMessage)
+		},
+		onSettled: () => {
+			onSettled?.()
+		}
+	})
+}
+
+export const useVerifyOTPMutation = ({
+	onSuccess,
+	onError,
+	onSettled
+}: useVerifyOTPMutaionOptions = {}) => {
+	return useMutation({
+		mutationFn: authApi.verifyOTP,
+		onSuccess: res => {
+			if (res.code === 200 || res.code === 201) {
+				onSuccess?.(res.data.verifyToken)
+			} else {
+				const errorMessage = res.message
+				const cleanedMessage = errorMessage.split(':')[0].trim()
+				onError?.(cleanedMessage)
+			}
+		},
+		onError: (error: any) => {
+			const errorMessage = (error as IApiErrorResponse).message
+			const cleanedMessage = errorMessage.split(':')[0].trim()
+			onError?.(cleanedMessage)
+		},
+		onSettled: () => {
+			onSettled?.()
+		}
+	})
+}
+
+export const useVerifySignupMutation = ({
+	onSuccess,
+	onError,
+	onSettled
+}: useVerifySignupMutaionOptions = {}) => {
+	return useMutation({
+		mutationFn: authApi.verifySignup,
+		onSuccess: res => {
+			if (res.code === 200 || res.code === 201) {
+				onSuccess?.()
+			}
+		},
+		onError: (error: any) => {
+			const errorMessage = (error as IApiErrorResponse).message
+			const field = errorMessage.split(':')[0].trim()
+			const message =
+				errorMessage.split(':')[1]?.trim() || 'Đã xảy ra lỗi không xác định'
+			onError?.({
+				field,
+				message
+			})
+		},
+		onSettled: () => {
+			onSettled?.()
+		}
+	})
+}
+
+export const useResetPasswordMutation = ({
+	onSuccess,
+	onError,
+	onSettled
+}: useRegisterMutaionOptions = {}) => {
+	return useMutation({
+		mutationFn: authApi.resetPassword,
 		onSuccess: res => {
 			if (res.code === 200 || res.code === 201) {
 				onSuccess?.()
@@ -91,7 +221,7 @@ export const useUpdateUserMutation = ({
 	onError,
 	onSettled
 }: UseUpdateUserMutationOptions = {}) => {
-	const { showLoading, showError, close, showSuccess } = useAlertModalContext()
+	const { showLoading, showError, showSuccess } = useAlertModalContext()
 	const abortControllerRef = useRef<AbortController | null>(null)
 
 	return useMutation({
@@ -101,12 +231,7 @@ export const useUpdateUserMutation = ({
 		},
 		onMutate: () => {
 			showLoading({
-				loadingMessage: 'Đang cập nhật thông tin...',
-				showCancel: true,
-				onCancel: () => {
-					abortControllerRef.current?.abort()
-					close()
-				}
+				loadingMessage: 'Đang cập nhật thông tin...'
 			})
 		},
 		onSuccess: res => {

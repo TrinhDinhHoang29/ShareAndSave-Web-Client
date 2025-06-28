@@ -101,9 +101,11 @@ const PostItem: React.FC<PostItemProps> = ({
 
 				{/* Stats & Type */}
 				<div className='flex items-center justify-between'>
-					<div className='text-muted-foreground flex items-center gap-2 text-sm'>
+					<div className='text-muted-foreground flex w-2/3 items-center gap-2 truncate text-sm'>
 						<User className='h-4 w-4' />
-						<span>{post.authorName}</span>
+						<div className='w-full truncate'>
+							<span>{post.authorName}</span>
+						</div>
 					</div>
 
 					<div className='flex items-center gap-2'>

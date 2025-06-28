@@ -2,6 +2,7 @@ import { LucideIcon } from 'lucide-react'
 
 import {
 	EAppointmentStatus,
+	EGoodDeedType,
 	EMessageStatus,
 	EPostSTatus,
 	EPostType,
@@ -207,13 +208,6 @@ export interface ILoginRequest {
 	password: string
 }
 
-export interface IRegisterRequest {
-	email: string
-	fullName: string
-	password: string
-	phoneNumber: string
-}
-
 export interface ILoginResponse {
 	jwt: string
 	refreshToken: string
@@ -237,6 +231,7 @@ export interface IPost {
 	title: string
 	type: number
 	currentItemCount: number
+	authorAvatar?: string
 }
 
 export interface IPostResponse {
@@ -491,4 +486,68 @@ export interface IAppointmentRequest {
 	endTime?: string
 	startTime?: string
 	status: EAppointmentStatus
+}
+
+export interface ICaoThangLink {
+	title: string
+	description: string
+	url: string
+	Icon: LucideIcon
+	imageUrl: string
+}
+
+export interface IGoodDeed {
+	goodDeedCount: number
+	goodDeedType: number
+}
+
+export interface IUserRank {
+	goodDeeds: IGoodDeed[]
+	goodPoint: number
+	major: string
+	userAvatar: string
+	userID: number
+	userName: string
+}
+
+export interface IItemGoodDeed {
+	itemID: number
+	itemImage: string
+	itemName: string
+	postItemID: number
+	quantity: number
+}
+
+export interface IDetailGoodDeed {
+	createdAt: string
+	goodDeedType: EGoodDeedType
+	goodPoint: number
+	id: number
+	items: IItemGoodDeed[]
+	transactionID: number
+	userID: number
+	userName: string
+}
+
+export interface IUserRankResponse {
+	userRanks: IUserRank[]
+	totalPage: number
+	yourInfo: IUserRank
+	yourRank: number
+}
+
+export interface IGoodDeedSetting {
+	id: number
+	key: string
+	value: string
+}
+
+export interface ISettingResponse {
+	name: string
+	setting: IGoodDeedSetting
+}
+
+export interface IVerifySignupError {
+	field: string
+	message: string
 }

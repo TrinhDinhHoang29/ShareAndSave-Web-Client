@@ -18,6 +18,7 @@ const Post = lazy(() => import('@/pages/post'))
 const LoginSession = lazy(() => import('@/pages/login-session'))
 const Dowload = lazy(() => import('@/pages/dowload'))
 const EditProfile = lazy(() => import('@/pages/profile/edit-profile'))
+const ChangePassword = lazy(() => import('@/pages/profile/change-password'))
 const Leaderboard = lazy(() => import('@/pages/leader-board'))
 const ItemWarehouse = lazy(() => import('@/pages/item-warehouse'))
 const Appointment = lazy(() => import('@/pages/appointment'))
@@ -159,12 +160,12 @@ function AppRouter() {
 				{
 					path: 'bang-xep-hang',
 					element: (
-						<>
+						<PrivateRoute>
 							<PageTitle title='Bảng xếp hạng' />
 							<ErrorBoundary>
 								<Leaderboard />
 							</ErrorBoundary>
-						</>
+						</PrivateRoute>
 					)
 				},
 				{
@@ -197,7 +198,7 @@ function AppRouter() {
 							element: (
 								<PrivateRoute>
 									<PageTitle title='Đổi mật khẩu' />
-									<div>Đổi mật khẩu</div>
+									<ChangePassword />
 								</PrivateRoute>
 							)
 						},

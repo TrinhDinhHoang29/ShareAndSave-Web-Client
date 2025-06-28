@@ -24,8 +24,6 @@ interface AlertModalProps {
 	isOpen: boolean
 	onClose: () => void
 	loadingMessage?: string
-	showCancel?: boolean
-	onCancel?: () => void
 	successTitle?: string
 	successMessage?: string
 	successButtonText?: string
@@ -50,8 +48,6 @@ const AlertModal: React.FC<AlertModalProps> = ({
 	isOpen,
 	onClose,
 	loadingMessage = 'Đang xử lý...',
-	showCancel = false,
-	onCancel,
 	successTitle = 'Thành công',
 	successMessage = 'Thao tác đã được thực hiện thành công!',
 	successButtonText = 'Tuyệt vời',
@@ -83,17 +79,6 @@ const AlertModal: React.FC<AlertModalProps> = ({
 			<p className='text-muted-foreground mb-8 text-lg leading-relaxed'>
 				{loadingMessage}
 			</p>
-			{showCancel && onCancel && (
-				<button
-					onClick={onCancel}
-					className={clsx(
-						'bg-muted text-foreground hover:bg-muted/80 rounded-2xl px-8 py-4',
-						'font-semibold transition-all duration-200'
-					)}
-				>
-					Hủy
-				</button>
-			)}
 		</div>
 	)
 

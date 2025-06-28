@@ -12,11 +12,13 @@ import { LoginFormData } from '@/models/types'
 interface LoginDialogProps {
 	onLoginSucess: () => void
 	onRegister: () => void
+	onVerifyEmail: () => void
 }
 
 const LoginDialog: React.FC<LoginDialogProps> = ({
 	onLoginSucess,
-	onRegister
+	onRegister,
+	onVerifyEmail
 }) => {
 	const {
 		register,
@@ -48,6 +50,11 @@ const LoginDialog: React.FC<LoginDialogProps> = ({
 
 	const handleClose = () => {
 		reset()
+	}
+
+	const handleVerifyEmailClick = () => {
+		handleClose()
+		onVerifyEmail()
 	}
 
 	const handleRegisterClick = () => {
@@ -96,6 +103,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({
 					className='flex justify-end'
 				>
 					<button
+						onClick={handleVerifyEmailClick}
 						type='button'
 						className='text-foreground/70 hover:text-foreground text-sm transition-all duration-200 hover:underline'
 					>

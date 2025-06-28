@@ -30,12 +30,7 @@ export const useCreateTransactionMutation = ({
 		},
 		onMutate: async () => {
 			showLoading({
-				loadingMessage: 'Đang tạo giao dịch...',
-				showCancel: true,
-				onCancel: () => {
-					abortControllerRef.current?.abort()
-					close()
-				}
+				loadingMessage: 'Đang tạo giao dịch...'
 			})
 		},
 		onSuccess: res => {
@@ -89,12 +84,7 @@ export const useUpdateTransactionMutation = ({
 		},
 		onMutate: async () => {
 			showLoading({
-				loadingMessage: 'Đang cập nhật...',
-				showCancel: true,
-				onCancel: () => {
-					abortControllerRef.current?.abort()
-					close()
-				}
+				loadingMessage: 'Đang cập nhật...'
 			})
 		},
 		onSuccess: async res => {

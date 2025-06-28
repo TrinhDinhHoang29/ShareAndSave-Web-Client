@@ -5,7 +5,6 @@ import { useAlertModal } from '@/hooks/useAlertModal'
 
 interface AlertModalConfig {
 	loadingMessage?: string
-	showCancel?: boolean
 	onCancel?: () => void
 	successTitle?: string
 	successMessage?: string
@@ -22,7 +21,6 @@ interface AlertModalConfig {
 	confirmTitle?: string
 	confirmMessage?: string
 	confirmButtonText?: string
-	cancelButtonText?: string
 	onConfirm?: () => void
 }
 

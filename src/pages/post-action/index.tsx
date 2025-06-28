@@ -7,6 +7,7 @@ import { useParams } from 'react-router-dom'
 import Loading from '@/components/common/Loading'
 import PrimaryButton from '@/components/common/PrimaryButton'
 import SecondaryButton from '@/components/common/SecondaryButton'
+import { useAlertModalContext } from '@/context/alert-modal-context'
 import { useAuthDialog } from '@/context/auth-dialog-context'
 import { useCreatePostMutation } from '@/hooks/mutations/use-post.mutation'
 import { EPostType } from '@/models/enums'
@@ -44,10 +45,15 @@ const PostSendLostItemForm = lazy(
 )
 const PostFindItemForm = lazy(() => import('./components/PostFindItemForm'))
 const PostForm = lazy(() => import('./components/PostForm'))
+const PostWantOldItemForm = lazy(
+	() => import('./components/PostWantOldItemForm')
+)
 
 function isValidPostType(value: string | undefined): value is EPostType {
 	return (
-		value !== undefined && Object.values(EPostType).includes(value as EPostType)
+		value !== undefined &&
+		Object.values(EPostType).includes(value as EPostType) &&
+		value !== EPostType.CAMPAIGN
 	)
 }
 
@@ -56,6 +62,7 @@ const PostAction: React.FC = () => {
 	const [formData, setFormData] = useState<IPostActionInfoFormData>(Object)
 	const [isCompleted, setIsCompleted] = useState<boolean>(false)
 	const [completedEmail, setCompletedEmail] = useState<string>('')
+	const { showError } = useAlertModalContext()
 	const { isAuthenticated } = useAuthStore()
 	const [currentStep, setCurrentStep] = useState<number>(() =>
 		isAuthenticated ? 1 : 0
@@ -66,7 +73,6 @@ const PostAction: React.FC = () => {
 		: EPostType.GIVE_AWAY_OLD_ITEM
 
 	const { openRegisterWithData, isRegisterByPost } = useAuthDialog()
-
 	useEffect(() => {
 		if (!isRegisterByPost) setCurrentStep(isAuthenticated ? 1 : 0)
 	}, [isAuthenticated, isRegisterByPost])
@@ -152,6 +158,19 @@ const PostAction: React.FC = () => {
 	}
 
 	const handleSubmit = async () => {
+		if (
+			type !== EPostType.ALL &&
+			type !== EPostType.CAMPAIGN &&
+			postInfoForm.getValues().newItems?.length === 0 &&
+			postInfoForm.getValues().oldItems?.length === 0
+		) {
+			showError({
+				errorButtonText: 'Đóng',
+				errorMessage: 'Vui lòng chọn ít nhất một món đồ',
+				errorTitle: 'Thông tin không hợp lệ'
+			})
+			return
+		}
 		const isValid = await postInfoForm.trigger()
 		if (isValid) {
 			if (!isAuthenticated) {
@@ -161,7 +180,7 @@ const PostAction: React.FC = () => {
 					fullName: formData.personalInfo.fullName,
 					phoneNumber: formData.personalInfo.phoneNumber,
 					password: '',
-					confirmPassword: ''
+					rePassword: ''
 				}
 				openRegisterWithData(userInfo)
 				return
@@ -270,6 +289,9 @@ const PostAction: React.FC = () => {
 						FormComponent = PostFindItemForm
 						break
 					case '4':
+						FormComponent = PostWantOldItemForm
+						break
+					case '6':
 						FormComponent = PostForm
 						break
 					default:

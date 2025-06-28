@@ -41,7 +41,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
 		{
 			label: 'Đổi mật khẩu',
 			icon: <Key className='h-4 w-4' />,
-			onClick: () => navigate('doi-mat-khau')
+			onClick: () => navigate('ho-so/doi-mat-khau')
 		},
 		{
 			label: 'Bài đăng của tôi',

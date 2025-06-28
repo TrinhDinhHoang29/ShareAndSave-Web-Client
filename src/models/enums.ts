@@ -16,10 +16,13 @@ export enum ERequestType {
 }
 
 export enum EPostType {
+	ALL = '0',
 	GIVE_AWAY_OLD_ITEM = '1',
 	FOUND_ITEM = '2',
 	SEEK_LOSE_ITEM = '3',
-	OTHER = '4'
+	WANT_OLD_ITEM = '4',
+	CAMPAIGN = '5',
+	OTHER = '6'
 }
 
 export enum EPostSTatus {
@@ -67,4 +70,21 @@ export enum EMethod {
 export enum EAppointmentStatus {
 	APPROVED = 1,
 	REJECTED = 2
+}
+
+export enum EGoodDeedType {
+	GOOD_DEED_TYPE_GIVE_OLD_ITEM = 1,
+	GOOD_DEED_TYPE_GIVE_LOSE_ITEM = 2,
+	GOOD_DEED_TYPE_CAMPAGIN = 3
+}
+
+export enum EGoodPOINTTYPE {
+	GOOD_POINT_GIVE_OLD_ITEM = 'goodPointGiveOldItem',
+	GOOD_POINT_GIVE_LOSE_ITEM = 'goodPointGiveLoseItem',
+	GOOD_POINT_JOIN_CAMPAIGN = 'goodPointJoinCampaign'
+}
+
+export enum EPurposeOTP {
+	ACTIVE_ACCOUNT = 'activeAccount',
+	RESET_PASSWORD = 'resetPassword'
 }

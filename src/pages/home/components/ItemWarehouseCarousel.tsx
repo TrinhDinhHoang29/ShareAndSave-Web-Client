@@ -3,7 +3,6 @@ import 'slick-carousel/slick/slick.css'
 
 import { Package } from 'lucide-react'
 import { useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
 
 import Carousel from '@/components/common/Carousel'
 import { useListItemWarehouseQuery } from '@/hooks/queries/use-item-warehouse-query'
@@ -14,7 +13,6 @@ const ItemWarehouseCarousel: React.FC = () => {
 	const { data, isLoading } = useListItemWarehouseQuery({
 		limit: 10
 	})
-	const navigate = useNavigate()
 	const itemWarehouses = useMemo(() => data?.itemOldStocks, [data])
 
 	return (
@@ -30,17 +28,18 @@ const ItemWarehouseCarousel: React.FC = () => {
 				>
 					{itemWarehouses.map(item => (
 						<ItemWarehouseCard
-							key={item.item_id}
+							key={item.itemID}
 							className='h-full'
 							item={item}
-							onClick={slug => navigate('/kho-do-cu' + '/' + slug)}
 						/>
 					))}
 				</Carousel>
 			) : (
-				<div className='flex flex-col items-center justify-center py-20 text-center'>
-					<Package className='text-secondary/50 mb-4 h-16 w-16' />
-					<p className='text-secondary/80 text-lg'>Hiện chưa có đồ cũ</p>
+				<div className='col-span-3'>
+					<div className='flex flex-col items-center justify-center py-10 text-center'>
+						<Package className='mb-4 h-16 w-16 text-gray-300' />
+						<p className='text-secondary text-lg'>Hiện chưa có đồ cũ</p>
+					</div>
 				</div>
 			)}
 		</div>

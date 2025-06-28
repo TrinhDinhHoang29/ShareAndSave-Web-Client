@@ -1,17 +1,18 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { motion } from 'framer-motion'
 import { LockIcon, MailIcon, PhoneIcon, UserIcon } from 'lucide-react'
-import React from 'react'
+import React, { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 
 import InputText from '@/components/common/InputText'
-import { useRegisterMutation } from '@/hooks/mutations/use-auth.mutation'
+import { useVerifySignupMutation } from '@/hooks/mutations/use-auth.mutation'
+import { IVerifySignupError } from '@/models/interfaces'
 import { registerSchema } from '@/models/schema'
 import { RegisterFormData } from '@/models/types'
 
 interface RegisterDialogProps {
 	defaultData?: RegisterFormData
-	onRegisterSuccess: (isRegisterByPost: boolean, data: RegisterFormData) => void
+	onRegisterSuccess: (data: RegisterFormData) => void
 	onLogin: () => void
 }
 
@@ -21,11 +22,21 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({
 	defaultData
 }) => {
 	// const { api, login } = useAuth()
-	const { mutate, isPending } = useRegisterMutation({
+	const isRegisterByPost = useMemo(() => {
+		return !!defaultData
+	}, [defaultData])
+	const { mutate, isPending } = useVerifySignupMutation({
 		onSuccess: () => {
-			const isRegisterByPost = !!defaultData
 			const data = getValues()
-			onRegisterSuccess(isRegisterByPost, data)
+			onRegisterSuccess(data)
+		},
+		onError: (error: IVerifySignupError) => {
+			const field = error.field
+			const message = error.message || 'Đã xảy ra lỗi không xác định'
+			setError(field as keyof RegisterFormData, {
+				type: 'manual',
+				message: message
+			})
 		}
 	})
 
@@ -35,7 +46,8 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({
 		formState: { errors, isValid },
 		reset,
 		watch,
-		getValues
+		getValues,
+		setError
 	} = useForm<RegisterFormData>({
 		resolver: zodResolver(registerSchema),
 		mode: 'onChange',
@@ -45,8 +57,7 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({
 	const password = watch('password')
 
 	const onSubmit = async (data: RegisterFormData) => {
-		const { confirmPassword, ...rest } = data
-		mutate(rest)
+		mutate(data)
 	}
 
 	const handleClose = () => {
@@ -99,7 +110,7 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({
 					error={errors.fullName}
 					icon={UserIcon}
 					animationDelay={0.2}
-					autocompleted='off'
+					// disabled={isRegisterByPost}
 				/>
 
 				{/* Phone Number Input */}
@@ -112,9 +123,8 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({
 					error={errors.phoneNumber}
 					icon={PhoneIcon}
 					animationDelay={0.3}
-					autocompleted='off'
+					// disabled={isRegisterByPost}
 				/>
-
 				{/* Email Input */}
 				<InputText
 					name='email'
@@ -125,7 +135,7 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({
 					error={errors.email}
 					icon={MailIcon}
 					animationDelay={0.4}
-					autocompleted='off'
+					// disabled={isRegisterByPost}
 				/>
 
 				{/* Password Input */}
@@ -140,7 +150,6 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({
 						icon={LockIcon}
 						showToggle
 						animationDelay={0.5}
-						autocompleted='off'
 					/>
 
 					{/* Password Strength Indicator */}
@@ -177,16 +186,15 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({
 
 				{/* Confirm Password Input */}
 				<InputText
-					name='confirmPassword'
+					name='rePassword'
 					label='Nhập lại mật khẩu *'
 					type='password'
 					placeholder='Nhập lại mật khẩu'
 					register={register}
-					error={errors.confirmPassword}
+					error={errors.rePassword}
 					icon={LockIcon}
 					showToggle
 					animationDelay={0.6}
-					autocompleted='off'
 				/>
 
 				{/* Terms and Conditions */}
@@ -238,41 +246,44 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({
 					)}
 				</motion.button>
 			</form>
+			{!isRegisterByPost && (
+				<>
+					{/* Divider */}
+					<motion.div
+						initial={{ opacity: 0, scaleX: 0 }}
+						animate={{ opacity: 1, scaleX: 1 }}
+						transition={{ delay: 0.9, duration: 0.3 }}
+						className='relative my-6'
+					>
+						<div className='absolute inset-0 flex items-center'>
+							<div className='border-border w-full border-t' />
+						</div>
+						<div className='relative flex justify-center text-sm'>
+							<span className='bg-card text-foreground/70 px-4 font-medium'>
+								hoặc
+							</span>
+						</div>
+					</motion.div>
 
-			{/* Divider */}
-			<motion.div
-				initial={{ opacity: 0, scaleX: 0 }}
-				animate={{ opacity: 1, scaleX: 1 }}
-				transition={{ delay: 0.9, duration: 0.3 }}
-				className='relative my-6'
-			>
-				<div className='absolute inset-0 flex items-center'>
-					<div className='border-border w-full border-t' />
-				</div>
-				<div className='relative flex justify-center text-sm'>
-					<span className='bg-card text-foreground/70 px-4 font-medium'>
-						hoặc
-					</span>
-				</div>
-			</motion.div>
-
-			{/* Login Section */}
-			<motion.div
-				initial={{ opacity: 0, y: 20 }}
-				animate={{ opacity: 1, y: 0 }}
-				transition={{ delay: 1.0, duration: 0.3 }}
-				className='space-y-4 text-center'
-			>
-				<p className='text-foreground/70 text-sm'>Đã có tài khoản?</p>
-				<motion.button
-					whileHover={{ scale: 1.02 }}
-					whileTap={{ scale: 0.98 }}
-					onClick={handleLoginClick}
-					className='border-border hover:border-border/80 text-foreground hover:bg-muted w-full rounded-xl border-2 py-3 font-semibold transition-all duration-200'
-				>
-					ĐĂNG NHẬP NGAY
-				</motion.button>
-			</motion.div>
+					{/* Login Section */}
+					<motion.div
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ delay: 1.0, duration: 0.3 }}
+						className='space-y-4 text-center'
+					>
+						<p className='text-foreground/70 text-sm'>Đã có tài khoản?</p>
+						<motion.button
+							whileHover={{ scale: 1.02 }}
+							whileTap={{ scale: 0.98 }}
+							onClick={handleLoginClick}
+							className='border-border hover:border-border/80 text-foreground hover:bg-muted w-full rounded-xl border-2 py-3 font-semibold transition-all duration-200'
+						>
+							ĐĂNG NHẬP NGAY
+						</motion.button>
+					</motion.div>
+				</>
+			)}
 		</div>
 	)
 }

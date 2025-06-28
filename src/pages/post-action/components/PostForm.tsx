@@ -74,9 +74,6 @@ const PostForm: React.FC<PostFormProps> = ({ isTransitioning }) => {
 							/>
 						)}
 					/>
-					<p className='text-muted-foreground mt-1 text-sm'>
-						Tải lên hình ảnh của món đồ (nếu có)
-					</p>
 				</div>
 			</div>
 		</div>

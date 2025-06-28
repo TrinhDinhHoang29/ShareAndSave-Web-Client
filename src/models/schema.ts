@@ -4,7 +4,10 @@ import * as z from 'zod'
 export const personalInfoSchema = z.object({
 	fullName: z.string().min(2, 'Họ và tên phải chứa ít nhất 2 ký tự'),
 	email: z.string().email('Email không hợp lệ'),
-	phoneNumber: z.string().min(10, 'Số điện thoại không hợp lệ')
+	phoneNumber: z
+		.string()
+		.min(1, 'Số điện thoại là bắt buộc')
+		.regex(/^(0|\+84)[3-9]\d{8}$/, 'Số điện thoại không đúng định dạng')
 })
 
 export const postInfoSchema = z.object({
@@ -29,16 +32,19 @@ export const postInfoSchema = z.object({
 				categoryID: z.number(),
 				name: z.string().min(1, 'Tên không được để trống'),
 				categoryName: z.string(),
-				image: z.string().refine(
-					val => {
-						if (!val) return true
-						const isWebp = val.includes('image/webp') || val.endsWith('.webp')
-						return !isWebp
-					},
-					{
-						message: 'Không chấp nhận ảnh định dạng .webp'
-					}
-				),
+				image: z
+					.string()
+					.refine(
+						val => {
+							if (!val) return true
+							const isWebp = val.includes('image/webp') || val.endsWith('.webp')
+							return !isWebp
+						},
+						{
+							message: 'Không chấp nhận ảnh định dạng .webp'
+						}
+					)
+					.optional(),
 				alternativeImage: z.string().optional()
 			})
 		)
@@ -51,16 +57,19 @@ export const postInfoSchema = z.object({
 				categoryName: z.string(),
 				categoryID: z.number(),
 				name: z.string().min(1, 'Tên không được để trống'),
-				image: z.string().refine(
-					val => {
-						if (!val) return true
-						const isWebp = val.includes('image/webp') || val.endsWith('.webp')
-						return !isWebp
-					},
-					{
-						message: 'Không chấp nhận ảnh định dạng .webp'
-					}
-				),
+				image: z
+					.string()
+					.refine(
+						val => {
+							if (!val) return true
+							const isWebp = val.includes('image/webp') || val.endsWith('.webp')
+							return !isWebp
+						},
+						{
+							message: 'Không chấp nhận ảnh định dạng .webp'
+						}
+					)
+					.optional(),
 				alternativeImage: z.string().optional()
 			})
 		)
@@ -98,12 +107,52 @@ export const registerSchema = z
 				/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
 				'Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 chữ thường và 1 số'
 			),
-		confirmPassword: z.string().min(1, 'Vui lòng nhập lại mật khẩu')
+		rePassword: z.string().min(1, 'Vui lòng nhập lại mật khẩu'),
+		verifyToken: z.string().optional()
 	})
-	.refine(data => data.password === data.confirmPassword, {
+	.refine(data => data.password === data.rePassword, {
 		message: 'Mật khẩu không khớp',
-		path: ['confirmPassword']
+		path: ['rePassword']
 	})
+
+export const resetPasswordSchema = z
+	.object({
+		email: z
+			.string()
+			.min(1, 'Email là bắt buộc')
+			.email('Email không đúng định dạng')
+			.optional(),
+		currentPassword: z
+			.string()
+			.min(8, 'Mật khẩu phải có ít nhất 8 ký tự')
+			.max(50, 'Mật khẩu không được quá 50 ký tự')
+			.regex(
+				/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+				'Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 chữ thường và 1 số'
+			)
+			.optional(),
+		password: z
+			.string()
+			.min(8, 'Mật khẩu phải có ít nhất 8 ký tự')
+			.max(50, 'Mật khẩu không được quá 50 ký tự')
+			.regex(
+				/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+				'Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 chữ thường và 1 số'
+			),
+		rePassword: z.string().min(1, 'Vui lòng nhập lại mật khẩu'),
+		verifyToken: z.string().optional()
+	})
+	.refine(data => data.password === data.rePassword, {
+		message: 'Mật khẩu không khớp',
+		path: ['rePassword']
+	})
+
+export const verifyEmailSchema = z.object({
+	email: z
+		.string()
+		.min(1, 'Email là bắt buộc')
+		.email('Email không đúng định dạng')
+})
 
 //Login
 export const loginSchema = z.object({

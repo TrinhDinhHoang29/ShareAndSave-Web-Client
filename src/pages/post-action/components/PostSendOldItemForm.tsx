@@ -1,4 +1,4 @@
-import { Package } from 'lucide-react'
+import { HandHelping } from 'lucide-react'
 import React from 'react'
 import { Controller, useFormContext } from 'react-hook-form'
 
@@ -31,7 +31,7 @@ const PostSendOldItemForm: React.FC<PostSendOldItemFormProps> = ({
 		>
 			<div className='mb-8 text-center'>
 				<div className='bg-primary/10 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full'>
-					<Package className='text-primary h-8 w-8' />
+					<HandHelping className='text-primary h-8 w-8' />
 				</div>
 				<h3 className='font-manrope text-foreground mb-2 text-2xl font-semibold'>
 					Gửi đồ cũ
@@ -82,9 +82,6 @@ const PostSendOldItemForm: React.FC<PostSendOldItemFormProps> = ({
 							/>
 						)}
 					/>
-					<p className='text-muted-foreground mt-1 text-sm'>
-						Tải lên hình ảnh của món đồ (nếu có)
-					</p>
 				</div>
 
 				<div className='space-y-2'>

@@ -32,12 +32,7 @@ export const useUpdateAppointmentMutation = ({
 		},
 		onMutate: async () => {
 			showLoading({
-				loadingMessage: 'Đang cập nhật...',
-				showCancel: true,
-				onCancel: () => {
-					abortControllerRef.current?.abort()
-					close()
-				}
+				loadingMessage: 'Đang cập nhật...'
 			})
 		},
 		onSuccess: async res => {

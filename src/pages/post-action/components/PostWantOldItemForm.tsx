@@ -1,44 +1,48 @@
-import { Gift } from 'lucide-react'
+import { Package } from 'lucide-react'
+import React from 'react'
 import { Controller, useFormContext } from 'react-hook-form'
 
-import DatePicker from '@/components/common/DatePicker'
 import ImageUpload from '@/components/common/ImageUpload'
 import InputText from '@/components/common/InputText'
 import { PostInfo } from '@/models/types'
 
 import ItemManager from './ItemManager'
 
-interface PostSendLostItemFormProps {
+interface PostSendOldItemFormProps {
 	isTransitioning: boolean
 }
 
-const PostSendLostItemForm: React.FC<PostSendLostItemFormProps> = ({
+const PostSendOldItemForm: React.FC<PostSendOldItemFormProps> = ({
 	isTransitioning
 }) => {
 	const {
+		control,
 		register,
-		formState: { errors },
-		control
+		formState: { errors }
 	} = useFormContext<PostInfo>()
 
 	return (
 		<div
-			className={`space-y-6 transition-all duration-200 ${isTransitioning ? 'translate-x-4 opacity-0' : 'translate-x-0 opacity-100'}`}
+			className={`space-y-6 transition-all duration-200 ${
+				isTransitioning
+					? 'translate-x-4 opacity-0'
+					: 'translate-x-0 opacity-100'
+			}`}
 		>
 			<div className='mb-8 text-center'>
 				<div className='bg-primary/10 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full'>
-					<Gift className='text-primary h-8 w-8' />
+					<Package className='text-primary h-8 w-8' />
 				</div>
-				<h3 className='text-foreground mb-2 text-2xl font-bold'>
-					Nhặt đồ thất lạc
+				<h3 className='font-manrope text-foreground mb-2 text-2xl font-semibold'>
+					Xin nhận đồ cũ
 				</h3>
 				<p className='text-muted-foreground'>
-					Nhập thông tin bài đăng cho nhặt đồ thất lạc
+					Nhập thông tin bài đăng cho xin nhận đồ cũ
 				</p>
 			</div>
 
 			<div className='space-y-4'>
-				<div>
+				<div className='space-y-2'>
 					<InputText
 						name='title'
 						label='Tiêu đề *'
@@ -47,9 +51,10 @@ const PostSendLostItemForm: React.FC<PostSendLostItemFormProps> = ({
 						error={errors.title}
 					/>
 					<p className='text-muted-foreground mt-1 text-sm'>
-						Ví dụ: 'Nhặt được ví da màu đen'
+						Ví dụ: "Xin nhận áo thun cũ còn mới"
 					</p>
 				</div>
+
 				<ItemManager
 					newItemsFieldName='newItems'
 					oldItemsFieldName='oldItems'
@@ -57,30 +62,8 @@ const PostSendLostItemForm: React.FC<PostSendLostItemFormProps> = ({
 					description='Bấm vào dấu "+" để thêm món đồ'
 					animationDelay={0.2}
 				/>
-				<div>
-					<DatePicker
-						name='foundDate'
-						label='Ngày nhặt được'
-						error={errors.foundDate}
-						register={register}
-					/>
-					<p className='text-muted-foreground mt-1 text-sm'>
-						Chọn ngày bạn nhặt được món đồ
-					</p>
-				</div>
-				<div>
-					<InputText
-						name='foundLocation'
-						label='Nơi nhặt được'
-						placeholder='Nhập nơi nhặt được'
-						register={register}
-						error={errors.foundLocation}
-					/>
-					<p className='text-muted-foreground mt-1 text-sm'>
-						Ví dụ: 'Công viên Tao Đàn, TP.HCM'
-					</p>
-				</div>
-				<div>
+
+				<div className='space-y-2'>
 					<Controller
 						name='images'
 						control={control}
@@ -99,11 +82,9 @@ const PostSendLostItemForm: React.FC<PostSendLostItemFormProps> = ({
 							/>
 						)}
 					/>
-					<p className='text-muted-foreground mt-1 text-sm'>
-						Tải lên hình ảnh của món đồ (nếu có)
-					</p>
 				</div>
-				<div>
+
+				<div className='space-y-2'>
 					<InputText
 						name='description'
 						label='Mô tả món đồ *'
@@ -113,7 +94,8 @@ const PostSendLostItemForm: React.FC<PostSendLostItemFormProps> = ({
 						error={errors.description}
 					/>
 					<p className='text-muted-foreground mt-1 text-sm'>
-						Ví dụ: 'Ví da màu đen, nhặt được ở công viên vào ngày 20/05'
+						Ví dụ: "Xin nhận áo thun màu xanh, size M, đã qua sử dụng nhưng còn
+						mới 80%"
 					</p>
 				</div>
 			</div>
@@ -121,4 +103,4 @@ const PostSendLostItemForm: React.FC<PostSendLostItemFormProps> = ({
 	)
 }
 
-export default PostSendLostItemForm
+export default PostSendOldItemForm

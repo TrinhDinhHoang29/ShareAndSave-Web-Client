@@ -47,9 +47,11 @@ const PostLostItemCarousel: React.FC<PostLostItemCarouselProps> = ({
 					))}
 				</Carousel>
 			) : (
-				<div className='flex flex-col items-center justify-center py-20 text-center'>
-					<FileText className='mb-4 h-16 w-16 text-gray-300' />
-					<p className='text-secondary text-lg'>Không có bài viết nào</p>
+				<div className='col-span-3'>
+					<div className='flex flex-col items-center justify-center py-10 text-center'>
+						<FileText className='mb-4 h-16 w-16 text-gray-300' />
+						<p className='text-secondary text-lg'>Không có bài viết nào</p>
+					</div>
 				</div>
 			)}
 		</div>

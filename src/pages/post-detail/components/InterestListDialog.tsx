@@ -3,16 +3,16 @@ import { Search, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 
 import CustomSelect from '@/components/common/CustomSelect'
+import Loading from '@/components/common/Loading'
+import { useDetailPostInterestQuery } from '@/hooks/queries/use-interest.query'
 import { EMethod, ETransactionStatus } from '@/models/enums'
 import { IOption, IUserInterest } from '@/models/interfaces'
 import { InterestItem } from '@/pages/interest/components/InterestItem'
 
 interface InterestListDialogProps {
+	interestID: number
 	isOpen: boolean
 	onClose: () => void
-	interests: IUserInterest[]
-	postID: number
-	authorID: number
 	title?: string
 }
 
@@ -39,28 +39,30 @@ const SORT_OPTIONS: IOption[] = [
 const InterestListDialog = ({
 	isOpen,
 	onClose,
-	interests,
-	postID,
-	authorID,
-	title = 'Danh sách quan tâm'
+	title = 'Danh sách quan tâm',
+	interestID
 }: InterestListDialogProps) => {
 	const [searchQuery, setSearchQuery] = useState('')
 	const [selectedFilter, setSelectedFilter] = useState<string>('all')
 	const [selectedMethod, setSelectedMethod] = useState<string | number>('all')
 	const [selectedSort, setSelectedSort] = useState<string | number>('default')
-	const [newInterests, setNewInterests] = useState<IUserInterest[]>(interests)
+	const { data, isPending } = useDetailPostInterestQuery(interestID)
+	const [interests, setInterests] = useState<IUserInterest[]>(
+		data?.interests || []
+	)
 
 	useEffect(() => {
-		setNewInterests(interests)
-	}, [interests])
+		if (data && data.interests) {
+			setInterests(data.interests)
+		}
+	}, [data])
 
 	const updateTransactionStatus = (
 		interestId: number,
 		status: ETransactionStatus,
 		method: EMethod
 	) => {
-		console.log('updateTransactionStatus', interestId, status)
-		setNewInterests(prevInterests =>
+		setInterests(prevInterests =>
 			prevInterests.map(interest =>
 				interest.id === interestId
 					? { ...interest, transactionStatus: status, method }
@@ -71,7 +73,7 @@ const InterestListDialog = ({
 
 	// Filter và search logic
 	const filteredInterests = useMemo(() => {
-		let filtered = [...newInterests]
+		let filtered = [...interests]
 
 		// Apply search filter
 		if (searchQuery.trim()) {
@@ -120,7 +122,7 @@ const InterestListDialog = ({
 		}
 
 		return filtered
-	}, [newInterests, searchQuery, selectedFilter, selectedMethod, selectedSort])
+	}, [interests, searchQuery, selectedFilter, selectedMethod, selectedSort])
 	useEffect(() => {
 		if (!isOpen) {
 			setSearchQuery('')
@@ -238,52 +240,56 @@ const InterestListDialog = ({
 						</div>
 
 						{/* Content */}
-						<div className='max-h-[calc(100vh-20rem)] overflow-y-auto'>
-							{filteredInterests.length > 0 ? (
-								<div className='space-y-3 p-6'>
-									{filteredInterests.map(interest => (
-										<InterestItem
-											isQuick={true}
-											key={interest.id}
-											userInterest={interest}
-											postID={postID}
-											authorID={authorID}
-											updateTransactionStatus={updateTransactionStatus}
-										/>
-									))}
-								</div>
-							) : (
-								<div className='flex flex-col items-center justify-center py-12 text-center'>
-									<div className='bg-muted mb-4 rounded-full p-4'>
-										<Search className='text-muted-foreground h-8 w-8' />
+						{isPending ? (
+							<Loading text='Đang tải' />
+						) : (
+							<div className='max-h-[calc(100vh-20rem)] overflow-y-auto'>
+								{filteredInterests.length > 0 ? (
+									<div className='space-y-3 p-6'>
+										{filteredInterests.map(interest => (
+											<InterestItem
+												isQuick={true}
+												key={interest.id}
+												userInterest={interest}
+												postID={data?.id || 0}
+												authorID={data?.authorID || 0}
+												updateTransactionStatus={updateTransactionStatus}
+											/>
+										))}
 									</div>
-									<h3 className='text-foreground mb-2 text-lg font-medium'>
-										Không tìm thấy kết quả
-									</h3>
-									<p className='text-muted-foreground max-w-sm'>
-										{searchQuery
-											? `Không có kết quả nào phù hợp với "${searchQuery}"`
-											: 'Không có mục quan tâm nào phù hợp với bộ lọc đã chọn'}
-									</p>
-									{hasActiveFilters && (
-										<button
-											onClick={handleResetFilters}
-											className='bg-primary text-primary-foreground hover:bg-primary/90 mt-4 rounded-lg px-4 py-2 text-sm font-medium transition-colors'
-										>
-											Xóa tất cả bộ lọc
-										</button>
-									)}
-								</div>
-							)}
-						</div>
+								) : (
+									<div className='flex flex-col items-center justify-center py-12 text-center'>
+										<div className='bg-muted mb-4 rounded-full p-4'>
+											<Search className='text-muted-foreground h-8 w-8' />
+										</div>
+										<h3 className='text-foreground mb-2 text-lg font-medium'>
+											Không tìm thấy kết quả
+										</h3>
+										<p className='text-muted-foreground max-w-sm'>
+											{searchQuery
+												? `Không có kết quả nào phù hợp với "${searchQuery}"`
+												: 'Không có mục quan tâm nào phù hợp với bộ lọc đã chọn'}
+										</p>
+										{hasActiveFilters && (
+											<button
+												onClick={handleResetFilters}
+												className='bg-primary text-primary-foreground hover:bg-primary/90 mt-4 rounded-lg px-4 py-2 text-sm font-medium transition-colors'
+											>
+												Xóa tất cả bộ lọc
+											</button>
+										)}
+									</div>
+								)}
+							</div>
+						)}
 
 						{/* Footer */}
 						{filteredInterests.length > 0 && (
 							<div className='border-border bg-muted border-t px-6 py-4'>
 								<div className='text-muted-foreground flex items-center justify-between text-sm'>
 									<span>
-										Hiển thị {filteredInterests.length} / {newInterests.length}{' '}
-										mục quan tâm
+										Hiển thị {filteredInterests.length} / {interests.length} mục
+										quan tâm
 										{hasActiveFilters && ' (đã lọc)'}
 									</span>
 									<button

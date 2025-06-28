@@ -6,7 +6,9 @@ import {
 	postInfoSchema,
 	postTypeSchema,
 	registerSchema,
-	userProfileSchema
+	resetPasswordSchema,
+	userProfileSchema,
+	verifyEmailSchema
 } from './schema'
 
 //Post
@@ -19,5 +21,7 @@ export type RegisterFormData = z.infer<typeof registerSchema>
 
 //Login
 export type LoginFormData = z.infer<typeof loginSchema>
+export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>
+export type VerifyEmailFormData = z.infer<typeof verifyEmailSchema>
 
 export type UserProfileFormData = z.infer<typeof userProfileSchema>

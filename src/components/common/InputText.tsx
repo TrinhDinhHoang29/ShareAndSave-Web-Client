@@ -5,7 +5,7 @@ import { FieldError, UseFormRegister } from 'react-hook-form'
 
 interface InputTextProps {
 	name: string
-	label: string
+	label?: string
 	type?: 'text' | 'email' | 'tel' | 'password' | 'textarea'
 	placeholder?: string
 	register: UseFormRegister<any>
@@ -15,6 +15,7 @@ interface InputTextProps {
 	showToggle?: boolean // For password visibility toggle
 	animationDelay?: number // For motion animation
 	autocompleted?: 'off' | 'on' // Autocomplete prop
+	disabled?: boolean // Added disabled prop
 }
 
 const InputText: React.FC<InputTextProps> = ({
@@ -28,7 +29,8 @@ const InputText: React.FC<InputTextProps> = ({
 	icon: Icon,
 	showToggle = false,
 	animationDelay = 0.2,
-	autocompleted = 'on'
+	autocompleted = 'on',
+	disabled = false // Default to false
 }) => {
 	const [showPassword, setShowPassword] = React.useState(false)
 
@@ -36,25 +38,25 @@ const InputText: React.FC<InputTextProps> = ({
 		error
 			? 'border-destructive bg-destructive/10'
 			: 'border-border hover:border-border/80'
-	}`
+	} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`
 
 	// CSS cho autocomplete fix
 	const autocompleteStyles = `
-		input:-webkit-autofill,
-		input:-webkit-autofill:hover,
-		input:-webkit-autofill:focus,
-		input:-webkit-autofill:active {
-			-webkit-box-shadow: 0 0 0 30px var(--card) inset !important;
-			-webkit-text-fill-color: var(--foreground) !important;
-			transition: background-color 5000s ease-in-out 0s;
-		}
-		
-		/* Đảm bảo icon không bị ảnh hưởng */
-		.input-icon-wrapper .lucide {
-			z-index: 20;
-			position: relative;
-		}
-	`
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    input:-webkit-autofill:active {
+      -webkit-box-shadow: 0 0 0 30px var(--card) inset !important;
+      -webkit-text-fill-color: var(--foreground) !important;
+      transition: background-color 5000s ease-in-out 0s;
+    }
+    
+    /* Đảm bảo icon không bị ảnh hưởng */
+    .input-icon-wrapper .lucide {
+      z-index: 20;
+      position: relative;
+    }
+  `
 
 	React.useEffect(() => {
 		// Inject CSS styles nếu chưa có
@@ -72,9 +74,11 @@ const InputText: React.FC<InputTextProps> = ({
 			animate={{ opacity: 1, x: 0 }}
 			transition={{ delay: animationDelay, duration: 0.3 }}
 		>
-			<label className='text-foreground mb-2 block text-sm font-medium'>
-				{label}
-			</label>
+			{label && (
+				<label className='text-foreground mb-2 block text-sm font-medium'>
+					{label}
+				</label>
+			)}
 			<div className='input-icon-wrapper relative'>
 				{Icon && (
 					<div className='pointer-events-none absolute inset-y-0 left-0 z-20 flex items-center pl-3'>
@@ -88,6 +92,7 @@ const InputText: React.FC<InputTextProps> = ({
 						className={`${commonClasses} ${Icon ? 'pl-10' : 'pl-4'} resize-none`}
 						placeholder={placeholder}
 						autoComplete={autocompleted}
+						disabled={disabled}
 					/>
 				) : (
 					<input
@@ -98,6 +103,7 @@ const InputText: React.FC<InputTextProps> = ({
 						}`}
 						placeholder={placeholder}
 						autoComplete={autocompleted}
+						disabled={disabled}
 						style={{
 							// Inline styles để đảm bảo autocomplete fix hoạt động
 							WebkitBoxShadow: 'none',
@@ -110,6 +116,7 @@ const InputText: React.FC<InputTextProps> = ({
 						type='button'
 						onClick={() => setShowPassword(!showPassword)}
 						className='hover:text-foreground/70 absolute inset-y-0 right-0 z-10 flex items-center pr-3 transition-colors'
+						disabled={disabled}
 					>
 						{showPassword ? (
 							<EyeOffIcon className='text-foreground/50 h-5 w-5' />

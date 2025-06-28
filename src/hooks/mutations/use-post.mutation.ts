@@ -39,12 +39,7 @@ export const useCreatePostMutation = ({
 		},
 		onMutate: () => {
 			showLoading({
-				loadingMessage: 'Đang gửi bài đăng...',
-				showCancel: true,
-				onCancel: () => {
-					abortControllerRef.current?.abort()
-					close()
-				}
+				loadingMessage: 'Đang gửi bài đăng...'
 			})
 		},
 		onSuccess: res => {
@@ -100,12 +95,7 @@ export const useUpdatePostMutation = ({
 		},
 		onMutate: async () => {
 			showLoading({
-				loadingMessage: 'Đang cập nhật...',
-				showCancel: true,
-				onCancel: () => {
-					abortControllerRef.current?.abort()
-					close()
-				}
+				loadingMessage: 'Đang cập nhật...'
 			})
 		},
 		onSuccess: async res => {
@@ -154,12 +144,7 @@ export const useDeletePostMutation = ({
 		},
 		onMutate: async () => {
 			showLoading({
-				loadingMessage: 'Đang tiến hành xóa...',
-				showCancel: true,
-				onCancel: () => {
-					abortControllerRef.current?.abort()
-					close()
-				}
+				loadingMessage: 'Đang tiến hành xóa...'
 			})
 		},
 		onSuccess: async res => {

@@ -4,8 +4,6 @@ import { ModalState } from '@/components/common/AlertModal'
 
 interface AlertModalConfig {
 	loadingMessage?: string
-	showCancel?: boolean
-	onCancel?: () => void
 	successTitle?: string
 	successMessage?: string
 	successButtonText?: string
@@ -21,7 +19,6 @@ interface AlertModalConfig {
 	confirmTitle?: string
 	confirmMessage?: string
 	confirmButtonText?: string
-	cancelButtonText?: string
 	onConfirm?: () => void
 }
 

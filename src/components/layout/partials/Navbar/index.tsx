@@ -177,25 +177,13 @@ const Navbar = () => {
 									)
 								})}
 							</div>
-							{/* Create Post Button */}
-							<div className='flex items-center gap-2'>
-								<a
-									target='_blank'
-									rel='noopener noreferrer'
-									href='https://caothang.edu.vn/'
-									className='from-info to-accent hidden items-center gap-2 rounded-full bg-gradient-to-r px-4 py-2 font-medium text-white transition-all hover:scale-105 hover:opacity-90 hover:shadow-lg sm:flex'
-								>
-									<ExternalLink className='h-4 w-4' />
-									Về Trường
-								</a>
-								<Link
-									to={'/dang-bai'}
-									className='from-primary to-accent text-primary-foreground hidden items-center gap-2 rounded-full bg-gradient-to-r px-4 py-2 font-medium transition-all hover:scale-105 hover:opacity-90 hover:shadow-lg sm:flex'
-								>
-									<Plus className='h-4 w-4' />
-									Đăng bài
-								</Link>
-							</div>
+							<Link
+								to={'/dang-bai'}
+								className='from-primary to-accent text-primary-foreground hidden items-center gap-2 rounded-full bg-gradient-to-r px-4 py-2 font-medium transition-all hover:scale-105 hover:opacity-90 hover:shadow-lg sm:flex'
+							>
+								<Plus className='h-4 w-4' />
+								Đăng bài
+							</Link>
 						</div>
 						<button
 							onClick={toggleNavbar}

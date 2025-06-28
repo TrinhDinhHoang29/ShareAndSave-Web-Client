@@ -3,7 +3,7 @@ import { twMerge } from 'tailwind-merge'
 import { v4 as uuidv4 } from 'uuid'
 
 import { TIME_GAP_THRESHOLD } from '@/models/constants'
-import { IMessage } from '@/models/interfaces'
+import { IGoodDeed, IMessage } from '@/models/interfaces'
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs))
@@ -194,4 +194,8 @@ export const getInitials = (name: string) => {
 
 export function generateRandomId(min = 100000, max = 999999) {
 	return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
+export const getTotalGoodDeeds = (goodDeeds: IGoodDeed[]) => {
+	return goodDeeds.reduce((total, deed) => total + deed.goodDeedCount, 0)
 }

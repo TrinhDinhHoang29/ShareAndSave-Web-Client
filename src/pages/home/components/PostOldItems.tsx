@@ -10,13 +10,16 @@ import PostItem from '@/pages/post/components/PostItem'
 import PostItemSkeleton from '@/pages/post/components/PostItemSkeleton'
 
 const limit = 6
+interface PostOldItemsProps {
+	type: EPostType
+}
 
-const PostOldItems: React.FC = () => {
+const PostOldItems: React.FC<PostOldItemsProps> = ({ type }) => {
 	const { data, isLoading } = useListPostQuery({
 		limit,
 		sort: 'createdAt',
 		order: ESortOrder.DESC,
-		type: EPostType.GIVE_AWAY_OLD_ITEM
+		type
 	})
 	const navigate = useNavigate()
 	const posts = data?.posts
@@ -34,9 +37,11 @@ const PostOldItems: React.FC = () => {
 					/>
 				))
 			) : (
-				<div className='flex flex-col items-center justify-center py-20 text-center'>
-					<FileText className='mb-4 h-16 w-16 text-gray-300' />
-					<p className='text-secondary text-lg'>Không có bài viết nào</p>
+				<div className='col-span-3'>
+					<div className='flex flex-col items-center justify-center py-10 text-center'>
+						<FileText className='mb-4 h-16 w-16 text-gray-300' />
+						<p className='text-secondary text-lg'>Không có bài viết nào</p>
+					</div>
 				</div>
 			)}
 		</div>

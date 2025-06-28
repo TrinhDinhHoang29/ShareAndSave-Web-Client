@@ -1,4 +1,4 @@
-import { Gift } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { Controller, useFormContext } from 'react-hook-form'
 
 import DatePicker from '@/components/common/DatePicker'
@@ -27,7 +27,7 @@ const PostFindItemForm: React.FC<PostFindItemFormProps> = ({
 		>
 			<div className='mb-8 text-center'>
 				<div className='bg-primary/10 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full'>
-					<Gift className='text-primary h-8 w-8' />
+					<Search className='text-primary h-8 w-8' />
 				</div>
 				<h3 className='text-foreground mb-2 text-2xl font-bold'>
 					Tìm đồ thất lạc
@@ -111,9 +111,6 @@ const PostFindItemForm: React.FC<PostFindItemFormProps> = ({
 							/>
 						)}
 					/>
-					<p className='text-muted-foreground mt-1 text-sm'>
-						Tải lên hình ảnh của món đồ (nếu có)
-					</p>
 				</div>
 				<div>
 					<InputText

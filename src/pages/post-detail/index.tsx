@@ -108,7 +108,8 @@ const PostDetail: React.FC = () => {
 				userAvatar: user?.avatar || '',
 				userID: user?.id || 0,
 				userName: user?.fullName || '',
-				createdAt: new Date().toISOString()
+				createdAt: new Date().toISOString(),
+				updatedAt: new Date().toISOString()
 			}
 			post?.interests.push(newUserInterest)
 			queryClient.invalidateQueries({ queryKey: ['postInterests'] })
@@ -595,12 +596,14 @@ const PostDetail: React.FC = () => {
 											<Users className='h-5 w-5' />
 											Những người quan tâm ({post.interests.length})
 										</h2>
-										<button
-											className='bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-3 py-1 transition-colors'
-											onClick={openInterestDialog}
-										>
-											Quản lý
-										</button>
+										{user?.id === post.authorID && (
+											<button
+												className='bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-3 py-1 transition-colors'
+												onClick={openInterestDialog}
+											>
+												Quản lý
+											</button>
+										)}
 									</div>
 									{post.interests && post.interests.length > 0 && (
 										<div className='glass grid grid-cols-8 rounded-xl p-6'>
@@ -852,9 +855,7 @@ const PostDetail: React.FC = () => {
 			<DialogComponent
 				isOpen={isOpen}
 				onClose={closeDialog}
-				interests={post.interests}
-				postID={post.id}
-				authorID={post.authorID}
+				interestID={interestID}
 				title='Quản lý quan tâm' // Optional
 			/>
 		</>

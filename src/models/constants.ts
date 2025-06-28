@@ -2,12 +2,19 @@ import {
 	Check,
 	CheckCircle,
 	Clock,
+	Computer,
 	FileText,
 	Gift,
+	Globe,
+	HandHelping,
 	HelpCircle,
 	Lock,
+	Megaphone,
+	Rabbit,
+	School,
 	Search,
 	ShieldX,
+	Users,
 	X,
 	XCircle
 } from 'lucide-react'
@@ -21,6 +28,7 @@ import Sub_Banner_3 from '@/assets/images/sub_3.jpg'
 import Sub_Banner_4 from '@/assets/images/sub_4.jpg'
 
 import { EPostSTatus, EPostType, ETransactionStatus } from './enums'
+import { ICaoThangLink } from './interfaces'
 
 export const getTypeInfo = (type: EPostType) => {
 	switch (type) {
@@ -29,35 +37,45 @@ export const getTypeInfo = (type: EPostType) => {
 				label: 'Cho tặng đồ cũ',
 				color:
 					'bg-post-type-1 text-post-type-foreground-1 dark:bg-post-type-1/20 dark:text-post-type-foreground-1',
-				Icon: Gift
+				Icon: HandHelping
 			}
 		case EPostType.FOUND_ITEM:
 			return {
 				label: 'Tìm thấy đồ',
 				color:
 					'bg-post-type-2 text-post-type-foreground-2 dark:bg-post-type-2/20 dark:text-post-type-foreground-2',
-				Icon: Search
+				Icon: Gift
 			}
 		case EPostType.SEEK_LOSE_ITEM:
 			return {
 				label: 'Tìm đồ bị mất',
 				color:
 					'bg-post-type-3 text-post-type-foreground-3 dark:bg-post-type-3/20 dark:text-post-type-foreground-3',
-				Icon: HelpCircle
+				Icon: Search
 			}
 		case EPostType.OTHER:
 			return {
 				label: 'Khác',
-				color:
-					'bg-post-type-4 text-post-type-foreground-4 dark:bg-post-type-4/20 dark:text-post-type-foreground-4',
-				Icon: FileText
+				color: 'bg-post-type-6 text-post-type-foreground-6',
+				Icon: Users
+			}
+		case EPostType.WANT_OLD_ITEM:
+			return {
+				label: 'Tìm đồ cũ',
+				color: 'bg-post-type-6 text-post-type-foreground-6',
+				Icon: Rabbit
+			}
+		case EPostType.CAMPAIGN:
+			return {
+				label: 'Chiến dịch',
+				color: 'bg-post-type-5 text-post-type-foreground-5',
+				Icon: Megaphone
 			}
 		default:
 			return {
 				label: 'Khác',
-				color:
-					'bg-post-type-4 text-post-type-foreground-4 dark:bg-post-type-4/20 dark:text-post-type-foreground-4',
-				Icon: FileText
+				color: 'bg-post-type-4 text-post-type-foreground-4',
+				Icon: Users
 			}
 	}
 }
@@ -245,7 +263,24 @@ export const getStatusPostTypeConfig = (type: EPostType, quantity: number) => {
 				Icon: isComplete ? CheckCircle : HelpCircle,
 				animationClass: isComplete ? '' : 'animate-bounce'
 			}
-
+		case EPostType.WANT_OLD_ITEM:
+			return {
+				label: isComplete ? 'Đã nhận đủ' : 'Đang tìm kiếm',
+				color: isComplete
+					? 'bg-success text-secondary-foreground'
+					: 'bg-secondary text-secondary-foreground',
+				Icon: isComplete ? CheckCircle : HelpCircle,
+				animationClass: isComplete ? '' : 'animate-bounce'
+			}
+		case EPostType.CAMPAIGN:
+			return {
+				label: isComplete ? 'Đã hoàn thành' : 'Đang diễn ra',
+				color: isComplete
+					? 'bg-success text-secondary-foreground'
+					: 'bg-warning text-white',
+				Icon: isComplete ? CheckCircle : Clock,
+				animationClass: isComplete ? '' : 'animate-pulse'
+			}
 		default:
 			return {}
 	}
@@ -291,3 +326,80 @@ export const SUB_BANNER_SOURCE = [
 		link: '#'
 	}
 ]
+
+export const caothangLinks: ICaoThangLink[] = [
+	{
+		title: 'Trường Cao đẳng Cao Thắng',
+		description:
+			'Trang chủ chính thức - Thông tin tuyển sinh, đào tạo và hoạt động của trường',
+		url: 'https://caothang.edu.vn/',
+		Icon: School,
+		imageUrl:
+			'https://caothang.edu.vn/uploads/images/Tuyen_Sinh/ts_2025/PhanMemRieng_2025_16x9-min.jpg'
+	},
+	{
+		title: 'Khoa Công nghệ Thông tin',
+		description:
+			'Chuyên ngành CNTT - Lập trình, Mạng máy tính, An toàn thông tin',
+		url: 'https://cntt.caothang.edu.vn/',
+		Icon: Computer,
+		imageUrl: 'https://cntt.caothang.edu.vn/uploads/media/default-slide.jpg'
+	},
+	{
+		title: 'Tuyển sinh 2024',
+		description:
+			'Thông tin tuyển sinh, hồ sơ xét tuyển và học bổng dành cho sinh viên',
+		url: 'https://caothang.edu.vn/tuyensinh/',
+		Icon: FileText,
+		imageUrl:
+			'https://caothang.edu.vn/tuyensinh/images/banner/Ketqua_HB_2025.png'
+	},
+	{
+		title: 'Trung tâm Anh ngữ Cao Thắng',
+		description:
+			'Khóa học tiếng Anh chất lượng cao - IELTS, TOEIC, Giao tiếp dành cho sinh viên',
+		url: 'https://englishcenter.caothang.edu.vn/',
+		Icon: Globe,
+		imageUrl:
+			'https://englishcenter.caothang.edu.vn/images/banner/1710867119_420918217_927143358976996_3473896296539658367_n.jpg'
+	}
+]
+
+export const getRankStyle = (rank: number) => {
+	switch (rank) {
+		case 1:
+			return 'glass border-warning/30 hover:border-warning/50 hover:shadow-lg hover:shadow-warning/10'
+		case 2:
+			return 'glass border-muted/30 hover:border-muted/50 hover:shadow-lg hover:shadow-muted/10'
+		case 3:
+			return 'glass border-orange-300/30 hover:border-orange-300/50 hover:shadow-lg hover:shadow-orange-300/10'
+		default:
+			return 'glass border-border/30 hover:border-border/50 hover:shadow-md'
+	}
+}
+
+export const getAvatarStyle = (rank: number) => {
+	switch (rank) {
+		case 1:
+			return 'ring-4 ring-warning shadow-lg'
+		case 2:
+			return 'ring-4 ring-muted shadow-lg'
+		case 3:
+			return 'ring-4 ring-accent shadow-lg'
+		default:
+			return 'ring-2 ring-border'
+	}
+}
+
+export const getRankBadgeStyle = (rank: number) => {
+	switch (rank) {
+		case 1:
+			return 'bg-warning text-white shadow-lg'
+		case 2:
+			return 'bg-muted text-foreground shadow-lg'
+		case 3:
+			return 'bg-accent text-white shadow-lg'
+		default:
+			return 'border-primary/20 bg-primary/10 text-primary border'
+	}
+}

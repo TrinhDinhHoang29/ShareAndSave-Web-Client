@@ -1,10 +1,11 @@
+import { EPurposeOTP } from '@/models/enums'
 import {
 	IApiResponse,
 	ILoginRequest,
 	ILoginResponse,
-	IRegisterRequest,
 	IUser
 } from '@/models/interfaces'
+import { RegisterFormData, ResetPasswordFormData } from '@/models/types'
 
 import axiosPrivate from '../client/private.client'
 import axiosPublic from '../client/public.client'
@@ -15,7 +16,11 @@ const authEndpoints = {
 	refreshToken: 'refresh-token',
 	getMe: 'client/get-me',
 	update: 'clients',
-	register: 'clients'
+	register: 'client/signup',
+	sendOTP: 'client/send-otp',
+	verifyOTP: 'client/verify-otp',
+	verifySignup: 'client/verify-signup',
+	resetPassword: 'client/reset-password'
 }
 
 const authApi = {
@@ -27,9 +32,7 @@ const authApi = {
 			throw error
 		}
 	},
-	async register(
-		data: IRegisterRequest
-	): Promise<IApiResponse<{ client: IUser }>> {
+	async register(data: RegisterFormData): Promise<IApiResponse<string>> {
 		// eslint-disable-next-line no-useless-catch
 		try {
 			return await axiosPublic.post(authEndpoints.register, data)
@@ -80,45 +83,46 @@ const authApi = {
 		} catch (error) {
 			throw error
 		}
+	},
+	async sendOTP(data: {
+		email: string
+		purpose: EPurposeOTP
+	}): Promise<IApiResponse<string>> {
+		// eslint-disable-next-line no-useless-catch
+		try {
+			return await axiosPublic.post(authEndpoints.sendOTP, data)
+		} catch (error) {
+			throw error
+		}
+	},
+	async verifyOTP(data: {
+		email: string
+		otp: string
+		purpose: EPurposeOTP
+	}): Promise<IApiResponse<{ verifyToken: string }>> {
+		// eslint-disable-next-line no-useless-catch
+		try {
+			return await axiosPublic.post(authEndpoints.verifyOTP, data)
+		} catch (error) {
+			throw error
+		}
+	},
+	async verifySignup(data: RegisterFormData): Promise<IApiResponse<{}>> {
+		// eslint-disable-next-line no-useless-catch
+		try {
+			return await axiosPublic.post(authEndpoints.verifySignup, data)
+		} catch (error) {
+			throw error
+		}
+	},
+	async resetPassword(data: ResetPasswordFormData): Promise<IApiResponse<{}>> {
+		// eslint-disable-next-line no-useless-catch
+		try {
+			return await axiosPublic.post(authEndpoints.resetPassword, data)
+		} catch (error) {
+			throw error
+		}
 	}
-	//   async list(params: {
-	//     page?: number;
-	//     limit?: number;
-	//     filters?: FilterSearch[];
-	//     sort?: keyof Irequest | "";
-	//     order?: ESortOrderValue;
-	//   }): Promise<IApiResponse<Irequest[]>> {
-	//     return axiosPrivate.get(requestEndpoints.common, {
-	//       params: { ...params, filters: JSON.stringify(params.filters) },
-	//     });
-	//   },
-	//   async add(data: { ten: string }): Promise<IApiResponse> {
-	//     // eslint-disable-next-line no-useless-catch
-	//     try {
-	//       return await axiosPrivate.auth(requestEndpoints.common, data);
-	//     } catch (error) {
-	//       throw error;
-	//     }
-	//   },
-	//   async delete(id: number | string): Promise<IApiResponse> {
-	//     // eslint-disable-next-line no-useless-catch
-	//     try {
-	//       return await axiosPrivate.delete(requestEndpoints.common + "/" + id);
-	//     } catch (error) {
-	//       throw error;
-	//     }
-	//   },
-	//   async edit(data: {
-	//     id: string | number;
-	//     ten: string;
-	//   }): Promise<IApiResponse> {
-	//     // eslint-disable-next-line no-useless-catch
-	//     try {
-	//       return await axiosPrivate.put(requestEndpoints.common, data);
-	//     } catch (error) {
-	//       throw error;
-	//     }
-	//   },
 }
 
 export default authApi
