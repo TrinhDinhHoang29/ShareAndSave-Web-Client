@@ -1,8 +1,43 @@
 import { Clock, Heart, Mail, MapPin, Phone } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
+import { ESettingKey } from '@/models/enums'
+import { useSettingsStore } from '@/stores/settingStore'
+
 const Footer = () => {
 	const currentYear = new Date().getFullYear()
+	const { getSettingValue } = useSettingsStore()
+
+	// Get settings values
+	const description = getSettingValue(ESettingKey.DESCRIPTION)
+	const email = getSettingValue(ESettingKey.EMAIL)
+	const phoneNumber = getSettingValue(ESettingKey.PHONE_NUMBER)
+	const location = getSettingValue(ESettingKey.LOCATION)
+	const workDay = getSettingValue(ESettingKey.WORK_DAY)
+	const startMorningTime = getSettingValue(ESettingKey.START_MORNING_TIME)
+	const endMorningTime = getSettingValue(ESettingKey.END_MORNING_TIME)
+	const startAfternoonTime = getSettingValue(ESettingKey.START_AFTERNOON_TIME)
+	const endAfternoonTime = getSettingValue(ESettingKey.END_AFTERNOON_TIME)
+
+	// Format working hours
+	const workingHours =
+		workDay &&
+		startMorningTime &&
+		endMorningTime &&
+		startAfternoonTime &&
+		endAfternoonTime ? (
+			<>
+				<p className='text-muted-foreground text-sm'>{workDay}</p>
+				<p className='text-muted-foreground text-sm'>
+					Sáng: {startMorningTime} - {endMorningTime}
+				</p>
+				<p className='text-muted-foreground text-sm'>
+					Chiều: {startAfternoonTime} - {endAfternoonTime}
+				</p>
+			</>
+		) : (
+			<p className='text-muted-foreground text-sm'>T2-T6: 7:00 - 17:00</p>
+		)
 
 	return (
 		<footer className='bg-card border-border border-t'>
@@ -25,9 +60,8 @@ const Footer = () => {
 							</span>
 						</Link>
 						<p className='text-muted-foreground mb-4 text-sm leading-relaxed'>
-							Nền tảng kết nối sinh viên Cao đẳng Kỹ thuật Cao Thắng. Tạo môi
-							trường an toàn, thuận tiện để tìm lại đồ thất lạc và chia sẻ đồ
-							cũ.
+							{description ||
+								'Nền tảng kết nối sinh viên Cao đẳng Kỹ thuật Cao Thắng.'}
 						</p>
 						<div className='text-muted-foreground flex items-center gap-2 text-sm'>
 							<Heart className='text-destructive h-4 w-4' />
@@ -74,10 +108,10 @@ const Footer = () => {
 								<div>
 									<p className='text-foreground text-sm font-medium'>Email</p>
 									<a
-										href='mailto:yeahsiraha@gmail.com'
+										href={`mailto:${email || 'yeahsiraha@gmail.com'}`}
 										className='text-muted-foreground hover:text-primary text-sm transition-colors'
 									>
-										yeahsiraha@gmail.com
+										{email || 'yeahsiraha@gmail.com'}
 									</a>
 								</div>
 							</div>
@@ -86,10 +120,10 @@ const Footer = () => {
 								<div>
 									<p className='text-foreground text-sm font-medium'>Hotline</p>
 									<a
-										href='tel:0123456789'
+										href={`tel:${phoneNumber || '0123456789'}`}
 										className='text-muted-foreground hover:text-primary text-sm transition-colors'
 									>
-										0123 456 789
+										{phoneNumber || '0123 456 789'}
 									</a>
 								</div>
 							</div>
@@ -99,9 +133,7 @@ const Footer = () => {
 									<p className='text-foreground text-sm font-medium'>
 										Giờ làm việc
 									</p>
-									<p className='text-muted-foreground text-sm'>
-										T2-T6: 7:00 - 17:00
-									</p>
+									{workingHours}
 								</div>
 							</div>
 						</div>
@@ -128,7 +160,7 @@ const Footer = () => {
 							<div className='pl-7'>
 								<p className='text-foreground text-sm font-medium'>Vị trí:</p>
 								<p className='text-muted-foreground text-sm'>
-									Khu F, Lầu 5, Phòng F5.12
+									{location || 'Khu F, Lầu 5, Phòng F5.12'}
 								</p>
 							</div>
 						</div>

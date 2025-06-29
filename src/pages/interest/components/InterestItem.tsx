@@ -7,19 +7,14 @@ import Loading from '@/components/common/Loading'
 import { useAlertModalContext } from '@/context/alert-modal-context'
 import { useChatNotification } from '@/context/chat-noti-context'
 import { useUpdateTransactionMutation } from '@/hooks/mutations/use-transaction.mutation'
-import { useListTransactionQuery } from '@/hooks/queries/use-transaction.query'
+import { useDetailTransactionQuery } from '@/hooks/queries/use-transaction.query'
 import { formatNearlyDateTimeVN } from '@/lib/utils'
 import {
 	getConfirmContentTransactionStatus,
 	getTransactionStatusConfig
 } from '@/models/constants'
-import { EMethod, ESortOrder, ETransactionStatus } from '@/models/enums'
-import {
-	ITransaction,
-	ITransactionParams,
-	ITransactionRequest,
-	IUserInterest
-} from '@/models/interfaces'
+import { EMethod, ETransactionStatus } from '@/models/enums'
+import { ITransactionRequest, IUserInterest } from '@/models/interfaces'
 import useAuthStore from '@/stores/authStore'
 
 import ChatButton from './ChatButton'
@@ -64,14 +59,12 @@ const ButtonStatus = ({
 
 export const InterestItem = ({
 	userInterest,
-	postID,
 	authorID,
 	isQuick = false,
 	updateTransactionStatus
 }: {
 	userInterest: IUserInterest
-	postID: number
-	authorID: number
+	authorID?: number
 	isQuick?: boolean
 	updateTransactionStatus?: (
 		interestID: number,
@@ -81,48 +74,30 @@ export const InterestItem = ({
 }) => {
 	const { user } = useAuthStore()
 	const { showConfirm } = useAlertModalContext()
-	const [latestTransaction, setLatestTransaction] =
-		useState<ITransaction | null>(null)
 	const userInterstStable = useMemo(() => userInterest, [userInterest])
 
-	const params: ITransactionParams = useMemo(
-		() => ({
-			postID,
-			searchBy: 'interestID',
-			searchValue: userInterstStable.id.toString(),
-			sort: 'createdAt',
-			page: 1,
-			order: ESortOrder.DESC
-		}),
-		[postID, userInterstStable]
-	)
-
 	const {
-		data: transactionData,
+		data: transaction,
 		isPending,
 		refetch
-	} = useListTransactionQuery(params)
-	const transactions = useMemo(() => {
-		return transactionData?.pages.flatMap(page => page.transactions) || []
-	}, [transactionData])
+	} = useDetailTransactionQuery(userInterstStable.id)
 
 	useEffect(() => {
-		if (transactions && transactions.length > 0) {
-			setLatestTransaction(transactions[0])
+		if (transaction) {
 			updateTransactionStatus?.(
 				userInterstStable.id,
-				transactions[0].status.toString() as ETransactionStatus,
-				transactions[0].method?.toString() as EMethod
+				transaction.status.toString() as ETransactionStatus,
+				transaction.method?.toString() as EMethod
 			)
 		}
-	}, [transactions])
+	}, [transaction])
 
 	const itemsText = useMemo(() => {
-		if (!latestTransaction?.items || latestTransaction.items.length === 0) {
+		if (!transaction?.items || transaction.items.length === 0) {
 			return ''
 		}
 
-		const itemTexts = latestTransaction.items.map(
+		const itemTexts = transaction.items.map(
 			item => `${item.itemName}: ${item.quantity}`
 		)
 
@@ -134,19 +109,19 @@ export const InterestItem = ({
 		}
 
 		return fullText
-	}, [latestTransaction])
+	}, [transaction])
 
 	const transactionStatusConfig = useMemo(() => {
-		if (latestTransaction)
+		if (transaction)
 			return getTransactionStatusConfig(
 				true,
-				latestTransaction?.status || ETransactionStatus.DEFAULT
+				transaction?.status || ETransactionStatus.DEFAULT
 			)
-	}, [latestTransaction])
+	}, [transaction])
 
 	const { mutate: updateTransactionMutation } = useUpdateTransactionMutation({
 		onSuccess: () => {
-			if (latestTransaction) {
+			if (transaction) {
 				refetch()
 			}
 		}
@@ -159,7 +134,7 @@ export const InterestItem = ({
 				status: Number(status)
 			}
 			updateTransactionMutation({
-				transactionID: latestTransaction?.id || 0,
+				transactionID: transaction?.id || 0,
 				data: transactionRequest
 			})
 		}
@@ -199,9 +174,9 @@ export const InterestItem = ({
 	}, [followedByNotification])
 
 	const canUpdateStatus =
-		(latestTransaction?.status.toString() as ETransactionStatus) ===
+		(transaction?.status.toString() as ETransactionStatus) ===
 			ETransactionStatus.SUCCESS ||
-		(latestTransaction?.status.toString() as ETransactionStatus) ===
+		(transaction?.status.toString() as ETransactionStatus) ===
 			ETransactionStatus.PENDING
 
 	return (
@@ -224,11 +199,11 @@ export const InterestItem = ({
 								)}
 							</div>
 							<div className='flex-1 space-y-1'>
-								{latestTransaction?.method && (
+								{transaction?.method && (
 									<span
 										className={`bg-primary text-primary-foreground inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium`}
 									>
-										{latestTransaction.method}
+										{transaction.method}
 									</span>
 								)}
 
@@ -239,7 +214,9 @@ export const InterestItem = ({
 									<div className='text-muted-foreground flex items-center text-sm'>
 										<Clock className='mr-1 h-3 w-3' />
 										<span>
-											{formatNearlyDateTimeVN(userInterstStable.updatedAt)}
+											{formatNearlyDateTimeVN(
+												transaction?.updatedAt || userInterstStable.createdAt
+											)}
 										</span>
 									</div>
 								</div>
@@ -276,8 +253,8 @@ export const InterestItem = ({
 											</MenuButton>
 
 											<MenuItems className='absolute top-full right-0 z-20 mt-2 w-48 origin-top-right overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl data-[closed]:scale-95 data-[closed]:opacity-0 data-[enter]:duration-100 data-[enter]:ease-out data-[leave]:duration-75 data-[leave]:ease-in'>
-												{latestTransaction &&
-													(latestTransaction.status.toString() as ETransactionStatus) ===
+												{transaction &&
+													(transaction.status.toString() as ETransactionStatus) ===
 														ETransactionStatus.PENDING && (
 														<>
 															<ButtonStatus
@@ -300,8 +277,8 @@ export const InterestItem = ({
 															/>
 														</>
 													)}
-												{latestTransaction &&
-													(latestTransaction.status.toString() as ETransactionStatus) ===
+												{transaction &&
+													(transaction.status.toString() as ETransactionStatus) ===
 														ETransactionStatus.SUCCESS && (
 														<ButtonStatus
 															handleClick={() =>
@@ -334,14 +311,14 @@ export const InterestItem = ({
 								newMessages={newMessages}
 								isPing={isPing}
 								isPending={
-									(latestTransaction?.status.toString() as ETransactionStatus) ===
+									(transaction?.status.toString() as ETransactionStatus) ===
 									ETransactionStatus.PENDING
 								}
 							/>
 						</div>
 					</div>
 
-					{userInterstStable.newMessage && (
+					{userInterstStable.newMessage && authorID && (
 						<p className='text-muted-foreground bg-muted/50 line-clamp-2 rounded-lg px-4 py-2 text-sm leading-relaxed'>
 							{authorID === user?.id ? 'Bạn' : 'Đối phương'}:{' '}
 							{userInterstStable.newMessage}

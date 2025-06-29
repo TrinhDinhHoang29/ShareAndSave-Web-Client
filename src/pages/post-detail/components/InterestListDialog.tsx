@@ -3,17 +3,16 @@ import { Search, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 
 import CustomSelect from '@/components/common/CustomSelect'
-import Loading from '@/components/common/Loading'
-import { useDetailPostInterestQuery } from '@/hooks/queries/use-interest.query'
 import { EMethod, ETransactionStatus } from '@/models/enums'
 import { IOption, IUserInterest } from '@/models/interfaces'
 import { InterestItem } from '@/pages/interest/components/InterestItem'
 
 interface InterestListDialogProps {
-	interestID: number
 	isOpen: boolean
 	onClose: () => void
 	title?: string
+	defaultInterests: IUserInterest[]
+	authorID: number
 }
 
 const FILTER_OPTIONS: IOption[] = [
@@ -40,22 +39,20 @@ const InterestListDialog = ({
 	isOpen,
 	onClose,
 	title = 'Danh sách quan tâm',
-	interestID
+	defaultInterests,
+	authorID
 }: InterestListDialogProps) => {
 	const [searchQuery, setSearchQuery] = useState('')
 	const [selectedFilter, setSelectedFilter] = useState<string>('all')
 	const [selectedMethod, setSelectedMethod] = useState<string | number>('all')
 	const [selectedSort, setSelectedSort] = useState<string | number>('default')
-	const { data, isPending } = useDetailPostInterestQuery(interestID)
-	const [interests, setInterests] = useState<IUserInterest[]>(
-		data?.interests || []
-	)
+	const [interests, setInterests] = useState<IUserInterest[]>(defaultInterests)
 
 	useEffect(() => {
-		if (data && data.interests) {
-			setInterests(data.interests)
+		if (defaultInterests) {
+			setInterests(defaultInterests)
 		}
-	}, [data])
+	}, [defaultInterests])
 
 	const updateTransactionStatus = (
 		interestId: number,
@@ -239,49 +236,43 @@ const InterestListDialog = ({
 							</div>
 						</div>
 
-						{/* Content */}
-						{isPending ? (
-							<Loading text='Đang tải' />
-						) : (
-							<div className='max-h-[calc(100vh-20rem)] overflow-y-auto'>
-								{filteredInterests.length > 0 ? (
-									<div className='space-y-3 p-6'>
-										{filteredInterests.map(interest => (
-											<InterestItem
-												isQuick={true}
-												key={interest.id}
-												userInterest={interest}
-												postID={data?.id || 0}
-												authorID={data?.authorID || 0}
-												updateTransactionStatus={updateTransactionStatus}
-											/>
-										))}
+						<div className='max-h-[calc(100vh-20rem)] overflow-y-auto'>
+							{filteredInterests.length > 0 ? (
+								<div className='space-y-3 p-6'>
+									{filteredInterests.map(interest => (
+										<InterestItem
+											isQuick={true}
+											key={interest.id}
+											userInterest={interest}
+											authorID={authorID || 0}
+											updateTransactionStatus={updateTransactionStatus}
+										/>
+									))}
+								</div>
+							) : (
+								<div className='flex flex-col items-center justify-center py-12 text-center'>
+									<div className='bg-muted mb-4 rounded-full p-4'>
+										<Search className='text-muted-foreground h-8 w-8' />
 									</div>
-								) : (
-									<div className='flex flex-col items-center justify-center py-12 text-center'>
-										<div className='bg-muted mb-4 rounded-full p-4'>
-											<Search className='text-muted-foreground h-8 w-8' />
-										</div>
-										<h3 className='text-foreground mb-2 text-lg font-medium'>
-											Không tìm thấy kết quả
-										</h3>
-										<p className='text-muted-foreground max-w-sm'>
-											{searchQuery
-												? `Không có kết quả nào phù hợp với "${searchQuery}"`
-												: 'Không có mục quan tâm nào phù hợp với bộ lọc đã chọn'}
-										</p>
-										{hasActiveFilters && (
-											<button
-												onClick={handleResetFilters}
-												className='bg-primary text-primary-foreground hover:bg-primary/90 mt-4 rounded-lg px-4 py-2 text-sm font-medium transition-colors'
-											>
-												Xóa tất cả bộ lọc
-											</button>
-										)}
-									</div>
-								)}
-							</div>
-						)}
+									<h3 className='text-foreground mb-2 text-lg font-medium'>
+										Không tìm thấy kết quả
+									</h3>
+									<p className='text-muted-foreground max-w-sm'>
+										{searchQuery
+											? `Không có kết quả nào phù hợp với "${searchQuery}"`
+											: 'Không có mục quan tâm nào phù hợp với bộ lọc đã chọn'}
+									</p>
+									{hasActiveFilters && (
+										<button
+											onClick={handleResetFilters}
+											className='bg-primary text-primary-foreground hover:bg-primary/90 mt-4 rounded-lg px-4 py-2 text-sm font-medium transition-colors'
+										>
+											Xóa tất cả bộ lọc
+										</button>
+									)}
+								</div>
+							)}
+						</div>
 
 						{/* Footer */}
 						{filteredInterests.length > 0 && (

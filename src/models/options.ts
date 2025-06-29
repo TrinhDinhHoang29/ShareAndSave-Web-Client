@@ -10,7 +10,8 @@ export const statusOptions = [
 ]
 
 export const typeOptions = [
-	{ value: '', label: 'Tất cả' },
+	{ value: EPostType.ALL, label: 'Tất cả' },
+	{ value: EPostType.CAMPAIGN, label: 'Chiến dịch	' },
 	{ value: EPostType.GIVE_AWAY_OLD_ITEM, label: 'Cho tặng đồ cũ' },
 	{ value: EPostType.FOUND_ITEM, label: 'Tìm thấy đồ' },
 	{ value: EPostType.SEEK_LOSE_ITEM, label: 'Tìm đồ bị mất' },

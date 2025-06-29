@@ -22,18 +22,30 @@ const ItemWarehouseCarousel: React.FC = () => {
 					<ItemWarehouseCardSkeleton quantity={3} />
 				</div>
 			) : itemWarehouses && itemWarehouses.length > 0 ? (
-				<Carousel
-					itemHeight='h-[350px]'
-					autoplay={false}
-				>
-					{itemWarehouses.map(item => (
-						<ItemWarehouseCard
-							key={item.itemID}
-							className='h-full'
-							item={item}
-						/>
-					))}
-				</Carousel>
+				itemWarehouses.length >= 3 ? (
+					<Carousel
+						itemHeight='h-[350px]'
+						autoplay={false}
+					>
+						{itemWarehouses.map(item => (
+							<ItemWarehouseCard
+								key={item.itemID}
+								className='h-full'
+								item={item}
+							/>
+						))}
+					</Carousel>
+				) : (
+					<div className='grid grid-cols-3 gap-6'>
+						{itemWarehouses.map(item => (
+							<ItemWarehouseCard
+								key={item.itemID}
+								className='h-[350px]'
+								item={item}
+							/>
+						))}
+					</div>
+				)
 			) : (
 				<div className='col-span-3'>
 					<div className='flex flex-col items-center justify-center py-10 text-center'>

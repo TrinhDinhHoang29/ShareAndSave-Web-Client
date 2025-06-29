@@ -34,7 +34,7 @@ const ItemWarehouseCard: React.FC<ItemWarehouseCardProps> = ({
 	}
 
 	const handleCardClick = () => {
-		if (!selectionMode || item.meQuantity) return
+		if (!selectionMode || item.meQuantity || item.maxClaim === 0) return
 
 		if (isSelected) {
 			onDeselect?.(item.itemID)
@@ -67,13 +67,15 @@ const ItemWarehouseCard: React.FC<ItemWarehouseCardProps> = ({
 				'bg-card group relative overflow-hidden rounded-lg border shadow-sm transition-all duration-300',
 				selectionMode && 'cursor-pointer hover:shadow-md',
 				isSelected && 'ring-primary border-primary ring-2',
-				selectionMode && item.meQuantity ? 'border-error/80' : 'border-border',
+				selectionMode && (item.meQuantity || item.maxClaim === 0)
+					? 'border-error/80'
+					: 'border-border',
 				className
 			)}
 			onClick={handleCardClick}
 		>
 			{/* Selection Indicator */}
-			{selectionMode && !item.meQuantity && (
+			{selectionMode && !item.meQuantity && item.maxClaim !== 0 && (
 				<div className='absolute top-3 left-3 z-20'>
 					<div
 						className={clsx(
@@ -138,6 +140,21 @@ const ItemWarehouseCard: React.FC<ItemWarehouseCardProps> = ({
 				<div className='absolute right-3 bottom-3 z-10'>
 					<span className='bg-card/90 text-card-foreground border-border rounded-full border px-2 py-1 text-xs font-medium backdrop-blur-sm'>
 						Còn: {item.quantity}
+					</span>
+				</div>
+
+				<div className='absolute bottom-3 left-3 z-10'>
+					<span
+						className={clsx(
+							'border-border rounded-full border px-2 py-1 text-xs font-medium backdrop-blur-sm',
+							item.maxClaim === 0
+								? 'bg-error/90 text-primary-foreground'
+								: 'bg-primary/90 text-primary-foreground'
+						)}
+					>
+						{item.maxClaim === 0
+							? 'Chưa thể đăng ký'
+							: 'Đăng ký tối đa: ' + item.maxClaim}
 					</span>
 				</div>
 			</div>

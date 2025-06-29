@@ -19,9 +19,7 @@ const Leaderboard: React.FC = () => {
 		data: userRankData,
 		fetchNextPage,
 		hasNextPage,
-		isFetchingNextPage,
-		isLoading,
-		isError
+		isFetchingNextPage
 	} = useUserRanksQuery({
 		limit: 10,
 		page: 1

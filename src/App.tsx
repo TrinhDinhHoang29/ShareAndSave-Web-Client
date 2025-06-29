@@ -6,10 +6,16 @@ import AppRouter from '@/routes/index.route'
 import authApi from './apis/modules/auth.api'
 import { getAccessToken, getRefreshToken, setAccessToken } from './lib/token'
 import useAuthStore from './stores/authStore'
+import { useSettingsStore } from './stores/settingStore'
 
 function App() {
 	const { login, logout, setAuthLoading, syncAuthState } = useAuthStore()
 	const navigate = useNavigate()
+	const { fetchSettings } = useSettingsStore()
+
+	useEffect(() => {
+		fetchSettings() // Fetch settings when component mounts
+	}, [fetchSettings])
 
 	useEffect(() => {
 		let isMounted = true // Flag để tránh setState sau khi unmount

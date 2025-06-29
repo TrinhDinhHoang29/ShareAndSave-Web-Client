@@ -15,7 +15,7 @@ const MyHistory: React.FC = () => {
 			case EGoodDeedType.GOOD_DEED_TYPE_GIVE_OLD_ITEM:
 				return 'Tặng đồ cũ'
 			case EGoodDeedType.GOOD_DEED_TYPE_GIVE_LOSE_ITEM:
-				return 'Tặng đồ thất lạc'
+				return 'Trả đồ thất lạc'
 			case EGoodDeedType.GOOD_DEED_TYPE_CAMPAGIN:
 				return 'Chiến dịch'
 			default:

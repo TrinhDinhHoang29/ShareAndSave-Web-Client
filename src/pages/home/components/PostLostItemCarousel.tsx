@@ -33,19 +33,32 @@ const PostLostItemCarousel: React.FC<PostLostItemCarouselProps> = ({
 					<PostItemSkeleton quantity={3} />
 				</div>
 			) : posts && posts.length > 0 ? (
-				<Carousel
-					autoplay={false}
-					itemHeight='h-[450px]'
-				>
-					{posts.map(post => (
-						<PostItem
-							key={post.id}
-							className='h-full'
-							post={post}
-							onPostClick={id => navigate('/bai-dang' + '/' + id)}
-						/>
-					))}
-				</Carousel>
+				posts.length >= 3 ? (
+					<Carousel
+						autoplay={false}
+						itemHeight='h-[450px]'
+					>
+						{posts.map(post => (
+							<PostItem
+								key={post.id}
+								className='h-full'
+								post={post}
+								onPostClick={id => navigate('/bai-dang' + '/' + id)}
+							/>
+						))}
+					</Carousel>
+				) : (
+					<div className='grid grid-cols-3 gap-6'>
+						{posts.map(post => (
+							<PostItem
+								key={post.id}
+								className='h-[450px]'
+								post={post}
+								onPostClick={id => navigate('/bai-dang' + '/' + id)}
+							/>
+						))}
+					</div>
+				)
 			) : (
 				<div className='col-span-3'>
 					<div className='flex flex-col items-center justify-center py-10 text-center'>

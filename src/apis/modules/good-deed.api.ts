@@ -2,7 +2,7 @@ import { EGoodPOINTTYPE } from '@/models/enums'
 import {
 	IApiResponse,
 	IDetailGoodDeed,
-	IGoodDeedSetting,
+	ISetting,
 	IUserRankResponse
 } from '@/models/interfaces'
 
@@ -28,7 +28,7 @@ const goodDeedApi = {
 	},
 	async getSettings(
 		key: EGoodPOINTTYPE
-	): Promise<IApiResponse<{ setting: IGoodDeedSetting }>> {
+	): Promise<IApiResponse<{ setting: ISetting }>> {
 		return axiosPrivate.get(goodDeedEndpoints.settings + '/' + key)
 	}
 	// async create(data: {

@@ -88,3 +88,20 @@ export enum EPurposeOTP {
 	ACTIVE_ACCOUNT = 'activeAccount',
 	RESET_PASSWORD = 'resetPassword'
 }
+
+export enum ESettingKey {
+	NUM_PER_HOUR = 'numPerHour',
+	START_MORNING_TIME = 'startMorningTime',
+	END_MORNING_TIME = 'endMorningTime',
+	START_AFTERNOON_TIME = 'startAfternoonTime',
+	END_AFTERNOON_TIME = 'endAfternoonTime',
+	DOMAIN = 'domain',
+	GOOD_POINT_GIVE_OLD_ITEM = 'goodPointGiveOldItem',
+	GOOD_POINT_GIVE_LOSE_ITEM = 'goodPointGiveLoseItem',
+	GOOD_POINT_JOIN_CAMPAIGN = 'goodPointJoinCampaign',
+	EMAIL = 'email',
+	PHONE_NUMBER = 'phoneNumber',
+	LOCATION = 'location',
+	DESCRIPTION = 'description',
+	WORK_DAY = 'workDay'
+}

@@ -36,14 +36,14 @@ export const useListTransactionQuery = (params: ITransactionParams) => {
 	})
 }
 
-export const useDetailTransactionQuery = (params: ITransactionParams) => {
+export const useDetailTransactionQuery = (interestID: number) => {
 	return useQuery<ITransaction | null>({
-		queryKey: ['transaction', 'detail', params], // Key để cache, dựa trên id
+		queryKey: ['transaction', 'detail', interestID], // Key để cache, dựa trên id
 		queryFn: async () => {
-			const res = await transactionApi.list(params)
-			return res.data.transactions[0] // Trả về null nếu post không tồn tại
+			const res = await transactionApi.detail(interestID)
+			return res.data.transaction // Trả về null nếu post không tồn tại
 		},
-		enabled: !!params.postID && !!params.searchValue, // Chỉ chạy query khi id tồn tại và lớn hơn 0
+		enabled: !!interestID, // Chỉ chạy query khi id tồn tại và lớn hơn 0
 		staleTime: 5 * 60 * 1000, // Dữ liệu tươi trong 5 phút
 		gcTime: 10 * 60 * 1000 // Cache trong 10 phút
 	})

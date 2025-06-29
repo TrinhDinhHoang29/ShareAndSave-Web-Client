@@ -26,6 +26,11 @@ const transactionApi = {
 	): Promise<IApiResponse<{ transactionID: number }>> {
 		return axiosPrivate.delete(transactionEndpoints.common + '/' + postID)
 	},
+	async detail(
+		interestID: number
+	): Promise<IApiResponse<{ transaction: ITransaction }>> {
+		return axiosPrivate.get(transactionEndpoints.common + '/' + interestID)
+	},
 	async list(
 		params: ITransactionParams
 	): Promise<IApiResponse<ITransactionResponse>> {

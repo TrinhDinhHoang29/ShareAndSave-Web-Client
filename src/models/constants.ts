@@ -1,4 +1,5 @@
 import {
+	BookOpen,
 	Check,
 	CheckCircle,
 	Clock,
@@ -7,10 +8,12 @@ import {
 	Gift,
 	Globe,
 	HandHelping,
+	Heart,
 	HelpCircle,
 	Lock,
 	Megaphone,
 	Rabbit,
+	Recycle,
 	School,
 	Search,
 	ShieldX,
@@ -289,20 +292,79 @@ export const getStatusPostTypeConfig = (type: EPostType, quantity: number) => {
 export const BANNER_CAROUSEL_SOURCE = [
 	{
 		url: Banner_1,
-		name: 'Banner 1',
-		link: '#'
+		name: 'Chiến dịch Yêu thương San sẻ',
+		link: '/campaigns/love-sharing',
+		icon: Heart,
+		badge: 'Chiến dịch từ thiện',
+		title: 'Yêu thương San sẻ',
+		subtitle:
+			'Cùng sinh viên Cao Thắng lan tỏa yêu thương đến cộng đồng qua những hoạt động từ thiện ý nghĩa.',
+		ctaText: 'Tham gia ngay',
+		stats: [
+			{ number: '2,500+', label: 'Sinh viên tham gia' },
+			{ number: '50+', label: 'Hoạt động từ thiện' },
+			{ number: '10 tỷ+', label: 'Đồng quyên góp' }
+		]
 	},
 	{
 		url: Banner_2,
-		name: 'Banner 2',
-		link: '#'
+		name: 'Phong trào Tái chế xanh',
+		link: '/campaigns/green-recycle',
+		icon: Recycle,
+		badge: 'Phong trào xanh',
+		title: 'Tái chế Xanh - Tương lai Bền vững',
+		subtitle:
+			'Biến đồ cũ thành tài nguyên quý giá. Cùng nhau bảo vệ môi trường và giúp đỡ những hoàn cảnh khó khăn.',
+		ctaText: 'Khám phá ngay',
+		stats: [
+			{ number: '5 tấn', label: 'Đồ cũ thu gom' },
+			{ number: '100+', label: 'Gia đình được hỗ trợ' },
+			{ number: '20+', label: 'Điểm thu gom' }
+		]
 	},
 	{
 		url: Banner_3,
-		name: 'Banner 3',
-		link: '#'
+		name: 'Chương trình Tri thức san sẻ',
+		link: '/campaigns/knowledge-sharing',
+		icon: BookOpen,
+		badge: 'Chương trình giáo dục',
+		title: 'Tri thức San sẻ',
+		subtitle:
+			'Sinh viên Cao Thắng đồng hành cùng trẻ em vùng khó khăn, mang kiến thức kỹ thuật đến những nơi cần nhất.',
+		ctaText: 'Đồng hành cùng chúng tôi',
+		stats: [
+			{ number: '15', label: 'Tỉnh thành' },
+			{ number: '1,200+', label: 'Trẻ em được hỗ trợ' },
+			{ number: '200+', label: 'Tình nguyện viên' }
+		]
 	}
+	// {
+	// 	url: Banner_4, // Thêm banner thứ 4 nếu cần
+	// 	name: 'Ngày hội Kết nối yêu thương',
+	// 	link: '/events/charity-festival',
+	// 	icon: Handshake,
+	// 	badge: 'Sự kiện đặc biệt',
+	// 	title: 'Ngày hội Kết nối Yêu thương',
+	// 	subtitle: 'Sự kiện thường niên quy tụ toàn thể sinh viên, giảng viên và cộng đồng trong tinh thần chia sẻ và yêu thương.',
+	// 	ctaText: 'Đăng ký tham gia',
+	// 	stats: [
+	// 		{ number: '5,000+', label: 'Người tham gia' },
+	// 		{ number: '100+', label: 'Hoạt động' },
+	// 		{ number: '3 ngày', label: 'Sự kiện' }
+	// 	]
+	// }
 ]
+
+export const BANNER_THEME = {
+	primaryColor: '#0066CC', // Màu chủ đạo của trường
+	secondaryColor: '#FF6B35', // Màu phụ
+	gradients: {
+		primary: 'from-blue-600 to-blue-800',
+		secondary: 'from-orange-500 to-red-600',
+		charity: 'from-pink-500 to-purple-600',
+		environment: 'from-green-500 to-teal-600'
+	}
+}
 
 export const SUB_BANNER_SOURCE = [
 	{

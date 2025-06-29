@@ -9,10 +9,16 @@ import {
 	Clock,
 	Gift,
 	Heart,
+	Locate,
+	Lock,
 	MapPin,
+	MessageCircle,
 	Package,
+	Pin,
 	Plus,
 	Tag,
+	Trash,
+	Unlock,
 	User,
 	Users,
 	X
@@ -28,6 +34,10 @@ import {
 	useCreateInterestMutation,
 	useDeleteInterestMutation
 } from '@/hooks/mutations/use-interest.mutation'
+import {
+	useDeletePostMutation,
+	useUpdatePostMutation
+} from '@/hooks/mutations/use-post.mutation'
 import { useCreateTransactionMutation } from '@/hooks/mutations/use-transaction.mutation'
 import { useDetailPostQuery } from '@/hooks/queries/use-post-query'
 import { useInterestListDialog } from '@/hooks/useInterestListDialog'
@@ -58,6 +68,13 @@ interface LostItemInfo {
 	reward: string
 }
 
+interface CampaignInfo {
+	startDate: string
+	endDate: string
+	location: string
+	organizer: string
+}
+
 const PostDetail: React.FC = () => {
 	const {
 		isOpen,
@@ -70,7 +87,7 @@ const PostDetail: React.FC = () => {
 	const [interestID, setInterestID] = useState(0)
 	const [showAllItems, setShowAllItems] = useState(false)
 	const queryClient = useQueryClient()
-	const { showSuccess, showInfo } = useAlertModalContext()
+	const { showSuccess, showInfo, showConfirm } = useAlertModalContext()
 	const { user, isAuthenticated } = useAuthStore()
 	const { openDialog } = useAuthDialog()
 	const navigate = useNavigate()
@@ -87,13 +104,76 @@ const PostDetail: React.FC = () => {
 		}
 	})
 
+	const { mutate: updatePostMutation } = useUpdatePostMutation({
+		onSuccess: () => {
+			refetch()
+		}
+	})
+	const { mutate: deletePostMutation } = useDeletePostMutation({
+		onSuccess: () => {
+			refetch()
+		}
+	})
+
+	const handleUpdateStatus = async (postID: number, status: EPostSTatus) => {
+		showConfirm({
+			confirmButtonText: 'Xác nhận',
+			confirmMessage:
+				status === EPostSTatus.SEAL
+					? 'Những người khác sẽ không còn được quan tâm bạn?'
+					: 'Cho phép người khác quan tâm bài đăng của bạn',
+			confirmTitle:
+				status === EPostSTatus.SEAL ? 'Khóa bài đăng' : 'Mở khóa bài đăng',
+			cancelButtonText: 'Hủy',
+			onConfirm: () => {
+				updatePostMutation({
+					postID,
+					data: {
+						status: Number(status)
+					}
+				})
+			}
+		})
+	}
+
+	const handleRepost = (postID: number, status: EPostSTatus) => {
+		if (status === EPostSTatus.SEAL) {
+			showInfo({
+				infoButtonText: 'Đã rõ',
+				infoMessage:
+					'Bài đăng hiện tại đang khóa. Vui lòng mở khóa để tiến hành ghim bài đăng.',
+				infoTitle: 'Thông tin bài đăng'
+			})
+		} else {
+			updatePostMutation({
+				postID,
+				data: {
+					isRepost: true
+				}
+			})
+		}
+	}
+
+	const handleDelete = (postID: number) => {
+		showConfirm({
+			confirmButtonText: 'Xác nhận',
+			confirmMessage: 'Hành động này không thể hoàn tác',
+			confirmTitle: 'Xác nhận xóa bài',
+			onConfirm: () => {
+				deletePostMutation(postID)
+			},
+			cancelButtonText: 'Hủy'
+		})
+	}
+
 	const params = useParams()
 	const slug = params.slug
 	const {
 		data: post,
 		isLoading,
 		isError,
-		error
+		error,
+		refetch
 	} = useDetailPostQuery(slug || '')
 	const {
 		mutate: createInterestMutatation,
@@ -154,13 +234,15 @@ const PostDetail: React.FC = () => {
 		sumCurrentQuantityItems
 	)
 
-	const handleChat = () => {
+	const handleChat = (option: 'chat' | 'transaction') => {
 		if (interestID) {
-			navigate(`/chat/${interestID}`)
+			if (option === 'chat') navigate(`/chat/${interestID}`)
+			else setIsDialogOpen(true)
 		} else {
 			showInfo({
 				infoTitle: 'Thông tin hỗ trợ',
-				infoMessage: 'Bạn phải "Quan Tâm" mới được thực hiện "Tạo giao dịch"',
+				infoMessage:
+					'Bạn phải "Quan Tâm" mới được thực hiện "Tạo giao dịch - Trò chuyện"',
 				infoButtonText: 'Đã rõ'
 			})
 		}
@@ -385,92 +467,144 @@ const PostDetail: React.FC = () => {
 								</motion.div>
 
 								{/* Specific Info based on Type */}
-								{parsedInfo && (post.type === 2 || post.type === 3) && (
-									<motion.div
-										initial={{ opacity: 0, y: 20 }}
-										animate={{ opacity: 1, y: 0 }}
-										transition={{ delay: 0.5 }}
-										className='space-y-4'
-									>
-										<h2 className='text-foreground text-xl font-semibold'>
-											Thông tin chi tiết
-										</h2>
-										<div className='bg-accent/30 space-y-3 rounded-lg p-4'>
-											{post.type === 2 && (
-												<>
-													{(parsedInfo as FoundItemInfo).foundLocation && (
-														<div className='flex items-center gap-2'>
-															<MapPin className='text-primary h-4 w-4' />
-															<span className='text-sm font-medium'>
-																Nơi tìm thấy:
-															</span>
-															<span className='text-muted-foreground text-sm'>
-																{(parsedInfo as FoundItemInfo).foundLocation}
-															</span>
-														</div>
-													)}
-													{(parsedInfo as FoundItemInfo).foundDate && (
+								{parsedInfo &&
+									((post.type.toString() as EPostType) ===
+										EPostType.FOUND_ITEM ||
+										(post.type.toString() as EPostType) ===
+											EPostType.SEEK_LOSE_ITEM ||
+										(post.type.toString() as EPostType) ===
+											EPostType.CAMPAIGN) && (
+										<motion.div
+											initial={{ opacity: 0, y: 20 }}
+											animate={{ opacity: 1, y: 0 }}
+											transition={{ delay: 0.5 }}
+											className='space-y-4'
+										>
+											<h2 className='text-foreground text-xl font-semibold'>
+												Thông tin chi tiết
+											</h2>
+											<div className='bg-accent/30 space-y-3 rounded-lg p-4'>
+												{(post.type.toString() as EPostType) ===
+													EPostType.FOUND_ITEM && (
+													<>
+														{(parsedInfo as FoundItemInfo).foundLocation && (
+															<div className='flex items-center gap-2'>
+																<MapPin className='text-primary h-4 w-4' />
+																<span className='text-sm font-medium'>
+																	Nơi tìm thấy:
+																</span>
+																<span className='text-muted-foreground text-sm'>
+																	{(parsedInfo as FoundItemInfo).foundLocation}
+																</span>
+															</div>
+														)}
+														{(parsedInfo as FoundItemInfo).foundDate && (
+															<div className='flex items-center gap-2'>
+																<Calendar className='text-primary h-4 w-4' />
+																<span className='text-sm font-medium'>
+																	Ngày tìm thấy:
+																</span>
+																<span className='text-muted-foreground text-sm'>
+																	{formatDateTimeVN(
+																		(parsedInfo as FoundItemInfo).foundDate
+																	)}
+																</span>
+															</div>
+														)}
+														{(parsedInfo as FoundItemInfo).condition && (
+															<div className='flex items-center gap-2'>
+																<Package className='text-primary h-4 w-4' />
+																<span className='text-sm font-medium'>
+																	Tình trạng:
+																</span>
+																<span className='text-muted-foreground text-sm'>
+																	{(parsedInfo as FoundItemInfo).condition}
+																</span>
+															</div>
+														)}
+													</>
+												)}
+												{(post.type.toString() as EPostType) ===
+													EPostType.SEEK_LOSE_ITEM && (
+													<>
 														<div className='flex items-center gap-2'>
 															<Calendar className='text-primary h-4 w-4' />
 															<span className='text-sm font-medium'>
-																Ngày tìm thấy:
+																Ngày mất:
 															</span>
 															<span className='text-muted-foreground text-sm'>
 																{formatDateTimeVN(
-																	(parsedInfo as FoundItemInfo).foundDate
+																	(parsedInfo as LostItemInfo).lostDate
 																)}
 															</span>
 														</div>
-													)}
-													{(parsedInfo as FoundItemInfo).condition && (
 														<div className='flex items-center gap-2'>
-															<Package className='text-primary h-4 w-4' />
+															<MapPin className='text-primary h-4 w-4' />
 															<span className='text-sm font-medium'>
-																Tình trạng:
+																Nơi mất:
 															</span>
 															<span className='text-muted-foreground text-sm'>
-																{(parsedInfo as FoundItemInfo).condition}
+																{(parsedInfo as LostItemInfo).lostLocation}
 															</span>
 														</div>
-													)}
-												</>
-											)}
-											{post.type === 3 && (
-												<>
-													<div className='flex items-center gap-2'>
-														<Calendar className='text-primary h-4 w-4' />
-														<span className='text-sm font-medium'>
-															Ngày mất:
-														</span>
-														<span className='text-muted-foreground text-sm'>
-															{formatDateTimeVN(
-																(parsedInfo as LostItemInfo).lostDate
-															)}
-														</span>
-													</div>
-													<div className='flex items-center gap-2'>
-														<MapPin className='text-primary h-4 w-4' />
-														<span className='text-sm font-medium'>
-															Nơi mất:
-														</span>
-														<span className='text-muted-foreground text-sm'>
-															{(parsedInfo as LostItemInfo).lostLocation}
-														</span>
-													</div>
-													<div className='flex items-center gap-2'>
-														<Gift className='text-primary h-4 w-4' />
-														<span className='text-sm font-medium'>
-															Phần thưởng:
-														</span>
-														<span className='text-muted-foreground text-sm'>
-															{(parsedInfo as LostItemInfo).reward}
-														</span>
-													</div>
-												</>
-											)}
-										</div>
-									</motion.div>
-								)}
+														<div className='flex items-center gap-2'>
+															<Gift className='text-primary h-4 w-4' />
+															<span className='text-sm font-medium'>
+																Phần thưởng:
+															</span>
+															<span className='text-muted-foreground text-sm'>
+																{(parsedInfo as LostItemInfo).reward}
+															</span>
+														</div>
+													</>
+												)}
+												{(post.type.toString() as EPostType) ===
+													EPostType.CAMPAIGN && (
+													<>
+														<div className='flex items-center gap-2'>
+															<Calendar className='text-primary h-4 w-4' />
+															<span className='text-sm font-medium'>
+																Ngày diễn ra:
+															</span>
+															<div className='text-muted-foreground space-x-1 text-sm'>
+																<span>
+																	{formatDateTimeVN(
+																		(parsedInfo as CampaignInfo).startDate,
+																		false
+																	)}
+																</span>
+																<span>-</span>
+																<span>
+																	{formatDateTimeVN(
+																		(parsedInfo as CampaignInfo).endDate,
+																		false
+																	)}
+																</span>
+															</div>
+														</div>
+														<div className='flex items-center gap-2'>
+															<Locate className='text-primary h-4 w-4' />
+															<span className='text-sm font-medium'>
+																Địa điểm:
+															</span>
+															<span className='text-muted-foreground text-sm'>
+																{(parsedInfo as CampaignInfo).location}
+															</span>
+														</div>
+														<div className='flex items-center gap-2'>
+															<Users className='text-primary h-4 w-4' />
+															<span className='text-sm font-medium'>
+																Tổ chức bởi:
+															</span>
+															<span className='text-muted-foreground text-sm'>
+																{(parsedInfo as CampaignInfo).organizer}
+															</span>
+														</div>
+													</>
+												)}
+											</div>
+										</motion.div>
+									)}
 
 								{/* Items List */}
 								{post.items && post.items.length > 0 && (
@@ -638,7 +772,7 @@ const PostDetail: React.FC = () => {
 							{/* Sidebar */}
 							<div className='space-y-6'>
 								{/* Action Buttons */}
-								{user?.id !== post.authorID && (
+								{user?.id !== post.authorID ? (
 									<motion.div
 										initial={{ opacity: 0, x: 20 }}
 										animate={{ opacity: 1, x: 0 }}
@@ -664,20 +798,96 @@ const PostDetail: React.FC = () => {
 											)}
 											{interestID ? 'Đã quan tâm' : 'Quan tâm'}
 										</button>
+										<div className='flex items-center gap-4'>
+											<button
+												type='button'
+												onClick={() => handleChat('chat')}
+												className={clsx(
+													'text-secondary-foreground flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 font-medium transition-colors',
+													interestID
+														? 'bg-secondary/90 hover:bg-secondary cursor-pointer'
+														: 'bg-secondary/20 hover:bg-secondary/30 cursor-not-allowed'
+												)}
+											>
+												<MessageCircle className='h-5 w-5' />
+												Trò chuyện
+											</button>
 
+											<button
+												type='button'
+												onClick={() => handleChat('transaction')}
+												className={clsx(
+													'text-primary-foreground flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 font-medium transition-colors',
+													interestID
+														? 'bg-success/90 hover:bg-success cursor-pointer'
+														: 'bg-success/20 hover:bg-success/30 cursor-not-allowed'
+												)}
+											>
+												<ArrowLeftRight className='h-5 w-5' />
+												Tạo giao dịch
+											</button>
+										</div>
+									</motion.div>
+								) : (
+									<motion.div
+										initial={{ opacity: 0, x: 20 }}
+										animate={{ opacity: 1, x: 0 }}
+										transition={{ delay: 0.4 }}
+										className='glass space-y-4 rounded-xl p-6'
+									>
 										<button
-											type='button'
-											onClick={handleChat}
-											className={clsx(
-												'text-secondary-foreground flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 font-medium transition-colors',
-												interestID
-													? 'bg-secondary/90 hover:bg-secondary cursor-pointer'
-													: 'bg-secondary/20 hover:bg-secondary/30 cursor-not-allowed'
-											)}
+											onClick={() =>
+												handleRepost(
+													post.id,
+													post.status.toString() as EPostSTatus
+												)
+											}
+											className={`bg-primary text-primary-foreground hover:bg-primary/90 relative flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 font-medium transition-all`}
 										>
-											<ArrowLeftRight className='h-5 w-5' />
-											Trò chuyện - Tạo giao dịch
+											<Pin
+												className={`h-5 w-5 ${interestID ? 'fill-current' : ''}`}
+											/>
+											Ghim bài đăng
 										</button>
+										<div className='flex items-center gap-4'>
+											<button
+												type='button'
+												onClick={() =>
+													handleUpdateStatus(
+														post.id,
+														(post.status.toString() as EPostSTatus) ===
+															EPostSTatus.APPROVED
+															? EPostSTatus.SEAL
+															: EPostSTatus.APPROVED
+													)
+												}
+												className={clsx(
+													'text-secondary-foreground bg-secondary/90 hover:bg-secondary flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-3 font-medium transition-colors'
+												)}
+											>
+												{(post.status.toString() as EPostSTatus) ===
+												EPostSTatus.APPROVED ? (
+													<Lock className='h-5 w-5' />
+												) : (
+													<Unlock className='h-5 w-5' />
+												)}
+												{(post.status.toString() as EPostSTatus) ===
+												EPostSTatus.APPROVED
+													? 'Khóa bài đăng'
+													: 'Mở khóa bài đăng'}
+											</button>
+
+											<button
+												type='button'
+												onClick={() => handleDelete(post.id)}
+												className={clsx(
+													'text-primary-foreground bg-error/90 hover:bg-error flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-3 font-medium transition-colors'
+												)}
+											>
+												<Trash className='h-5 w-5' />
+												Xóa bài đăng
+											</button>
+										</div>
 									</motion.div>
 								)}
 
@@ -788,13 +998,13 @@ const PostDetail: React.FC = () => {
 												initial={{ scale: 0.9 }}
 												animate={{ scale: 1 }}
 												exit={{ scale: 0.9 }}
-												className='max-h-full max-w-4xl'
+												className='h-[400px] w-[600px]'
 												onClick={e => e.stopPropagation()}
 											>
 												<img
 													src={post.images[currentImageIndex]}
 													alt={`${post.title} - Ảnh ${currentImageIndex + 1}`}
-													className='bg-muted max-h-[500px] max-w-full rounded-lg object-contain'
+													className='bg-muted h-full w-full rounded-lg object-contain'
 												/>
 											</motion.div>
 											{post.images.length > 1 && (
@@ -855,7 +1065,8 @@ const PostDetail: React.FC = () => {
 			<DialogComponent
 				isOpen={isOpen}
 				onClose={closeDialog}
-				interestID={interestID}
+				defaultInterests={post.interests}
+				authorID={post.authorID}
 				title='Quản lý quan tâm' // Optional
 			/>
 		</>

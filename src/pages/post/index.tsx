@@ -16,11 +16,10 @@ import PostItem from './components/PostItem'
 import PostItemSkeleton from './components/PostItemSkeleton'
 
 // Kiểu hợp nhất với '' cho "Tất cả"
-type PostTypeSelection = '' | EPostType
 const limit = 9
 
 const Post = () => {
-	const [selectedType, setSelectedType] = useState<PostTypeSelection>('') // Mặc định là "Tất cả"
+	const [selectedType, setSelectedType] = useState<EPostType>(EPostType.ALL) // Mặc định là "Tất cả"
 	const [search, setSearch] = useState('')
 	const [currentPage, setCurrentPage] = useState(1)
 	const [order, setOrder] = useState<ESortOrder>(ESortOrder.DESC) // Mặc định là mới nhất
@@ -85,7 +84,7 @@ const Post = () => {
 					</label>
 					<CustomSelect
 						value={selectedType}
-						onChange={value => setSelectedType(value as PostTypeSelection)}
+						onChange={value => setSelectedType(value as EPostType)}
 						options={typeOptions}
 						className='flex-1'
 					/>

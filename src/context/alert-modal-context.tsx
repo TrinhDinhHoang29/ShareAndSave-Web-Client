@@ -21,6 +21,7 @@ interface AlertModalConfig {
 	confirmTitle?: string
 	confirmMessage?: string
 	confirmButtonText?: string
+	cancelButtonText?: string
 	onConfirm?: () => void
 }
 

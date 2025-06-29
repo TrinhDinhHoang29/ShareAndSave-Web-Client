@@ -4,6 +4,8 @@ import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { formatDateTimeVN } from '@/lib/utils'
+import { getTypeInfo } from '@/models/constants'
+import { EPostType } from '@/models/enums'
 import { IPost } from '@/models/interfaces'
 
 interface CampaignCardProps {
@@ -36,7 +38,11 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
 	}
 
 	const getProgressPercentage = () => {
-		return Math.min((campaign.currentItemCount / campaign.itemCount) * 100, 100)
+		if (campaign.itemCount === 0) return 0 // Avoid division by zero
+		return (
+			((campaign.itemCount - campaign.currentItemCount) / campaign.itemCount) *
+			100
+		)
 	}
 
 	const getStatusBadge = () => {
@@ -148,12 +154,13 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
 						<div className='mb-1 flex justify-between text-xs'>
 							<span>Tiến độ thu thập</span>
 							<span>
-								{campaign.currentItemCount}/{campaign.itemCount}
+								{campaign.itemCount - campaign.currentItemCount}/
+								{campaign.itemCount}
 							</span>
 						</div>
 						<div className='h-2 w-full rounded-full bg-white/30'>
 							<motion.div
-								className='bg-success h-2 rounded-full'
+								className='bg-primary h-2 rounded-full'
 								initial={{ width: 0 }}
 								animate={{ width: `${getProgressPercentage()}%` }}
 								transition={{ duration: 1, delay: 0.5 }}
@@ -300,8 +307,15 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
 				</div>
 
 				{/* Created Date */}
-				<div className='text-muted-foreground text-xs'>
-					Đăng ngày: {formatDateTimeVN(campaign.createdAt, false)}
+				<div className='flex items-center justify-between'>
+					<div className='text-muted-foreground text-xs'>
+						Đăng ngày: {formatDateTimeVN(campaign.createdAt, false)}
+					</div>
+					<span
+						className={`rounded-full px-2 py-1 text-xs font-medium ${getTypeInfo(EPostType.CAMPAIGN).color}`}
+					>
+						{getTypeInfo(EPostType.CAMPAIGN).label}
+					</span>
 				</div>
 			</div>
 		</motion.div>

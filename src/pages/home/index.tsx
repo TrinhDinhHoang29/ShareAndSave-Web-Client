@@ -17,6 +17,7 @@ import BannerCarousel from './components/BannerCarousel'
 import CampaignList from './components/CampaignList'
 import CaoThangLinks from './components/CaoThangLinks'
 import Heading from './components/Heading'
+import InstructionBanner from './components/InstructionBanner'
 import ItemWarehouseCarousel from './components/ItemWarehouseCarousel'
 import NoticeCard from './components/NoticeCard'
 import PostLostItemCarousel from './components/PostLostItemCarousel'
@@ -33,7 +34,10 @@ const Home = () => {
 	)
 	return (
 		<div className='mb-12 space-y-10'>
-			<BannerCarousel />
+			<div>
+				<BannerCarousel />
+				<InstructionBanner />
+			</div>
 			<div className='container mx-auto space-y-5'>
 				<Heading title='Chiến dịch'>
 					<Link

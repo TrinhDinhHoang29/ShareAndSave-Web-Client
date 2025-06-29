@@ -8,6 +8,7 @@ import {
 	EPostType,
 	ERequestStatus,
 	ERequestType,
+	ESettingKey,
 	ESortOrder,
 	ETransactionStatus
 } from './enums'
@@ -400,6 +401,7 @@ export interface IItemWarehouse {
 	quantity: number
 	curentQuantity?: number
 	meQuantity?: number
+	maxClaim: number
 }
 
 export interface IItemWarehouseParams {
@@ -536,15 +538,15 @@ export interface IUserRankResponse {
 	yourRank: number
 }
 
-export interface IGoodDeedSetting {
+export interface ISetting {
 	id: number
-	key: string
+	key: ESettingKey
 	value: string
 }
 
 export interface ISettingResponse {
 	name: string
-	setting: IGoodDeedSetting
+	setting: ISetting
 }
 
 export interface IVerifySignupError {
