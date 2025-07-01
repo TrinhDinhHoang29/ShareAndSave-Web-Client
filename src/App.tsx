@@ -4,7 +4,9 @@ import { useNavigate } from 'react-router-dom'
 import AppRouter from '@/routes/index.route'
 
 import authApi from './apis/modules/auth.api'
+import { useScreenSize } from './hooks/useScreenSize' // Import hook
 import { getAccessToken, getRefreshToken, setAccessToken } from './lib/token'
+import Dowload from './pages/dowload'
 import useAuthStore from './stores/authStore'
 import { useSettingsStore } from './stores/settingStore'
 
@@ -12,18 +14,18 @@ function App() {
 	const { login, logout, setAuthLoading, syncAuthState } = useAuthStore()
 	const navigate = useNavigate()
 	const { fetchSettings } = useSettingsStore()
+	const { isDesktop } = useScreenSize() // Sử dụng hook
 
 	useEffect(() => {
-		fetchSettings() // Fetch settings when component mounts
+		fetchSettings()
 	}, [fetchSettings])
 
 	useEffect(() => {
-		let isMounted = true // Flag để tránh setState sau khi unmount
+		let isMounted = true
 
 		const initializeAuth = async () => {
 			setAuthLoading(true)
 			try {
-				// Chỉ gọi syncAuthState nếu có token
 				const accessToken = getAccessToken()
 				const refreshToken = getRefreshToken()
 				if (accessToken) {
@@ -34,11 +36,11 @@ function App() {
 					setAccessToken(jwt)
 					await syncAuthState()
 				} else {
-					useAuthStore.setState({ user: null, isAuthenticated: false }) // Sử dụng setState từ store
+					useAuthStore.setState({ user: null, isAuthenticated: false })
 				}
 			} catch (error) {
 				console.error('Auth initialization failed:', error)
-				logout() // Đăng xuất nếu đồng bộ thất bại
+				logout()
 				navigate('/')
 			} finally {
 				if (isMounted) {
@@ -49,11 +51,15 @@ function App() {
 
 		initializeAuth()
 
-		// Cleanup
 		return () => {
 			isMounted = false
 		}
 	}, [login, logout, setAuthLoading, syncAuthState])
+
+	// 🎯 Điều kiện hiển thị
+	if (!isDesktop) {
+		return <Dowload />
+	}
 
 	return <AppRouter />
 }

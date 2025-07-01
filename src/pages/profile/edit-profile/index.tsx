@@ -1,6 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { motion } from 'framer-motion'
-import { Camera, MapPin, Phone, Save, User } from 'lucide-react'
+import {
+	Award,
+	Camera,
+	Mail,
+	MapPin,
+	PhoneCall,
+	Save,
+	User
+} from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
@@ -175,7 +183,63 @@ const EditProfile = () => {
 						</div>
 					</motion.div>
 
-					{/* Form */}
+					{/* Static Information Section */}
+					<motion.div
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ delay: 0.35, duration: 0.5 }}
+						className='border-border bg-muted/30 mb-8 rounded-lg border p-6'
+					>
+						<h3 className='text-foreground mb-4 text-lg font-semibold'>
+							Thông Tin
+						</h3>
+						<div className='space-y-4'>
+							{/* Email */}
+							<div className='flex items-center gap-3'>
+								<div className='bg-primary/10 flex h-10 w-10 items-center justify-center rounded-full'>
+									<Mail className='text-primary h-5 w-5' />
+								</div>
+								<div className='flex-1'>
+									<p className='text-muted-foreground text-sm'>
+										Email đã xác thực
+									</p>
+									<p className='text-foreground font-medium'>
+										{user?.email || 'Chưa cập nhật'}
+									</p>
+								</div>
+							</div>
+
+							{/* Phone Number (Static) */}
+							<div className='flex items-center gap-3'>
+								<div className='bg-primary/10 flex h-10 w-10 items-center justify-center rounded-full'>
+									<PhoneCall className='text-primary h-5 w-5' />
+								</div>
+								<div className='flex-1'>
+									<p className='text-muted-foreground text-sm'>Số điện thoại</p>
+									<p className='text-foreground font-medium'>
+										{user?.phoneNumber || 'Chưa cập nhật'}
+									</p>
+								</div>
+							</div>
+
+							{/* Good Point */}
+							<div className='flex items-center gap-3'>
+								<div className='bg-primary/10 flex h-10 w-10 items-center justify-center rounded-full'>
+									<Award className='text-primary h-5 w-5' />
+								</div>
+								<div className='flex-1'>
+									<p className='text-muted-foreground text-sm'>Điểm tích lũy</p>
+									<p className='text-foreground font-medium'>
+										{user?.goodPoint !== undefined
+											? `${user.goodPoint} điểm`
+											: 'Chưa có điểm'}
+									</p>
+								</div>
+							</div>
+						</div>
+					</motion.div>
+
+					{/* Editable Form */}
 					<div className='space-y-6'>
 						<InputText
 							name='fullName'
@@ -189,18 +253,6 @@ const EditProfile = () => {
 						/>
 
 						<InputText
-							name='phoneNumber'
-							label='Số Điện Thoại'
-							type='tel'
-							placeholder='Nhập số điện thoại'
-							register={register}
-							error={errors.phoneNumber}
-							icon={Phone}
-							animationDelay={0.5}
-							autocompleted='off'
-						/>
-
-						<InputText
 							name='address'
 							label='Địa Chỉ'
 							type='text'
@@ -208,7 +260,7 @@ const EditProfile = () => {
 							register={register}
 							error={errors.address}
 							icon={MapPin}
-							animationDelay={0.6}
+							animationDelay={0.5}
 							rows={4}
 							autocompleted='off'
 						/>
@@ -219,7 +271,7 @@ const EditProfile = () => {
 							options={majors}
 							register={register}
 							error={errors.majorID}
-							animationDelay={0.7}
+							animationDelay={0.6}
 							defaulTextOption='chuyên ngành'
 							isLoading={false}
 							disabled={false}

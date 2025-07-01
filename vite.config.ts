@@ -14,8 +14,7 @@ export default defineConfig({
 		rollupOptions: {
 			output: {
 				manualChunks: {
-					vendor: ['react', 'react-dom'],
-					ui: ['@radix-ui/react-*']
+					vendor: ['react', 'react-dom']
 				}
 			}
 		},
@@ -23,5 +22,13 @@ export default defineConfig({
 	},
 	optimizeDeps: {
 		include: ['react', 'react-dom']
+	},
+	server: {
+		port: 3001,
+		allowedHosts: ['0.0.0.0', '0.0.0.0']
+	},
+	preview: {
+		port: 3001,
+		allowedHosts: ['0.0.0.0', '0.0.0.0']
 	}
 })

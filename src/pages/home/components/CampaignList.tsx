@@ -30,7 +30,7 @@ const CampaignList = () => {
 			) : posts && posts.length > 0 ? (
 				posts.length >= 3 ? (
 					<Carousel
-						itemHeight='h-[570px]'
+						itemHeight='h-[600px]'
 						autoplay={false}
 					>
 						{posts.map(campaign => (

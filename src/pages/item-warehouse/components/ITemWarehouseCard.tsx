@@ -34,7 +34,13 @@ const ItemWarehouseCard: React.FC<ItemWarehouseCardProps> = ({
 	}
 
 	const handleCardClick = () => {
-		if (!selectionMode || item.meQuantity || item.maxClaim === 0) return
+		if (
+			!selectionMode ||
+			item.meQuantity ||
+			item.maxClaim === 0 ||
+			item.quantity === 0
+		)
+			return
 
 		if (isSelected) {
 			onDeselect?.(item.itemID)
@@ -45,7 +51,8 @@ const ItemWarehouseCard: React.FC<ItemWarehouseCardProps> = ({
 
 	const handleQuantityChange = (newQuantity: number, e: React.MouseEvent) => {
 		e.stopPropagation()
-		if (newQuantity < 1 || newQuantity > item.quantity) return
+		if (newQuantity < 1 || newQuantity > Math.min(item.maxClaim, item.quantity))
+			return
 
 		setLocalQuantity(newQuantity)
 		if (isSelected) {
@@ -67,7 +74,8 @@ const ItemWarehouseCard: React.FC<ItemWarehouseCardProps> = ({
 				'bg-card group relative overflow-hidden rounded-lg border shadow-sm transition-all duration-300',
 				selectionMode && 'cursor-pointer hover:shadow-md',
 				isSelected && 'ring-primary border-primary ring-2',
-				selectionMode && (item.meQuantity || item.maxClaim === 0)
+				selectionMode &&
+					(item.meQuantity || item.maxClaim === 0 || item.quantity === 0)
 					? 'border-error/80'
 					: 'border-border',
 				className
@@ -75,20 +83,23 @@ const ItemWarehouseCard: React.FC<ItemWarehouseCardProps> = ({
 			onClick={handleCardClick}
 		>
 			{/* Selection Indicator */}
-			{selectionMode && !item.meQuantity && item.maxClaim !== 0 && (
-				<div className='absolute top-3 left-3 z-20'>
-					<div
-						className={clsx(
-							'flex h-6 w-6 items-center justify-center rounded-full border-2 shadow-sm transition-all duration-200',
-							isSelected
-								? 'bg-primary border-primary text-primary-foreground shadow-primary/25'
-								: 'bg-card border-muted-foreground/30 group-hover:border-primary group-hover:bg-primary/10'
-						)}
-					>
-						{isSelected && <Check className='h-3 w-3 stroke-[3]' />}
+			{selectionMode &&
+				!item.meQuantity &&
+				item.maxClaim !== 0 &&
+				item.quantity !== 0 && (
+					<div className='absolute top-3 left-3 z-20'>
+						<div
+							className={clsx(
+								'flex h-6 w-6 items-center justify-center rounded-full border-2 shadow-sm transition-all duration-200',
+								isSelected
+									? 'bg-primary border-primary text-primary-foreground shadow-primary/25'
+									: 'bg-card border-muted-foreground/30 group-hover:border-primary group-hover:bg-primary/10'
+							)}
+						>
+							{isSelected && <Check className='h-3 w-3 stroke-[3]' />}
+						</div>
 					</div>
-				</div>
-			)}
+				)}
 
 			{/* Image Section */}
 			<div className='bg-muted relative h-48 overflow-hidden'>
@@ -154,7 +165,7 @@ const ItemWarehouseCard: React.FC<ItemWarehouseCardProps> = ({
 					>
 						{item.maxClaim === 0
 							? 'Chưa thể đăng ký'
-							: 'Đăng ký tối đa: ' + item.maxClaim}
+							: 'Đăng ký tối đa: ' + Math.min(item.maxClaim, item.quantity)}
 					</span>
 				</div>
 			</div>
@@ -197,7 +208,9 @@ const ItemWarehouseCard: React.FC<ItemWarehouseCardProps> = ({
 							</span>
 							<button
 								onClick={e => handleQuantityChange(localQuantity + 1, e)}
-								disabled={localQuantity >= item.quantity}
+								disabled={
+									localQuantity >= Math.min(item.maxClaim, item.quantity)
+								}
 								className='bg-background border-border hover:bg-muted flex h-8 w-8 items-center justify-center rounded-full border transition-colors disabled:cursor-not-allowed disabled:opacity-50'
 							>
 								<Plus className='h-4 w-4' />

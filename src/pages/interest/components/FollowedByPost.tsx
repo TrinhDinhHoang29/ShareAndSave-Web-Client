@@ -37,7 +37,7 @@ export const PostItem = ({ post }: { post: IPostInterest }) => {
 			)}
 		>
 			<div
-				className='bg-card hover:bg-muted/50 flex cursor-pointer items-center justify-between p-6 transition-colors duration-200'
+				className='bg-card hover:bg-muted/50 flex cursor-pointer items-center justify-between rounded-2xl p-6 transition-colors duration-200'
 				onClick={() => setIsExpanded(!isExpanded)}
 			>
 				<div className='flex items-center space-x-4'>
@@ -109,7 +109,6 @@ export const PostItem = ({ post }: { post: IPostInterest }) => {
 											authorID={post.authorID}
 											userInterest={interest}
 											key={interest.id}
-											postID={post.id}
 										/>
 									))}
 								</div>

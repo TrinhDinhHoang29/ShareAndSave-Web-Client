@@ -6,7 +6,7 @@ import { useAuthDialog } from '@/context/auth-dialog-context'
 import useAuthStore from '@/stores/authStore'
 
 const LoginSession = () => {
-	const [isVisible, setIsVisible] = useState(true)
+	const [isVisible] = useState(true)
 	const { syncAuthState } = useAuthStore()
 	const { openDialog } = useAuthDialog()
 

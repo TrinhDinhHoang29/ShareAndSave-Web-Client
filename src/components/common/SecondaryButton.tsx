@@ -1,5 +1,4 @@
 import clsx from 'clsx'
-import { ChevronLeft } from 'lucide-react' // Assuming Lucide icons
 import React, { MouseEvent, ReactNode } from 'react'
 import { Link } from 'react-router-dom' // Import Link from react-router-dom
 

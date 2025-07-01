@@ -58,7 +58,9 @@ export const ChatNotificationProvider: React.FC<{
 			socketRef.current.close() // Đóng kết nối cũ nếu có
 		}
 
-		const wsUrl = `ws://34.142.168.171:8001/chat-noti`
+		const wsUrl =
+			import.meta.env.VITE_SOCKET_CHAT_NOTI ||
+			'ws://34.142.168.171:8001/chat-noti'
 		const newSocket = new WebSocket(wsUrl, token || '')
 
 		newSocket.onopen = () => {

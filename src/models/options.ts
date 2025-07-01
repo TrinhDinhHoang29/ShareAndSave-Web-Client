@@ -13,8 +13,9 @@ export const typeOptions = [
 	{ value: EPostType.ALL, label: 'Tất cả' },
 	{ value: EPostType.CAMPAIGN, label: 'Chiến dịch	' },
 	{ value: EPostType.GIVE_AWAY_OLD_ITEM, label: 'Cho tặng đồ cũ' },
-	{ value: EPostType.FOUND_ITEM, label: 'Tìm thấy đồ' },
-	{ value: EPostType.SEEK_LOSE_ITEM, label: 'Tìm đồ bị mất' },
+	{ value: EPostType.FOUND_ITEM, label: 'Nhặt được đồ thất lạc' },
+	{ value: EPostType.SEEK_LOSE_ITEM, label: 'Tìm đồ thất lạc' },
+	{ value: EPostType.WANT_OLD_ITEM, label: 'Xin nhận đồ cũ' },
 	{ value: EPostType.OTHER, label: 'Khác' }
 ]
 

@@ -44,14 +44,14 @@ export const getTypeInfo = (type: EPostType) => {
 			}
 		case EPostType.FOUND_ITEM:
 			return {
-				label: 'Tìm thấy đồ',
+				label: 'Nhặt được đồ thất lạc',
 				color:
 					'bg-post-type-2 text-post-type-foreground-2 dark:bg-post-type-2/20 dark:text-post-type-foreground-2',
 				Icon: Gift
 			}
 		case EPostType.SEEK_LOSE_ITEM:
 			return {
-				label: 'Tìm đồ bị mất',
+				label: 'Tìm đồ thất lạc',
 				color:
 					'bg-post-type-3 text-post-type-foreground-3 dark:bg-post-type-3/20 dark:text-post-type-foreground-3',
 				Icon: Search
@@ -64,7 +64,7 @@ export const getTypeInfo = (type: EPostType) => {
 			}
 		case EPostType.WANT_OLD_ITEM:
 			return {
-				label: 'Tìm đồ cũ',
+				label: 'Xin nhận đồ cũ',
 				color: 'bg-post-type-6 text-post-type-foreground-6',
 				Icon: Rabbit
 			}
@@ -228,13 +228,22 @@ export const getConfirmContentTransactionStatus = (
 	}
 }
 
-export const getStatusPostTypeConfig = (type: EPostType, quantity: number) => {
+export const getStatusPostTypeConfig = (
+	type: EPostType,
+	quantity: number,
+	startDate?: string,
+	endDate?: string,
+	tags?: string[]
+) => {
 	// Không xử lý cho type OTHER
 	if (type === EPostType.OTHER) {
 		return {}
 	}
 
-	const isComplete = quantity === 0
+	const isComplete = quantity === 0 && tags && tags.length > 0
+	const currentDate = new Date()
+	const start = new Date(startDate || '')
+	const end = new Date(endDate || '')
 
 	switch (type) {
 		case EPostType.GIVE_AWAY_OLD_ITEM:
@@ -276,13 +285,35 @@ export const getStatusPostTypeConfig = (type: EPostType, quantity: number) => {
 				animationClass: isComplete ? '' : 'animate-bounce'
 			}
 		case EPostType.CAMPAIGN:
+			if (isComplete && !startDate && !endDate) {
+				return {
+					label: 'Đã hoàn thành',
+					color: 'bg-success text-secondary-foreground',
+					Icon: CheckCircle,
+					animationClass: ''
+				}
+			}
+			if (currentDate < start) {
+				return {
+					label: 'Sắp diễn ra',
+					color: 'bg-info text-white',
+					Icon: Clock,
+					animationClass: 'animate-pulse'
+				}
+			}
+			if (currentDate > end) {
+				return {
+					label: 'Đã kết thúc',
+					color: 'bg-error text-white',
+					Icon: CheckCircle,
+					animationClass: ''
+				}
+			}
 			return {
-				label: isComplete ? 'Đã hoàn thành' : 'Đang diễn ra',
-				color: isComplete
-					? 'bg-success text-secondary-foreground'
-					: 'bg-warning text-white',
-				Icon: isComplete ? CheckCircle : Clock,
-				animationClass: isComplete ? '' : 'animate-pulse'
+				label: 'Đang diễn ra',
+				color: 'bg-warning text-white',
+				Icon: Clock,
+				animationClass: 'animate-pulse'
 			}
 		default:
 			return {}

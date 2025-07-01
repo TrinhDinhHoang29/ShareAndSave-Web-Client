@@ -3,19 +3,45 @@ import { useEffect, useState } from 'react'
 
 interface AlertPingProps {
 	isPulse?: boolean
-	duration?: number // Thời gian ping (ms), mặc định 3000ms
+	size?: string
+	position?: string
+	duration?: number // Thời gian hiển thị (ms)
 }
 
-const AlertPing = ({ isPulse = false }: AlertPingProps) => {
+const AlertPing = ({
+	isPulse = false,
+	size = 'size-4',
+	position = '-top-1 -right-2',
+	duration
+}: AlertPingProps) => {
+	const [isVisible, setIsVisible] = useState(true)
+
+	useEffect(() => {
+		if (duration && duration > 0) {
+			const timer = setTimeout(() => {
+				setIsVisible(false)
+			}, duration)
+
+			return () => clearTimeout(timer)
+		}
+	}, [duration])
+
+	// Nếu có duration và đã hết thời gian thì ẩn component
+	if (duration && !isVisible) {
+		return null
+	}
+
 	return (
-		<span className='absolute -top-1 -right-2 flex size-4'>
+		<span className={clsx('absolute flex', size, position)}>
 			<span
 				className={clsx(
 					'absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75',
 					isPulse && 'animate-ping'
 				)}
 			/>
-			<span className='relative inline-flex size-4 rounded-full bg-red-600' />
+			<span
+				className={clsx('relative inline-flex rounded-full bg-red-600', size)}
+			/>
 		</span>
 	)
 }

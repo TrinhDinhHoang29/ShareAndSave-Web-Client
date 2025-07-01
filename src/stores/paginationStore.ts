@@ -16,7 +16,7 @@ interface PaginationState {
 }
 
 const usePaginationStore = create<PaginationState>()(
-	subscribeWithSelector((set, get) => ({
+	subscribeWithSelector(set => ({
 		pagination: {},
 		setPage: (pageId, page) =>
 			set(state => {

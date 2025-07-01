@@ -13,7 +13,12 @@ import { useDetailPostInterestQuery } from '@/hooks/queries/use-interest.query'
 import { useListTransactionQuery } from '@/hooks/queries/use-transaction.query'
 import { getAccessToken } from '@/lib/token'
 import { getConfirmContentTransactionStatus } from '@/models/constants'
-import { EMethod, ESortOrder, ETransactionStatus } from '@/models/enums'
+import {
+	EMethod,
+	EPostType,
+	ESortOrder,
+	ETransactionStatus
+} from '@/models/enums'
 import {
 	IReceiver,
 	ISocketMessageResponse,
@@ -32,7 +37,7 @@ const Chat = () => {
 	const params = useParams()
 	const interestID = Number(params.interestID)
 	const navigate = useNavigate()
-	const { showInfo, showConfirm, close, showSuccess } = useAlertModalContext()
+	const { showInfo, showConfirm, showSuccess } = useAlertModalContext()
 
 	useEffect(() => {
 		if (isNaN(interestID)) {
@@ -164,10 +169,10 @@ const Chat = () => {
 							status: 'error'
 						})
 					} else if (data.event === 'send_transaction_response') {
-						console.log(event.data)
 						if (!isAuthor) {
 							setTransactionStatus(ETransactionStatus.DEFAULT)
 							setTransactionItems([])
+							postDetailDataRefetch()
 						}
 						transactionDataRefetch()
 					}
@@ -575,6 +580,10 @@ const Chat = () => {
 								isFetchingNextPage={isTransactionFetchingNextPage}
 								sentinelRef={transactionRef}
 								isPendingTransaction={isPendingTransaction}
+								postType={
+									(postDetailInterestData?.type.toString() as EPostType) ||
+									EPostType.GIVE_AWAY_OLD_ITEM
+								}
 							/>
 							<ChatMessagesPanel
 								socketMessageResponse={socketMessageResponse}

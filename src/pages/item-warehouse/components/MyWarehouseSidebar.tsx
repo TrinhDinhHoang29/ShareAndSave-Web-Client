@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Minus, Package, Plus, X } from 'lucide-react'
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 
 import DefaultImage from '@/assets/images/default_img.webp'
 import Loading from '@/components/common/Loading'
@@ -41,6 +41,9 @@ const MyWarehouseSidebar: React.FC<MyWarehouseSidebarProps> = ({
 	isItemDeleting
 }) => {
 	const [activeTab, setActiveTab] = useState<TabType>('register')
+	const claimRequestStables = useMemo(() => {
+		return claimRequests
+	}, [claimRequests])
 
 	const handleQuantityChange = (
 		itemID: number,
@@ -154,9 +157,9 @@ const MyWarehouseSidebar: React.FC<MyWarehouseSidebarProps> = ({
 									<p className='text-muted-foreground text-xs'>
 										Phân loại: {item.categoryName}
 									</p>
-									{item.curentQuantity && (
+									{item.currentQuantity && (
 										<div className='text-muted-foreground text-xs'>
-											Có sẵn: {item.curentQuantity}
+											Có sẵn: {item.currentQuantity}
 										</div>
 									)}
 								</div>
@@ -198,13 +201,14 @@ const MyWarehouseSidebar: React.FC<MyWarehouseSidebarProps> = ({
 											incrementQuantity(
 												item.itemID,
 												item.quantity,
-												item.curentQuantity,
+												Math.min(item.currentQuantity || 0, item.maxClaim),
 												isClaimRequest
 											)
 										}
 										disabled={
-											item.curentQuantity
-												? item.quantity >= item.curentQuantity
+											Math.min(item.currentQuantity || 0, item.maxClaim)
+												? item.quantity >=
+													Math.min(item.currentQuantity || 0, item.maxClaim)
 												: false
 										}
 										className='bg-background hover:bg-background/80 flex h-8 w-8 items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50'
@@ -253,7 +257,7 @@ const MyWarehouseSidebar: React.FC<MyWarehouseSidebarProps> = ({
 						) : (
 							<>
 								<Package className='h-4 w-4' />
-								{claimRequests && claimRequests.length > 0
+								{claimRequestStables && claimRequestStables.length > 0
 									? 'Xác nhận thêm đồ'
 									: 'Xác nhận đăng ký nhận đồ'}
 							</>
@@ -319,9 +323,9 @@ const MyWarehouseSidebar: React.FC<MyWarehouseSidebarProps> = ({
 									}`}
 								>
 									Yêu cầu đã gửi
-									{claimRequests.length > 0 && (
+									{claimRequestStables.length > 0 && (
 										<span className='bg-success/70 ml-2 rounded-full px-2 py-0.5 text-xs text-white'>
-											{claimRequests.length}
+											{claimRequestStables.length}
 										</span>
 									)}
 								</button>
@@ -332,7 +336,7 @@ const MyWarehouseSidebar: React.FC<MyWarehouseSidebarProps> = ({
 								{activeTab === 'register' &&
 									renderItemList(selectedItems, false)}
 								{activeTab === 'submitted' &&
-									renderItemList(claimRequests, true)}
+									renderItemList(claimRequestStables, true)}
 							</div>
 						</div>
 					</motion.div>

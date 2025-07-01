@@ -22,7 +22,7 @@ import React, { useState } from 'react'
 
 import Loading from '@/components/common/Loading'
 import { getTransactionStatusConfig } from '@/models/constants'
-import { EMethod, ETransactionStatus } from '@/models/enums'
+import { EMethod, EPostType, ETransactionStatus } from '@/models/enums'
 import { IReceiver, ITransaction, ITransactionItem } from '@/models/interfaces'
 
 import { TransactionsDialog } from './TransactionDialog'
@@ -53,6 +53,7 @@ interface Props {
 	sentinelRef?: (node: HTMLElement | null) => void
 	setSelectedMethod: (method: EMethod) => void
 	onRefetch: () => void
+	postType: EPostType
 }
 
 const ChatHeaderWithRequests = ({
@@ -79,7 +80,8 @@ const ChatHeaderWithRequests = ({
 	isFetchingNextPage = false,
 	sentinelRef,
 	setSelectedMethod,
-	onRefetch
+	onRefetch,
+	postType
 }: Props) => {
 	transactionStatus = transactionStatus.toString() as ETransactionStatus
 	const currentItem = transactionItems[currentRequestIndex]
@@ -91,6 +93,8 @@ const ChatHeaderWithRequests = ({
 	const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false)
 	const [isTutorialTransactionDialogOpen, setIsTutorialTransactionDialogOpen] =
 		useState(false)
+
+	console.log(postType)
 
 	const handleTransactionSelect = (index: number) => {
 		const status = transactions[index]?.status.toString() as ETransactionStatus
@@ -226,6 +230,8 @@ const ChatHeaderWithRequests = ({
 									onClick={() =>
 										isAuthor &&
 										transactionStatus === ETransactionStatus.PENDING &&
+										postType !== EPostType.WANT_OLD_ITEM &&
+										postType !== EPostType.SEEK_LOSE_ITEM &&
 										handleToggleMethod()
 									}
 									className='bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200'
@@ -235,7 +241,9 @@ const ChatHeaderWithRequests = ({
 								{((!isAuthor &&
 									transactionStatus === ETransactionStatus.DEFAULT) ||
 									(isAuthor &&
-										transactionStatus === ETransactionStatus.PENDING)) && (
+										transactionStatus === ETransactionStatus.PENDING &&
+										postType !== EPostType.WANT_OLD_ITEM &&
+										postType !== EPostType.SEEK_LOSE_ITEM)) && (
 									<button
 										disabled={isCreateTransactionPending}
 										onClick={handleConfirmRequest}
@@ -329,6 +337,8 @@ const ChatHeaderWithRequests = ({
 											</button>
 										)}
 										{transactionStatus === ETransactionStatus.PENDING &&
+											postType !== EPostType.WANT_OLD_ITEM &&
+											postType !== EPostType.SEEK_LOSE_ITEM &&
 											isAuthor && (
 												<div className='bg-card border-border flex items-center gap-2 rounded-lg border p-1 shadow-sm'>
 													<button

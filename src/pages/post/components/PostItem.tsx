@@ -16,6 +16,13 @@ interface PostItemProps {
 	className?: string
 }
 
+interface CampaignInfo {
+	startDate: string
+	endDate: string
+	location: string
+	organizer: string
+}
+
 const PostItem: React.FC<PostItemProps> = ({
 	post,
 	onPostClick,
@@ -24,9 +31,23 @@ const PostItem: React.FC<PostItemProps> = ({
 	const truncateText = (text: string, maxLength: number) => {
 		return text.length > maxLength ? text.substring(0, maxLength) + '...' : text
 	}
+	const getCampaignInfo = () => {
+		try {
+			return JSON.parse(post.info)
+		} catch (error) {
+			console.error('Error parsing campaign info:', error)
+			return {}
+		}
+	}
+
+	const campaignInfo: CampaignInfo = getCampaignInfo()
+
 	const { color, label } = getStatusPostTypeConfig(
 		post.type.toString() as EPostType,
-		post.currentItemCount
+		post.currentItemCount,
+		campaignInfo.startDate || '',
+		campaignInfo.endDate || '',
+		post.tags
 	)
 	const { user } = useAuthStore()
 
@@ -101,7 +122,7 @@ const PostItem: React.FC<PostItemProps> = ({
 
 				{/* Stats & Type */}
 				<div className='flex items-center justify-between'>
-					<div className='text-muted-foreground flex w-2/3 items-center gap-2 truncate text-sm'>
+					<div className='text-muted-foreground flex w-1/2 items-center gap-2 truncate text-sm'>
 						<User className='h-4 w-4' />
 						<div className='w-full truncate'>
 							<span>{post.authorName}</span>

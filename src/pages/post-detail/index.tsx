@@ -229,9 +229,23 @@ const PostDetail: React.FC = () => {
 		return post?.items?.reduce((acc, cur) => acc + (cur.quantity || 0), 0) || 0
 	}, [post])
 
+	const getCampaignInfo = () => {
+		try {
+			return JSON.parse(post?.info || '')
+		} catch (error) {
+			console.error('Error parsing campaign info:', error)
+			return {}
+		}
+	}
+
+	const campaignInfo: CampaignInfo = getCampaignInfo()
+
 	const { color: statusColor, label: statusLabel } = getStatusPostTypeConfig(
 		post?.type.toString() as EPostType,
-		sumCurrentQuantityItems
+		sumCurrentQuantityItems,
+		campaignInfo.startDate || '',
+		campaignInfo.endDate || '',
+		post?.tags
 	)
 
 	const handleChat = (option: 'chat' | 'transaction') => {

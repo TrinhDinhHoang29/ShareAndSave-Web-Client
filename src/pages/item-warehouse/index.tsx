@@ -119,13 +119,6 @@ const ItemWarehouse = () => {
 		}
 	})
 
-	// 🔄 Cập nhật submittedRequests khi có dữ liệu từ API
-	useEffect(() => {
-		if (claimRequests) {
-			setSubmittedRequests(claimRequests)
-		}
-	}, [claimRequests])
-
 	const itemWarehouses = useMemo(() => {
 		if (
 			claimRequests &&
@@ -146,6 +139,13 @@ const ItemWarehouse = () => {
 		}
 		return data?.itemOldStocks || []
 	}, [claimRequests, data])
+
+	// 🔄 Cập nhật submittedRequests khi có dữ liệu từ API
+	useEffect(() => {
+		if (claimRequests) {
+			setSubmittedRequests(claimRequests)
+		}
+	}, [claimRequests])
 
 	const categoryOptions: IOption[] = useMemo(() => {
 		if (categories && categories.length > 0) {
@@ -181,7 +181,7 @@ const ItemWarehouse = () => {
 			newItem = {
 				...item,
 				quantity: quantity,
-				curentQuantity: item.quantity
+				currentQuantity: item.quantity
 			}
 		}
 

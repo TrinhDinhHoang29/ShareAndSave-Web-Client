@@ -2,7 +2,6 @@ import { EGoodPOINTTYPE } from '@/models/enums'
 import { IApiResponse, ISetting } from '@/models/interfaces'
 
 import axiosPrivate from '../client/private.client'
-import axiosPublic from '../client/public.client'
 
 const settingEndpoints = {
 	rank: 'client/users/ranks',

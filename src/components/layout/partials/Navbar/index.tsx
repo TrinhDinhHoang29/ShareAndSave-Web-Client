@@ -10,10 +10,12 @@ import {
 	Search,
 	Sun
 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
+import { useChatNotification } from '@/context/chat-noti-context'
 import { useTheme } from '@/context/theme-context'
+import AlertPing from '@/pages/interest/components/AlertPing'
 
 import DropdownProfileMenu from './DropdownProfileMenu'
 import SearchDropdown from './SearchDropdown'
@@ -32,6 +34,14 @@ const Navbar = () => {
 	const location = useLocation()
 	const [searchQuery, setSearchQuery] = useState('')
 	const [isVisible, setIsVisible] = useState(true)
+	const { followedByNotification, followingNotification } =
+		useChatNotification()
+
+	// Check if there are any notifications for "Quan tâm"
+	const hasInterestNotifications =
+		followedByNotification || followingNotification
+
+	useEffect(() => {}, [followedByNotification, followingNotification])
 
 	const handleSearch = (e: any) => {
 		e.preventDefault()
@@ -162,18 +172,33 @@ const Navbar = () => {
 							<div className='no-scrollbar flex items-center gap-1 overflow-x-auto py-2'>
 								{navLinks.map(({ to, label }) => {
 									const isActive = location.pathname === to
+									const isInterestPage = to === '/quan-tam'
+
 									return (
-										<Link
+										<div
 											key={to}
-											to={to}
-											className={`rounded-full px-4 py-2 whitespace-nowrap transition-all ${
-												isActive
-													? 'bg-blue-100 font-medium text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
-													: 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
-											}`}
+											className='relative'
 										>
-											<span className='hidden sm:inline'>{label}</span>
-										</Link>
+											<Link
+												to={to}
+												className={`rounded-full px-4 py-2 whitespace-nowrap transition-all ${
+													isActive
+														? 'bg-blue-100 font-medium text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+														: 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
+												}`}
+											>
+												<span className='hidden sm:inline'>{label}</span>
+											</Link>
+											{/* Show AlertPing for "Quan tâm" when there are notifications */}
+											{isInterestPage && hasInterestNotifications && (
+												<AlertPing
+													duration={5000}
+													size='size-3'
+													position='-top-1 right-0'
+													isPulse={true}
+												/>
+											)}
+										</div>
 									)
 								})}
 							</div>

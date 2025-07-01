@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { formatDateTimeVN } from '@/lib/utils'
-import { getTypeInfo } from '@/models/constants'
+import { getStatusPostTypeConfig, getTypeInfo } from '@/models/constants'
 import { EPostType } from '@/models/enums'
 import { IPost } from '@/models/interfaces'
 
@@ -12,6 +12,13 @@ interface CampaignCardProps {
 	campaign: IPost
 	onClick?: (campaign: IPost) => void
 	className?: string
+}
+
+interface CampaignInfo {
+	startDate: string
+	endDate: string
+	location: string
+	organizer: string
 }
 
 const CampaignCard: React.FC<CampaignCardProps> = ({
@@ -31,7 +38,7 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
 		}
 	}
 
-	const campaignInfo = getCampaignInfo()
+	const campaignInfo: CampaignInfo = getCampaignInfo()
 
 	const handleCardClick = () => {
 		onClick?.(campaign)
@@ -44,33 +51,18 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
 			100
 		)
 	}
-
-	const getStatusBadge = () => {
-		// Map status number to display text
-		const statusConfig: Record<number, { label: string; color: string }> = {
-			1: {
-				label: 'Sắp diễn ra',
-				color: 'bg-warning text-white'
-			},
-			2: {
-				label: 'Đang diễn ra',
-				color: 'bg-success text-success-foreground'
-			},
-			3: {
-				label: 'Đã kết thúc',
-				color: 'bg-secondary text-secondary-foreground'
-			}
-		}
-
-		return statusConfig[campaign.status || 2] || statusConfig[2]
-	}
+	const statusBadge = getStatusPostTypeConfig(
+		EPostType.CAMPAIGN,
+		campaign.currentItemCount,
+		campaignInfo.startDate,
+		campaignInfo.endDate,
+		campaign.tags
+	)
 
 	const truncateText = (text: string, maxLength: number = 120) => {
 		if (text.length <= maxLength) return text
 		return text.substring(0, maxLength) + '...'
 	}
-
-	const statusBadge = getStatusBadge()
 
 	// Get main image from images array
 	const mainImage =
@@ -149,31 +141,33 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
 				</div>
 
 				{/* Progress Overlay */}
-				<div className='absolute right-0 bottom-0 left-0 bg-gradient-to-t from-black/60 to-transparent p-4'>
-					<div className='text-white'>
-						<div className='mb-1 flex justify-between text-xs'>
-							<span>Tiến độ thu thập</span>
-							<span>
-								{campaign.itemCount - campaign.currentItemCount}/
-								{campaign.itemCount}
-							</span>
-						</div>
-						<div className='h-2 w-full rounded-full bg-white/30'>
-							<motion.div
-								className='bg-primary h-2 rounded-full'
-								initial={{ width: 0 }}
-								animate={{ width: `${getProgressPercentage()}%` }}
-								transition={{ duration: 1, delay: 0.5 }}
-							/>
+				{campaign.tags && campaign.tags.length > 0 && (
+					<div className='absolute right-0 bottom-0 left-0 bg-gradient-to-t from-black/60 to-transparent p-4'>
+						<div className='text-white'>
+							<div className='mb-1 flex justify-between text-xs'>
+								<span>Tiến độ thu thập</span>
+								<span>
+									{campaign.itemCount - campaign.currentItemCount}/
+									{campaign.itemCount}
+								</span>
+							</div>
+							<div className='h-2 w-full rounded-full bg-white/30'>
+								<motion.div
+									className='bg-primary h-2 rounded-full'
+									initial={{ width: 0 }}
+									animate={{ width: `${getProgressPercentage()}%` }}
+									transition={{ duration: 1, delay: 0.5 }}
+								/>
+							</div>
 						</div>
 					</div>
-				</div>
+				)}
 			</div>
 
 			{/* Content Section */}
 			<div className='space-y-4 p-5'>
 				{/* Title */}
-				<h3 className='text-card-foreground group-hover:text-primary text-lg leading-tight font-bold transition-colors'>
+				<h3 className='text-card-foreground group-hover:text-primary line-clamp-2 text-lg leading-tight font-bold transition-colors'>
 					{campaign.title}
 				</h3>
 

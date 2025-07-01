@@ -17,13 +17,38 @@ const UserRanksOutTop: React.FC<UserRanksOutTopProps> = ({
 	userRanks,
 	myID
 }) => {
-	return userRanks.slice(3).map((user, index) => (
+	// Tính toán thứ hạng thực tế cho từng user
+	const getUsersWithRealRank = (users: IUserRank[]) => {
+		const usersWithRank = []
+		let currentRank = 1
+
+		for (let i = 0; i < users.length; i++) {
+			const currentUser = users[i]
+
+			// Nếu không phải user đầu tiên và có điểm khác với user trước đó
+			if (i > 0 && currentUser.goodPoint !== users[i - 1].goodPoint) {
+				currentRank = i + 1
+			}
+
+			usersWithRank.push({
+				...currentUser,
+				realRank: currentRank
+			})
+		}
+
+		return usersWithRank
+	}
+
+	const usersWithRealRank = getUsersWithRealRank(userRanks)
+	const usersOutOfTop3 = usersWithRealRank.slice(3)
+
+	return usersOutOfTop3.map((user, index) => (
 		<div
 			key={`${user.userID}-${index}`}
-			className={`flex items-center rounded-xl p-5 transition-all duration-300 ${getRankStyle(index + 4)} ${myID === user.userID ? 'ring-primary/50 ring-2' : ''}`}
+			className={`flex items-center rounded-xl p-5 transition-all duration-300 ${getRankStyle(user.realRank)} ${myID === user.userID ? 'ring-primary/50 ring-2' : ''}`}
 		>
 			<div
-				className={`relative h-12 w-12 overflow-hidden rounded-full ${getAvatarStyle(index + 4)}`}
+				className={`relative h-12 w-12 overflow-hidden rounded-full ${getAvatarStyle(user.realRank)}`}
 			>
 				<img
 					src={user.userAvatar}
@@ -55,9 +80,9 @@ const UserRanksOutTop: React.FC<UserRanksOutTopProps> = ({
 							</div>
 						</div>
 						<div
-							className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold ${getRankBadgeStyle(index + 4)}`}
+							className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold ${getRankBadgeStyle(user.realRank)}`}
 						>
-							{index + 4}
+							{user.realRank}
 						</div>
 					</div>
 				</div>

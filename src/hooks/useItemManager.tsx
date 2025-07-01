@@ -23,7 +23,7 @@ export const useItemManager = ({
 	newItemsFieldName = 'newItems',
 	oldItemsFieldName = 'oldItems'
 }: UseItemManagerProps = {}) => {
-	const { setValue, getValues } = useFormContext()
+	const { setValue } = useFormContext()
 	const [newItems, setNewItems] = useState<IItemRequest[]>([])
 	const [oldItems, setOldItems] = useState<IItemRequest[]>([])
 	const [isDialogOpen, setIsDialogOpen] = useState(false)

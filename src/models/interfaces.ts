@@ -399,7 +399,7 @@ export interface IItemWarehouse {
 	itemImage: string
 	itemName: string
 	quantity: number
-	curentQuantity?: number
+	currentQuantity?: number
 	meQuantity?: number
 	maxClaim: number
 }

@@ -1,6 +1,6 @@
 import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Calendar, Gift, MapPin, Package, Tag, User, X } from 'lucide-react'
+import { Calendar, Gift, MapPin, Package, User, X } from 'lucide-react'
 import { FC } from 'react'
 
 import { formatDate } from '@/lib/utils'

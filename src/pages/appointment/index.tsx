@@ -8,7 +8,7 @@ import { useAlertModalContext } from '@/context/alert-modal-context'
 import { useUpdateAppointmentMutation } from '@/hooks/mutations/use-appointment.mutation'
 import { useListAppointmentQuery } from '@/hooks/queries/use-appointment.query'
 import useDebounce from '@/hooks/use-debounce'
-import { EAppointmentStatus, EPostType, ESortOrder } from '@/models/enums'
+import { EAppointmentStatus, ESortOrder } from '@/models/enums'
 import { IAppointment } from '@/models/interfaces'
 import { sortOptions } from '@/models/options'
 
@@ -18,7 +18,6 @@ import AppointmentItem from './components/AppointmentItem'
 import AppointmentItemSkeleton from './components/AppointmentItemSkeleton'
 
 // Kiểu hợp nhất với '' cho "Tất cả"
-type PostTypeSelection = '' | EPostType
 const limit = 9
 
 const Appointment = () => {

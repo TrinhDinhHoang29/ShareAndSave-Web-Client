@@ -41,7 +41,7 @@ const Home = () => {
 			<div className='container mx-auto space-y-5'>
 				<Heading title='Chiến dịch'>
 					<Link
-						to='#'
+						to='/bai-dang'
 						className='text-primary/90 underline underline-offset-1'
 					>
 						Xem tất cả
