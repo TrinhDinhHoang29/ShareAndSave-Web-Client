@@ -7,7 +7,7 @@ import {
 } from '@/hooks/mutations/use-auth.mutation'
 import { EPurposeOTP } from '@/models/enums'
 import { RegisterFormData } from '@/models/types'
-import AuthLayoutDialog from '@/pages/(auth)/AuthLayoutDialog'
+import AuthLayoutDialog from '@/pages/(auth)/authLayoutDialog'
 import LoginDialog from '@/pages/(auth)/loginDialog'
 import OTPInputDialog from '@/pages/(auth)/OtpInputDialog'
 import RegisterDialog from '@/pages/(auth)/registerDialog'
