@@ -17,7 +17,7 @@ import useAuthStore from './stores/authStore'
 import { useSettingsStore } from './stores/settingStore'
 
 function App() {
-	const { login, logout, setAuthLoading, syncAuthState } = useAuthStore()
+	const { login, setAuthLoading, syncAuthState } = useAuthStore()
 	const navigate = useNavigate()
 	const { fetchSettings } = useSettingsStore()
 	const { isDesktop } = useScreenSize() // Sử dụng hook
@@ -62,7 +62,7 @@ function App() {
 		return () => {
 			isMounted = false
 		}
-	}, [login, logout, setAuthLoading, syncAuthState])
+	}, [login, setAuthLoading, syncAuthState])
 
 	// 🎯 Điều kiện hiển thị
 	if (!isDesktop) {
