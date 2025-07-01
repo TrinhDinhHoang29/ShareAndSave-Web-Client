@@ -41,7 +41,7 @@ export const useDetailTransactionQuery = (interestID: number) => {
 		queryKey: ['transaction', 'detail', interestID], // Key để cache, dựa trên id
 		queryFn: async () => {
 			const res = await transactionApi.detail(interestID)
-			return res.data.transaction // Trả về null nếu post không tồn tại
+			return res.data.transaction.id === 0 ? null : res.data.transaction // Trả về null nếu post không tồn tại
 		},
 		enabled: !!interestID, // Chỉ chạy query khi id tồn tại và lớn hơn 0
 		staleTime: 5 * 60 * 1000, // Dữ liệu tươi trong 5 phút
