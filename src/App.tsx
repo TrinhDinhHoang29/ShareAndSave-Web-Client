@@ -5,7 +5,13 @@ import AppRouter from '@/routes/index.route'
 
 import authApi from './apis/modules/auth.api'
 import { useScreenSize } from './hooks/useScreenSize' // Import hook
-import { getAccessToken, getRefreshToken, setAccessToken } from './lib/token'
+import {
+	clearAccessToken,
+	clearRefreshToken,
+	getAccessToken,
+	getRefreshToken,
+	setAccessToken
+} from './lib/token'
 import Dowload from './pages/dowload'
 import useAuthStore from './stores/authStore'
 import { useSettingsStore } from './stores/settingStore'
@@ -40,7 +46,9 @@ function App() {
 				}
 			} catch (error) {
 				console.error('Auth initialization failed:', error)
-				logout()
+				useAuthStore.setState({ user: null, isAuthenticated: false })
+				clearAccessToken()
+				clearRefreshToken()
 				navigate('/')
 			} finally {
 				if (isMounted) {

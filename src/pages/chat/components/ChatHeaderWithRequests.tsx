@@ -94,8 +94,6 @@ const ChatHeaderWithRequests = ({
 	const [isTutorialTransactionDialogOpen, setIsTutorialTransactionDialogOpen] =
 		useState(false)
 
-	console.log(postType)
-
 	const handleTransactionSelect = (index: number) => {
 		const status = transactions[index]?.status.toString() as ETransactionStatus
 		if (
@@ -123,7 +121,7 @@ const ChatHeaderWithRequests = ({
 			<div className='bg-primary text-primary-foreground border-b px-6 py-4'>
 				{/* Header với nút quay lại */}
 				<div className='flex items-center justify-between'>
-					<div className='flex items-center space-x-3'>
+					<div className='flex w-1/2 items-center space-x-3'>
 						<div className='flex h-12 w-12 items-center justify-center rounded-full bg-gray-200'>
 							{receiver?.avatar ? (
 								<img
@@ -135,7 +133,7 @@ const ChatHeaderWithRequests = ({
 								<User className='text-secondary h-5 w-5' /> // Placeholder nếu không có avatar
 							)}
 						</div>
-						<div>
+						<div className='w-full truncate text-wrap'>
 							<h3 className='font-manrope text-lg font-semibold'>
 								{receiver?.name}
 							</h3>

@@ -36,12 +36,18 @@ const Navbar = () => {
 	const [isVisible, setIsVisible] = useState(true)
 	const { followedByNotification, followingNotification } =
 		useChatNotification()
+	const [hasInterestNotifications, setHasInterestNotifications] =
+		useState<boolean>(false)
 
-	// Check if there are any notifications for "Quan tâm"
-	const hasInterestNotifications =
-		followedByNotification || followingNotification
-
-	useEffect(() => {}, [followedByNotification, followingNotification])
+	useEffect(() => {
+		const handlePing = async () => {
+			setHasInterestNotifications(true)
+			setTimeout(() => {
+				setHasInterestNotifications(false)
+			}, 5000)
+		}
+		handlePing()
+	}, [followedByNotification, followingNotification])
 
 	const handleSearch = (e: any) => {
 		e.preventDefault()
@@ -192,7 +198,6 @@ const Navbar = () => {
 											{/* Show AlertPing for "Quan tâm" when there are notifications */}
 											{isInterestPage && hasInterestNotifications && (
 												<AlertPing
-													duration={5000}
 													size='size-3'
 													position='-top-1 right-0'
 													isPulse={true}
