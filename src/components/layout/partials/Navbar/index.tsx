@@ -46,7 +46,7 @@ const Navbar = () => {
 				setHasInterestNotifications(false)
 			}, 5000)
 		}
-		handlePing()
+		if (followedByNotification || followingNotification) handlePing()
 	}, [followedByNotification, followingNotification])
 
 	const handleSearch = (e: any) => {
