@@ -96,7 +96,7 @@ const PostItem: React.FC<PostItemProps> = ({
 				</h3>
 
 				{/* Description */}
-				<p className='text-muted-foreground mb-4 line-clamp-3 text-sm leading-relaxed'>
+				<p className='text-muted-foreground mb-4 line-clamp-2 text-sm leading-relaxed'>
 					{truncateText(post.description || post.content, 150)}
 				</p>
 
