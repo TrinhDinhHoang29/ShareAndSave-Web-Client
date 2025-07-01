@@ -59,21 +59,25 @@ const Interest = () => {
 	const queryClient = useQueryClient()
 
 	useEffect(() => {
+		setIsFollowingPing(false)
+		setIsFollowedByPing(false)
+	}, [])
+
+	useEffect(() => {
 		if (followedByNotification) {
 			setIsFollowedByPing(true)
 		}
+		return () => setIsFollowingPing(false)
 	}, [followedByNotification])
 
 	useEffect(() => {
 		if (followingNotification) {
 			setIsFollowingPing(true)
 		}
+		return () => setIsFollowingPing(false)
 	}, [followingNotification])
 
-	useEffect(() => {
-		setIsFollowingPing(false)
-		setIsFollowedByPing(false)
-	}, [])
+	console.log(followedByNotification, followingNotification)
 	// Mutation để hủy quan tâm
 	const { mutate: deleteInterestMutation, isPending: isDeleteInterestPending } =
 		useDeleteInterestMutation({

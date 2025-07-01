@@ -10,6 +10,7 @@ import SecondaryButton from '@/components/common/SecondaryButton'
 import { useAlertModalContext } from '@/context/alert-modal-context'
 import { useAuthDialog } from '@/context/auth-dialog-context'
 import { useCreatePostMutation } from '@/hooks/mutations/use-post.mutation'
+import { processImagesArray, processItemImages } from '@/lib/utils'
 import { EPostType } from '@/models/enums'
 import {
 	IPostActionInfoFormData,
@@ -224,30 +225,51 @@ const PostAction: React.FC = () => {
 			// Chuyển contentData thành JSON string
 			const infoJson = JSON.stringify(contentData)
 
-			const convertedData: IPostActionRequest = {
-				// fullName: requestData?.fullName,
-				// email: requestData?.email,
-				// phoneNumber: requestData?.phoneNumber,
-				// author_id: user?.id,
-				description: requestData.description,
-				type: Number(requestData.type),
-				images: requestData.images || [],
-				title: requestData.title,
-				info: infoJson, // Gán content dưới dạng JSON string
-				newItems: requestData.newItems?.map(item => ({
-					quantity: item.quantity,
-					categoryID: item.categoryID,
-					name: item.name,
-					image: item.image
-				})),
-				oldItems: requestData.oldItems?.map(item => ({
-					itemID: item.itemID,
-					quantity: item.quantity,
-					image: item.image
-				}))
-			}
+			try {
+				const processedImages = await processImagesArray(
+					requestData.images || [],
+					800,
+					600,
+					80
+				)
 
-			mutation.mutate(convertedData)
+				// Xử lý ảnh cho newItems - resize về 400x400, chất lượng 85%
+				const processedNewItems = requestData.newItems
+					? await processItemImages(requestData.newItems, 'image', 400, 400, 85)
+					: undefined
+
+				// Xử lý ảnh cho oldItems - resize về 400x400, chất lượng 85%
+				const processedOldItems = requestData.oldItems
+					? await processItemImages(requestData.oldItems, 'image', 400, 400, 85)
+					: undefined
+
+				const convertedData: IPostActionRequest = {
+					description: requestData.description,
+					type: Number(requestData.type),
+					images: processedImages,
+					title: requestData.title,
+					info: infoJson, // Gán content dưới dạng JSON string
+					newItems: processedNewItems?.map(item => ({
+						quantity: item.quantity,
+						categoryID: item.categoryID,
+						name: item.name,
+						image: item.image
+					})),
+					oldItems: processedOldItems?.map(item => ({
+						itemID: item.itemID,
+						quantity: item.quantity,
+						image: item.image
+					}))
+				}
+				mutation.mutate(convertedData)
+			} catch (error) {
+				console.error('Error processing images:', error)
+				showError({
+					errorButtonText: 'Đóng',
+					errorMessage: 'Có lỗi xảy ra khi xử lý ảnh. Vui lòng thử lại.',
+					errorTitle: 'Lỗi xử lý ảnh'
+				})
+			}
 		}
 	}
 

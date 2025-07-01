@@ -43,12 +43,13 @@ import { useDetailPostQuery } from '@/hooks/queries/use-post-query'
 import { useInterestListDialog } from '@/hooks/useInterestListDialog'
 import { formatDateTimeVN } from '@/lib/utils'
 import {
+	checkDateRange,
 	getStatusConfig,
 	getStatusPostTypeConfig,
 	getTypeInfo
 } from '@/models/constants'
-import { EPostSTatus, EPostType } from '@/models/enums'
-import { IUserInterest } from '@/models/interfaces'
+import { EDateRangeStatus, EPostSTatus, EPostType } from '@/models/enums'
+import { IDateRangeResult, IUserInterest } from '@/models/interfaces'
 import useAuthStore from '@/stores/authStore'
 
 import RelatedPosts from './components/RelatedPosts'
@@ -231,20 +232,44 @@ const PostDetail: React.FC = () => {
 
 	const getCampaignInfo = () => {
 		try {
-			return JSON.parse(post?.info || '')
+			if (!post?.info) return null
+
+			const parsed = JSON.parse(post.info)
+
+			// Kiểm tra các trường hợp rỗng
+			if (
+				parsed == null ||
+				(typeof parsed === 'object' &&
+					!Array.isArray(parsed) &&
+					Object.keys(parsed).length === 0) ||
+				(Array.isArray(parsed) && parsed.length === 0)
+			) {
+				return null
+			}
+
+			return parsed
 		} catch (error) {
-			console.error('Error parsing campaign info:', error)
-			return {}
+			console.warn('Failed to parse campaign info:', error)
+			return null
 		}
 	}
 
-	const campaignInfo: CampaignInfo = getCampaignInfo()
+	const campaignInfo: CampaignInfo | null = getCampaignInfo()
+
+	const statusTimeCampaign: IDateRangeResult | null = useMemo(() => {
+		if (campaignInfo) {
+			return checkDateRange(campaignInfo.startDate, campaignInfo.endDate)
+		}
+		return null
+	}, [campaignInfo])
+
+	// console.log(statusTimeCampaign)
 
 	const { color: statusColor, label: statusLabel } = getStatusPostTypeConfig(
 		post?.type.toString() as EPostType,
 		sumCurrentQuantityItems,
-		campaignInfo.startDate || '',
-		campaignInfo.endDate || '',
+		campaignInfo?.startDate || '',
+		campaignInfo?.endDate || '',
 		post?.tags
 	)
 
@@ -298,6 +323,17 @@ const PostDetail: React.FC = () => {
 
 	const handleInterest = async () => {
 		if (isAuthenticated) {
+			if (
+				statusTimeCampaign &&
+				statusTimeCampaign.status !== EDateRangeStatus.IN_RANGE
+			) {
+				showInfo({
+					infoButtonText: 'Đã rõ',
+					infoMessage: statusTimeCampaign.message,
+					infoTitle: 'Thông tin chiến dịch'
+				})
+				return
+			}
 			if (!interestID) {
 				createInterestMutatation({ postID: post.id })
 			} else {
@@ -795,11 +831,14 @@ const PostDetail: React.FC = () => {
 									>
 										<button
 											onClick={handleInterest}
-											className={`relative flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 font-medium transition-all ${
+											className={clsx(
+												`relative flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 font-medium transition-all`,
 												interestID
 													? 'bg-primary text-primary-foreground hover:bg-primary/90'
-													: 'bg-accent text-accent-foreground hover:bg-accent/80'
-											}`}
+													: statusTimeCampaign
+														? 'bg-accent/20 text-accent-foreground hover:bg-accent/30 cursor-not-allowed'
+														: 'bg-accent text-accent-foreground hover:bg-accent/80'
+											)}
 										>
 											{isCreateInterestPending || isDeleteInterestPending ? (
 												<Loading />
