@@ -99,7 +99,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
 			</div>
 
 			{/* Menu Items */}
-			<div className='bg-background/90 rounded-b-md pb-2'>
+			<div className='bg-background rounded-b-md pb-2'>
 				{profileMenuItems.map((item: MenuItem, index: number) => (
 					<div key={index}>
 						{item.divider && (

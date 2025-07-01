@@ -15,7 +15,6 @@ import {
 } from '@/models/constants'
 import { EMethod, ETransactionStatus } from '@/models/enums'
 import { ITransactionRequest, IUserInterest } from '@/models/interfaces'
-import useAuthStore from '@/stores/authStore'
 
 import ChatButton from './ChatButton'
 
@@ -72,7 +71,6 @@ export const InterestItem = ({
 		method: EMethod
 	) => void
 }) => {
-	const { user } = useAuthStore()
 	const { showConfirm } = useAlertModalContext()
 	const userInterstStable = useMemo(() => userInterest, [userInterest])
 
@@ -320,8 +318,10 @@ export const InterestItem = ({
 
 					{userInterstStable.newMessage && authorID && (
 						<p className='text-muted-foreground bg-muted/50 line-clamp-2 rounded-lg px-4 py-2 text-sm leading-relaxed'>
-							{authorID === user?.id ? 'Bạn' : 'Đối phương'}:{' '}
-							{userInterstStable.newMessage}
+							{authorID === userInterstStable.messageFromID
+								? 'Bạn'
+								: 'Đối phương'}
+							: {userInterstStable.newMessage}
 						</p>
 					)}
 				</>

@@ -4,6 +4,7 @@ import { getDeviceId, getDeviceType } from '@/lib/utils'
 
 const axiosPublic = axios.create({
 	baseURL: import.meta.env.VITE_API_URL, // Địa chỉ API public
+	timeout: 1000000,
 	headers: {
 		Accept: 'application/json',
 		'Content-Type': 'application/json',

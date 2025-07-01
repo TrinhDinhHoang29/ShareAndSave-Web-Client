@@ -30,8 +30,13 @@ import Sub_Banner_2 from '@/assets/images/sub_2.jpg'
 import Sub_Banner_3 from '@/assets/images/sub_3.jpg'
 import Sub_Banner_4 from '@/assets/images/sub_4.jpg'
 
-import { EPostSTatus, EPostType, ETransactionStatus } from './enums'
-import { ICaoThangLink } from './interfaces'
+import {
+	EDateRangeStatus,
+	EPostSTatus,
+	EPostType,
+	ETransactionStatus
+} from './enums'
+import { ICaoThangLink, IDateRangeResult } from './interfaces'
 
 export const getTypeInfo = (type: EPostType) => {
 	switch (type) {
@@ -494,5 +499,115 @@ export const getRankBadgeStyle = (rank: number) => {
 			return 'bg-accent text-white shadow-lg'
 		default:
 			return 'border-primary/20 bg-primary/10 text-primary border'
+	}
+}
+
+function formatTimeRemaining(milliseconds: number): string {
+	const seconds = Math.floor(milliseconds / 1000)
+	const minutes = Math.floor(seconds / 60)
+	const hours = Math.floor(minutes / 60)
+	const days = Math.floor(hours / 24)
+
+	if (days > 0) {
+		const remainingHours = hours % 24
+		return `${days} ngày ${remainingHours > 0 ? remainingHours + ' giờ' : ''}`
+	}
+
+	if (hours > 0) {
+		const remainingMinutes = minutes % 60
+		return `${hours} giờ ${remainingMinutes > 0 ? remainingMinutes + ' phút' : ''}`
+	}
+
+	if (minutes > 0) {
+		const remainingSeconds = seconds % 60
+		return `${minutes} phút ${remainingSeconds > 0 ? remainingSeconds + ' giây' : ''}`
+	}
+
+	return `${seconds} giây`
+}
+export function checkDateRange(
+	startDate: string,
+	endDate: string
+): IDateRangeResult {
+	const currentTime = new Date()
+
+	try {
+		const startTime = new Date(startDate)
+		const endTime = new Date(endDate)
+
+		// Kiểm tra tính hợp lệ của ngày
+		if (isNaN(startTime.getTime()) || isNaN(endTime.getTime())) {
+			return {
+				isInRange: false,
+				status: EDateRangeStatus.INVALID_RANGE,
+				message: 'Ngày tháng không hợp lệ',
+				currentTime,
+				startTime: new Date(),
+				endTime: new Date()
+			}
+		}
+
+		// Kiểm tra nếu startDate > endDate
+		if (startTime.getTime() > endTime.getTime()) {
+			return {
+				isInRange: false,
+				status: EDateRangeStatus.INVALID_RANGE,
+				message: 'Thời gian bắt đầu không thể lớn hơn thời gian kết thúc',
+				currentTime,
+				startTime,
+				endTime
+			}
+		}
+
+		const currentTimestamp = currentTime.getTime()
+		const startTimestamp = startTime.getTime()
+		const endTimestamp = endTime.getTime()
+
+		// Trước thời gian bắt đầu
+		if (currentTimestamp < startTimestamp) {
+			const timeUntilStart = startTimestamp - currentTimestamp
+			return {
+				isInRange: false,
+				status: EDateRangeStatus.BEFORE_START,
+				message: `Chưa đến thời gian bắt đầu. Còn ${formatTimeRemaining(timeUntilStart)}`,
+				currentTime,
+				startTime,
+				endTime,
+				timeUntilStart
+			}
+		}
+
+		// Sau thời gian kết thúc
+		if (currentTimestamp > endTimestamp) {
+			return {
+				isInRange: false,
+				status: EDateRangeStatus.AFTER_END,
+				message: 'Chiến dịch đã kết thúc',
+				currentTime,
+				startTime,
+				endTime
+			}
+		}
+
+		// Trong khoảng thời gian
+		const timeUntilEnd = endTimestamp - currentTimestamp
+		return {
+			isInRange: true,
+			status: EDateRangeStatus.IN_RANGE,
+			message: `Đang trong thời gian hoạt động. Còn ${formatTimeRemaining(timeUntilEnd)}`,
+			currentTime,
+			startTime,
+			endTime,
+			timeUntilEnd
+		}
+	} catch (error) {
+		return {
+			isInRange: false,
+			status: EDateRangeStatus.INVALID_RANGE,
+			message: 'Lỗi khi xử lý thời gian',
+			currentTime,
+			startTime: new Date(),
+			endTime: new Date()
+		}
 	}
 }

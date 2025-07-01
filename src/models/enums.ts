@@ -105,3 +105,11 @@ export enum ESettingKey {
 	DESCRIPTION = 'description',
 	WORK_DAY = 'workDay'
 }
+
+// Enum để định nghĩa các trạng thái thời gian
+export enum EDateRangeStatus {
+	BEFORE_START = 'BEFORE_START',
+	IN_RANGE = 'IN_RANGE',
+	AFTER_END = 'AFTER_END',
+	INVALID_RANGE = 'INVALID_RANGE'
+}

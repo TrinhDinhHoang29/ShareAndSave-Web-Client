@@ -2,6 +2,7 @@ import { LucideIcon } from 'lucide-react'
 
 import {
 	EAppointmentStatus,
+	EDateRangeStatus,
 	EGoodDeedType,
 	EMessageStatus,
 	EPostSTatus,
@@ -552,4 +553,16 @@ export interface ISettingResponse {
 export interface IVerifySignupError {
 	field: string
 	message: string
+}
+
+// Interface cho kết quả trả về
+export interface IDateRangeResult {
+	isInRange: boolean
+	status: EDateRangeStatus
+	message: string
+	currentTime: Date
+	startTime: Date
+	endTime: Date
+	timeUntilStart?: number // milliseconds
+	timeUntilEnd?: number // milliseconds
 }

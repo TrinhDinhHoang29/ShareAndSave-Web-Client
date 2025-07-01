@@ -199,3 +199,169 @@ export function generateRandomId(min = 100000, max = 999999) {
 export const getTotalGoodDeeds = (goodDeeds: IGoodDeed[]) => {
 	return goodDeeds.reduce((total, deed) => total + deed.goodDeedCount, 0)
 }
+
+// Hàm chuyển file ảnh thành base64
+export const imageToBase64 = (file: File): Promise<string> => {
+	return new Promise((resolve, reject) => {
+		const reader = new FileReader()
+		reader.onload = () => {
+			resolve(reader.result as string)
+		}
+		reader.onerror = reject
+		reader.readAsDataURL(file)
+	})
+}
+
+// Hàm resize và nén ảnh base64
+export const processImageBase64 = (
+	inputBase64: string,
+	width: number,
+	height: number,
+	quality: number = 80
+): Promise<string> => {
+	return new Promise((resolve, reject) => {
+		// Nếu đã resize thì bỏ qua
+		if (inputBase64.includes(';resized;')) {
+			resolve(inputBase64)
+			return
+		}
+
+		// Tách prefix và kiểm tra định dạng
+		const commaIndex = inputBase64.indexOf(',')
+		if (commaIndex === -1) {
+			reject(new Error('Invalid base64 image data'))
+			return
+		}
+
+		const prefix = inputBase64.substring(0, commaIndex + 1)
+
+		let mimeType = ''
+		if (prefix.includes('image/jpeg') || prefix.includes('image/jpg')) {
+			mimeType = 'jpeg'
+		} else if (prefix.includes('image/png')) {
+			mimeType = 'png'
+		} else {
+			reject(new Error('Unsupported image format'))
+			return
+		}
+
+		// Tạo image element để load ảnh
+		const img = new Image()
+		img.onload = () => {
+			try {
+				// Tạo canvas để resize
+				const canvas = document.createElement('canvas')
+				const ctx = canvas.getContext('2d')
+
+				if (!ctx) {
+					reject(new Error('Cannot get canvas context'))
+					return
+				}
+
+				// Tính toán kích thước mới (giữ tỷ lệ nếu chỉ có width hoặc height)
+				let newWidth = width
+				let newHeight = height
+
+				if (width === 0 && height > 0) {
+					newWidth = (img.width * height) / img.height
+				} else if (height === 0 && width > 0) {
+					newHeight = (img.height * width) / img.width
+				} else if (width === 0 && height === 0) {
+					newWidth = img.width
+					newHeight = img.height
+				}
+
+				canvas.width = newWidth
+				canvas.height = newHeight
+
+				// Enable high quality resizing
+				ctx.imageSmoothingEnabled = true
+				ctx.imageSmoothingQuality = 'high'
+
+				// Vẽ ảnh lên canvas với kích thước mới
+				ctx.drawImage(img, 0, 0, newWidth, newHeight)
+
+				// Convert canvas về base64
+				let outputMimeType = 'image/jpeg'
+				if (mimeType === 'png') {
+					outputMimeType = 'image/png'
+				}
+
+				const resizedBase64 = canvas.toDataURL(outputMimeType, quality / 100)
+
+				// Thêm dấu hiệu đã resize vào prefix
+				const newPrefix = prefix.replace('base64,', 'resized;base64,')
+				const finalResult = newPrefix + resizedBase64.split(',')[1]
+
+				resolve(finalResult)
+			} catch (error) {
+				reject(error)
+			}
+		}
+
+		img.onerror = () => {
+			reject(new Error('Failed to load image'))
+		}
+
+		img.src = inputBase64
+	})
+}
+
+// Hàm xử lý mảng ảnh
+export const processImagesArray = async (
+	images: string[],
+	width: number = 800,
+	height: number = 600,
+	quality: number = 80
+): Promise<string[]> => {
+	const processedImages: string[] = []
+
+	for (const image of images) {
+		try {
+			const processed = await processImageBase64(image, width, height, quality)
+			processedImages.push(processed)
+		} catch (error) {
+			console.error('Error processing image:', error)
+			// Giữ nguyên ảnh gốc nếu không thể xử lý
+			processedImages.push(image)
+		}
+	}
+
+	return processedImages
+}
+
+// Hàm xử lý ảnh cho items (newItems và oldItems)
+export const processItemImages = async (
+	items: any[],
+	imageField: string = 'image',
+	width: number = 400,
+	height: number = 400,
+	quality: number = 85
+): Promise<any[]> => {
+	const processedItems = []
+
+	for (const item of items) {
+		if (item[imageField]) {
+			try {
+				const processedImage = await processImageBase64(
+					item[imageField],
+					width,
+					height,
+					quality
+				)
+				processedItems.push({
+					...item,
+					[imageField]: processedImage
+				})
+			} catch (error) {
+				console.error('Error processing item image:', error)
+				// Giữ nguyên item gốc nếu không thể xử lý ảnh
+				processedItems.push(item)
+			}
+		} else {
+			processedItems.push(item)
+		}
+	}
+
+	return processedItems
+}
