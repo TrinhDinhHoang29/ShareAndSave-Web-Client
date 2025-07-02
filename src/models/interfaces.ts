@@ -5,6 +5,8 @@ import {
 	EDateRangeStatus,
 	EGoodDeedType,
 	EMessageStatus,
+	ENotiTargetType,
+	ENotiType,
 	EPostSTatus,
 	EPostType,
 	ERequestStatus,
@@ -565,4 +567,24 @@ export interface IDateRangeResult {
 	endTime: Date
 	timeUntilStart?: number // milliseconds
 	timeUntilEnd?: number // milliseconds
+}
+
+export interface INoti {
+	id: number
+	senderID: number
+	receiverID: number
+	type: ENotiType
+	targetType: ENotiTargetType
+	targetID: number
+	content: string
+	isRead: boolean
+	createdAt: string
+	senderName: string
+	receiverName: string
+}
+
+export interface INotiResponse {
+	totalPage: number
+	unreadCount: number
+	notifications: INoti[]
 }

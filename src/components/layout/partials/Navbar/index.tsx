@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion'
 import {
-	Bell,
 	ChevronDown,
 	ChevronUp,
 	Download,
@@ -17,6 +16,7 @@ import { useChatNotification } from '@/context/chat-noti-context'
 import { useTheme } from '@/context/theme-context'
 import AlertPing from '@/pages/interest/components/AlertPing'
 
+import DropdownNoti from './DropdownNoti'
 import DropdownProfileMenu from './DropdownProfileMenu'
 import SearchDropdown from './SearchDropdown'
 
@@ -42,9 +42,6 @@ const Navbar = () => {
 	useEffect(() => {
 		const handlePing = async () => {
 			setHasInterestNotifications(true)
-			setTimeout(() => {
-				setHasInterestNotifications(false)
-			}, 5000)
 		}
 		if (followedByNotification || followingNotification) handlePing()
 	}, [followedByNotification, followingNotification])
@@ -162,13 +159,7 @@ const Navbar = () => {
 										<Download className='h-5 w-5' />
 									</button>
 
-									<button
-										className='hover:bg-muted relative rounded-full p-2 transition-colors'
-										title='Thông báo'
-									>
-										<Bell className='h-5 w-5' />
-										<span className='bg-destructive absolute -top-1 -right-1 h-3 w-3 rounded-full'></span>
-									</button>
+									<DropdownNoti />
 
 									<DropdownProfileMenu />
 								</div>
@@ -186,6 +177,7 @@ const Navbar = () => {
 											className='relative'
 										>
 											<Link
+												onClick={() => setHasInterestNotifications(false)}
 												to={to}
 												className={`rounded-full px-4 py-2 whitespace-nowrap transition-all ${
 													isActive

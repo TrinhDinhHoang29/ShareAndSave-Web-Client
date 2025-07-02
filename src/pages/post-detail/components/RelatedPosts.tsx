@@ -43,7 +43,9 @@ const RelatedPosts: React.FC<RelatedPostsProps> = ({ type, postID }) => {
 					<h2 className='text-lg font-medium'>Bài đăng liên quan</h2>
 				</div>
 				{isPending ? (
-					<PostItemTileSkeleton quantity={quantity} />
+					<div className='space-y-6'>
+						<PostItemTileSkeleton quantity={quantity} />
+					</div>
 				) : (
 					<div className='space-y-6'>
 						{relatedPosts.length > 0 ? (

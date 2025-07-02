@@ -1,10 +1,11 @@
 import 'slick-carousel/slick/slick-theme.css'
 import 'slick-carousel/slick/slick.css'
 
-import { Heart } from 'lucide-react'
+import { Calendar, Heart, MapPin, User } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import Carousel from '@/components/common/Carousel'
+import { formatDateTimeVN } from '@/lib/utils'
 import { BANNER_CAROUSEL_SOURCE } from '@/models/constants'
 
 const BannerCarousel: React.FC = () => {
@@ -21,7 +22,7 @@ const BannerCarousel: React.FC = () => {
 				{BANNER_CAROUSEL_SOURCE.map((banner, index) => (
 					<Link
 						to={banner.link}
-						key={index}
+						key={banner.id || index}
 						className='group relative'
 					>
 						{/* Background Image */}
@@ -37,8 +38,8 @@ const BannerCarousel: React.FC = () => {
 						{/* Content Container */}
 						<div className='absolute inset-0 flex flex-col justify-center px-12 lg:px-20'>
 							<div className='max-w-2xl text-white'>
-								{/* Badge */}
-								<div className='mb-4 flex items-center gap-2'>
+								{/* Badges Row */}
+								<div className='mb-4 flex flex-wrap items-center gap-3'>
 									{banner.icon && <banner.icon className='h-5 w-5' />}
 									<span className='bg-primary/90 text-primary-foreground rounded-full px-4 py-2 text-sm font-medium'>
 										{banner.badge}
@@ -46,29 +47,43 @@ const BannerCarousel: React.FC = () => {
 								</div>
 
 								{/* Main Title */}
-								<h1 className='mb-4 text-4xl leading-tight font-bold lg:text-6xl'>
+								<h1 className='mb-4 line-clamp-2 text-3xl leading-tight font-bold lg:text-5xl'>
 									{banner.title}
 								</h1>
 
-								{/* Subtitle */}
-								<p className='mb-6 text-lg leading-relaxed text-gray-200 lg:text-xl'>
+								{/* Event Info */}
+								<div className='mb-4 flex flex-wrap items-center gap-4 text-gray-200'>
+									{banner.organizer && (
+										<div className='flex items-center gap-2'>
+											<User className='h-4 w-4' />
+											<span className='text-sm'>{banner.organizer}</span>
+										</div>
+									)}
+									{banner.startDate && (
+										<div className='flex items-center gap-2'>
+											<Calendar className='h-4 w-4' />
+											<span className='text-sm'>
+												{formatDateTimeVN(banner.startDate, false)}
+												{banner.endDate &&
+													banner.endDate !== banner.startDate &&
+													` - ${formatDateTimeVN(banner.endDate, false)}`}
+											</span>
+										</div>
+									)}
+									{banner.location && (
+										<div className='flex items-center gap-2'>
+											<MapPin className='h-4 w-4' />
+											<span className='line-clamp-1 text-sm'>
+												{banner.location}
+											</span>
+										</div>
+									)}
+								</div>
+
+								{/* Subtitle/Description */}
+								<p className='mb-6 line-clamp-3 text-base leading-relaxed text-gray-200 lg:text-lg'>
 									{banner.subtitle}
 								</p>
-
-								{/* Stats or highlights */}
-								<div className='mb-8 flex gap-6 text-sm'>
-									{banner.stats?.map((stat, idx) => (
-										<div
-											key={idx}
-											className='text-center'
-										>
-											<div className='text-primary text-2xl font-bold'>
-												{stat.number}
-											</div>
-											<div className='text-gray-300'>{stat.label}</div>
-										</div>
-									))}
-								</div>
 
 								{/* CTA Button */}
 								<button className='bg-primary hover:bg-primary/90 text-primary-foreground flex items-center gap-2 rounded-full px-8 py-4 text-lg font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg'>

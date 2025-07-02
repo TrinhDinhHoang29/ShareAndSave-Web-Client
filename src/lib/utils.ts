@@ -1,4 +1,19 @@
 import { type ClassValue, clsx } from 'clsx'
+import {
+	differenceInDays,
+	differenceInHours,
+	differenceInMinutes,
+	differenceInMonths,
+	differenceInSeconds,
+	differenceInWeeks,
+	format,
+	isSameWeek,
+	isSameYear,
+	isToday,
+	isValid,
+	parseISO
+} from 'date-fns'
+import { vi } from 'date-fns/locale'
 import { twMerge } from 'tailwind-merge'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -12,121 +27,188 @@ export function cn(...inputs: ClassValue[]) {
 export const formatNearlyDateTimeVN = (dateString: string): string => {
 	try {
 		const now = new Date()
-		const date = new Date(dateString)
-		const diffMs = now.getTime() - date.getTime()
-		const diffSeconds = Math.floor(diffMs / 1000)
-		const diffMinutes = Math.floor(diffSeconds / 60)
-		const diffHours = Math.floor(diffMinutes / 60)
-		const diffDays = Math.floor(diffHours / 24)
-		const diffWeeks = Math.floor(diffDays / 7)
-		const diffMonths = Math.floor(diffDays / 30) // Approximate
+		const date = parseISO(dateString)
+
+		if (!isValid(date)) {
+			return dateString
+		}
+
+		const diffSeconds = differenceInSeconds(now, date)
+		const diffMinutes = differenceInMinutes(now, date)
+		const diffHours = differenceInHours(now, date)
+		const diffDays = differenceInDays(now, date)
+		const diffWeeks = differenceInWeeks(now, date)
+		const diffMonths = differenceInMonths(now, date)
 
 		if (diffSeconds < 60) {
 			return `${diffSeconds} giây trước`
 		} else if (diffMinutes < 60) {
-			const minutes = diffMinutes === 1 ? 'phút' : 'phút'
-			return `${diffMinutes} ${minutes} trước`
+			return `${diffMinutes} phút trước`
 		} else if (diffHours < 24) {
-			const hours = diffHours === 1 ? 'giờ' : 'giờ'
-			return `${diffHours} ${hours} trước`
+			return `${diffHours} giờ trước`
 		} else if (diffDays < 7) {
-			const days = diffDays === 1 ? 'ngày' : 'ngày'
-			return `${diffDays} ${days} trước`
+			return `${diffDays} ngày trước`
 		} else if (diffWeeks < 4) {
-			const weeks = diffWeeks === 1 ? 'tuần' : 'tuần'
-			return `${diffWeeks} ${weeks} trước`
+			return `${diffWeeks} tuần trước`
 		} else if (diffMonths < 12) {
-			const months = diffMonths === 1 ? 'tháng' : 'tháng'
-			return `${diffMonths} ${months} trước`
+			return `${diffMonths} tháng trước`
 		} else {
-			return date.toLocaleDateString('vi-VN', {
-				year: 'numeric',
-				month: 'long',
-				day: 'numeric'
-			})
+			return format(date, 'd MMMM yyyy', { locale: vi })
 		}
 	} catch {
 		return dateString
 	}
 }
 
-export const formatDateTimeVN = (dateString: string, isShowTime = true) => {
+export const formatDateTimeVN = (
+	dateString: string,
+	isShowTime = true
+): string => {
 	try {
-		return new Date(dateString).toLocaleDateString('vi-VN', {
-			weekday: isShowTime ? 'long' : undefined,
-			year: 'numeric',
-			month: 'long',
-			day: '2-digit',
-			hour: isShowTime ? 'numeric' : undefined,
-			minute: isShowTime ? 'numeric' : undefined
-		})
+		const date = parseISO(dateString)
+
+		if (!isValid(date)) {
+			return dateString
+		}
+
+		if (isShowTime) {
+			return format(date, 'EEEE, dd MMMM yyyy, HH:mm', { locale: vi })
+		} else {
+			return format(date, 'dd MMMM yyyy', { locale: vi })
+		}
 	} catch {
 		return dateString
 	}
 }
 
-export const formatDate = (dateString: string) => {
-	return new Date(dateString).toLocaleDateString('vi-VN', {
-		day: '2-digit',
-		month: '2-digit',
-		year: 'numeric',
-		hour: '2-digit',
-		minute: '2-digit'
-	})
+export const formatDate = (dateString: string): string => {
+	try {
+		const date = parseISO(dateString)
+
+		if (!isValid(date)) {
+			return dateString
+		}
+
+		return format(date, 'dd/MM/yyyy, HH:mm', { locale: vi })
+	} catch {
+		return dateString
+	}
 }
 
-// Format date time
+// Format date time - returns separate date and time
 export const formatDateTime = (dateString: string) => {
-	const date = new Date(dateString)
-	return {
-		date: date.toLocaleDateString('vi-VN'),
-		time: date.toLocaleTimeString('vi-VN', {
-			hour: '2-digit',
-			minute: '2-digit'
-		})
+	try {
+		const date = parseISO(dateString)
+
+		if (!isValid(date)) {
+			return {
+				date: dateString,
+				time: ''
+			}
+		}
+
+		return {
+			date: format(date, 'dd/MM/yyyy', { locale: vi }),
+			time: format(date, 'HH:mm', { locale: vi })
+		}
+	} catch {
+		return {
+			date: dateString,
+			time: ''
+		}
 	}
 }
 
 export const formatHoverTime = (dateString: string): string => {
 	try {
 		const now = new Date()
-		const date = new Date(dateString)
-		const diffMs = now.getTime() - date.getTime()
-		const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-		const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+		const date = parseISO(dateString)
+
+		if (!isValid(date)) {
+			return dateString
+		}
 
 		// Same day: show hour:minute (e.g., 14:30)
-		if (diffHours < 24 && diffDays === 0) {
-			return date.toLocaleTimeString('vi-VN', {
-				hour: '2-digit',
-				minute: '2-digit'
-			})
+		if (isToday(date)) {
+			return format(date, 'HH:mm', { locale: vi })
 		}
 		// Same week: show day of week and time (e.g., Thứ Hai, 14:30)
-		else if (diffDays < 7) {
-			return date.toLocaleString('vi-VN', {
-				weekday: 'long',
-				hour: '2-digit',
-				minute: '2-digit'
-			})
+		else if (isSameWeek(date, now, { weekStartsOn: 1 })) {
+			return format(date, 'EEEE, HH:mm', { locale: vi })
 		}
 		// Same year: show day, month, and time (e.g., 15/06, 14:30)
-		else if (date.getFullYear() === now.getFullYear()) {
-			return date.toLocaleString('vi-VN', {
-				day: '2-digit',
-				month: '2-digit',
-				hour: '2-digit',
-				minute: '2-digit'
-			})
+		else if (isSameYear(date, now)) {
+			return format(date, 'dd/MM, HH:mm', { locale: vi })
 		}
 		// Older: show full date (e.g., 15/06/2024)
 		else {
-			return date.toLocaleDateString('vi-VN', {
-				day: '2-digit',
-				month: '2-digit',
-				year: 'numeric'
-			})
+			return format(date, 'dd/MM/yyyy', { locale: vi })
 		}
+	} catch {
+		return dateString
+	}
+}
+
+// Additional utility functions for better date handling
+
+export const formatRelativeTime = (dateString: string): string => {
+	try {
+		const now = new Date()
+		const date = parseISO(dateString)
+
+		if (!isValid(date)) {
+			return dateString
+		}
+
+		const diffSeconds = differenceInSeconds(now, date)
+
+		// Handle future dates
+		if (diffSeconds < 0) {
+			const absDiffSeconds = Math.abs(diffSeconds)
+			const absDiffMinutes = differenceInMinutes(date, now)
+			const absDiffHours = differenceInHours(date, now)
+			const absDiffDays = differenceInDays(date, now)
+
+			if (absDiffSeconds < 60) {
+				return `sau ${absDiffSeconds} giây`
+			} else if (absDiffMinutes < 60) {
+				return `sau ${absDiffMinutes} phút`
+			} else if (absDiffHours < 24) {
+				return `sau ${absDiffHours} giờ`
+			} else {
+				return `sau ${absDiffDays} ngày`
+			}
+		}
+
+		return formatNearlyDateTimeVN(dateString)
+	} catch {
+		return dateString
+	}
+}
+
+export const formatShortDate = (dateString: string): string => {
+	try {
+		const date = parseISO(dateString)
+
+		if (!isValid(date)) {
+			return dateString
+		}
+
+		return format(date, 'dd/MM/yy', { locale: vi })
+	} catch {
+		return dateString
+	}
+}
+
+export const formatLongDate = (dateString: string): string => {
+	try {
+		const date = parseISO(dateString)
+
+		if (!isValid(date)) {
+			return dateString
+		}
+
+		return format(date, 'EEEE, dd MMMM yyyy', { locale: vi })
 	} catch {
 		return dateString
 	}

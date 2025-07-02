@@ -211,7 +211,6 @@ export const AuthDialogProvider: React.FC<{ children: ReactNode }> = ({
 			<LoginDialog
 				onLoginSucess={() => {
 					closeDialog()
-					window.location.href = '/'
 				}}
 				onRegister={switchToRegister}
 				onVerifyEmail={switchToVerifyEmail}

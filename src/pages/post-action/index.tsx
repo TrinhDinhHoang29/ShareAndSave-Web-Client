@@ -73,7 +73,7 @@ const PostAction: React.FC = () => {
 		? params.type
 		: EPostType.GIVE_AWAY_OLD_ITEM
 
-	const { openRegisterWithData, isRegisterByPost } = useAuthDialog()
+	const { openRegisterWithData, openDialog, isRegisterByPost } = useAuthDialog()
 	useEffect(() => {
 		if (!isRegisterByPost) setCurrentStep(isAuthenticated ? 1 : 0)
 	}, [isAuthenticated, isRegisterByPost])
@@ -352,6 +352,10 @@ const PostAction: React.FC = () => {
 								(currentStep > 1 && isAuthenticated) ? (
 									<SecondaryButton onClick={handleBack}>
 										Quay lại
+									</SecondaryButton>
+								) : currentStep === 0 && !isAuthenticated ? (
+									<SecondaryButton onClick={() => openDialog({})}>
+										Đã có tài khoản?
 									</SecondaryButton>
 								) : (
 									<div></div>

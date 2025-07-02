@@ -113,3 +113,13 @@ export enum EDateRangeStatus {
 	AFTER_END = 'AFTER_END',
 	INVALID_RANGE = 'INVALID_RANGE'
 }
+
+export enum ENotiType {
+	NORMAL = 'normal',
+	SYSTEM = 'system'
+}
+
+export enum ENotiTargetType {
+	INTEREST = 'interest',
+	APPOINTMENT = 'appointment'
+}

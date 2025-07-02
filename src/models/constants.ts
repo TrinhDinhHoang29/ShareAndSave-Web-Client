@@ -1,5 +1,4 @@
 import {
-	BookOpen,
 	Check,
 	CheckCircle,
 	Clock,
@@ -13,7 +12,6 @@ import {
 	Lock,
 	Megaphone,
 	Rabbit,
-	Recycle,
 	School,
 	Search,
 	ShieldX,
@@ -327,68 +325,60 @@ export const getStatusPostTypeConfig = (
 
 export const BANNER_CAROUSEL_SOURCE = [
 	{
+		id: 10,
 		url: Banner_1,
-		name: 'Chiến dịch Yêu thương San sẻ',
-		link: '/campaigns/love-sharing',
+		name: '🍀MÙA HÈ XANH NĂM 2024 MẶT TRẬN THÀNH PHỐ HỒ CHÍ MINH🍀',
+		link: '/bai-dang/mua-he-xanh-nam-2024-mat-tran-thanh-pho-ho-chi-minh-724',
 		icon: Heart,
 		badge: 'Chiến dịch từ thiện',
-		title: 'Yêu thương San sẻ',
+		title: 'MÙA HÈ XANH NĂM 2024 MẶT TRẬN THÀNH PHỐ HỒ CHÍ MINH',
+		organizer: 'Tuổi trẻ Cao Thắng',
 		subtitle:
-			'Cùng sinh viên Cao Thắng lan tỏa yêu thương đến cộng đồng qua những hoạt động từ thiện ý nghĩa.',
-		ctaText: 'Tham gia ngay',
-		stats: [
-			{ number: '2,500+', label: 'Sinh viên tham gia' },
-			{ number: '50+', label: 'Hoạt động từ thiện' },
-			{ number: '10 tỷ+', label: 'Đồng quyên góp' }
-		]
-	},
-	{
-		url: Banner_2,
-		name: 'Phong trào Tái chế xanh',
-		link: '/campaigns/green-recycle',
-		icon: Recycle,
-		badge: 'Phong trào xanh',
-		title: 'Tái chế Xanh - Tương lai Bền vững',
-		subtitle:
-			'Biến đồ cũ thành tài nguyên quý giá. Cùng nhau bảo vệ môi trường và giúp đỡ những hoàn cảnh khó khăn.',
-		ctaText: 'Khám phá ngay',
-		stats: [
-			{ number: '5 tấn', label: 'Đồ cũ thu gom' },
-			{ number: '100+', label: 'Gia đình được hỗ trợ' },
-			{ number: '20+', label: 'Điểm thu gom' }
-		]
-	},
-	{
-		url: Banner_3,
-		name: 'Chương trình Tri thức san sẻ',
-		link: '/campaigns/knowledge-sharing',
-		icon: BookOpen,
-		badge: 'Chương trình giáo dục',
-		title: 'Tri thức San sẻ',
-		subtitle:
-			'Sinh viên Cao Thắng đồng hành cùng trẻ em vùng khó khăn, mang kiến thức kỹ thuật đến những nơi cần nhất.',
+			'NGÀY HOẠT ĐỘNG CAO ĐIỂM "CHIẾN SĨ TÌNH NGUYỆN CHUNG TAY XÂY DỰNG NÔNG THÔN MỚI"',
+		description:
+			'💥NGÀY HOẠT ĐỘNG CAO ĐIỂM "CHIẾN SĨ TÌNH NGUYỆN CHUNG TAY XÂY DỰNG NÔNG THÔN MỚI"\n📆Ngày 20/7/2024, Chiến sĩ tình nguyện trường Cao đẳng Kỹ thuật Cao Thắng phối hợp cùng đoàn viên, thanh niên xã Tân Quý Tây tổ chức các hoạt động chung tay bảo vệ môi trường, xây dựng nông thôn mới.\n🍀Các chiến sĩ tình nguyện đã tổ chức dọn dẹp cảnh quan môi trường, xoá các biển quảng cáo trái phép trên cột điện, tổ chức trồng cây cải tạo cảnh quan tại các địa điểm dễ gây ô nhiễm môi trường,…\n🕊️Cùng ngày, Các chiến sĩ tình nguyện cũng đã trao 02 bộ bàn ghế học tập dành cho các em học sinh có hoàn cảnh khó khăn vươn lên trong học tập.',
 		ctaText: 'Đồng hành cùng chúng tôi',
-		stats: [
-			{ number: '15', label: 'Tỉnh thành' },
-			{ number: '1,200+', label: 'Trẻ em được hỗ trợ' },
-			{ number: '200+', label: 'Tình nguyện viên' }
-		]
+		startDate: '2025-07-04T17:00:00.000Z',
+		endDate: '2025-08-03T17:00:00.000Z',
+		location: 'Trường Cao Đẳng Kỹ Thuật Cao Thắng'
+	},
+	{
+		id: 39,
+		url: Banner_2,
+		name: '💥CHIẾN SĨ TÌNH NGUYỆN MÙA HÈ XANH TRƯỜNG CAO ĐẲNG KỸ THUẬT CAO THẮNG',
+		link: '/bai-dang/chien-si-tinh-nguyen-mua-he-xanh-truong-cao-ang-ky-thuat-cao-thang-314',
+		icon: Heart,
+		badge: 'Chiến dịch từ thiện',
+		title:
+			'CHIẾN SĨ TÌNH NGUYỆN MÙA HÈ XANH TRƯỜNG CAO ĐẲNG KỸ THUẬT CAO THẮNG',
+		organizer: 'Tuổi trẻ Cao Thắng',
+		subtitle:
+			'CHIẾN SĨ TÌNH NGUYỆN MÙA HÈ XANH TRƯỜNG CAO ĐẲNG KỸ THUẬT CAO THẮNG ĐÃ CÓ MẶT TẠI ĐẢO PHÚ QUÝ, TỈNH BÌNH THUẬN',
+		description:
+			'💥CHIẾN SĨ TÌNH NGUYỆN MÙA HÈ XANH TRƯỜNG CAO ĐẲNG KỸ THUẬT CAO THẮNG ĐÃ CÓ MẶT TẠI ĐẢO PHÚ QUÝ, TỈNH BÌNH THUẬN\n🌟Năm 2024, trường Cao đẳng Kỹ thuật Cao Thắng cùng tham gia đội hình chiến sĩ tình nguyện của Thành phố Hồ Chí Minh tại huyện đảo Phú Quý, tỉnh Bình Thuận.\n🛳️Xuất phát từ Thành Đoàn TP. Hồ Chí Minh, sau gần 6 giờ di chuyển, các chiến sĩ tham gia các hoạt động tình nguyện hè tại huyện Đảo Phú Quý, tỉnh Bình Thuận đã có mặt tại Đảo . \n🕊️Các công tác chuẩn bị đã sẵn sàng cho các hoạt động tình nguyện tại vùng đảo phía Đông Nam tổ quốc.',
+		ctaText: 'Đồng hành cùng chúng tôi',
+		startDate: '2025-06-30T17:00:00.000Z',
+		endDate: '2025-08-22T17:00:00.000Z',
+		location: 'Huyện đảo Phú Quý, Tỉnh Bình Thuận.'
+	},
+	{
+		id: 40,
+		url: Banner_3,
+		name: '🍀MÙA HÈ XANH NĂM 2024 MẶT TRẬN THÀNH PHỐ HỒ CHÍ MINH🍀',
+		link: '/bai-dang/mua-he-xanh-nam-2024-mat-tran-thanh-pho-ho-chi-minh-686',
+		icon: Heart,
+		badge: 'Chiến dịch từ thiện',
+		title: 'MÙA HÈ XANH NĂM 2024 MẶT TRẬN THÀNH PHỐ HỒ CHÍ MINH',
+		organizer: 'Trường Cao đẳng Kỹ thuật Cao Thắng',
+		subtitle:
+			'NGÀY HOẠT ĐỘNG CAO ĐIỂM "CHIẾN SĨ TÌNH NGUYỆN CHUNG TAY XÂY DỰNG NÔNG THÔN MỚI"',
+		description:
+			'💥NGÀY HOẠT ĐỘNG CAO ĐIỂM "CHIẾN SĨ TÌNH NGUYỆN CHUNG TAY XÂY DỰNG NÔNG THÔN MỚI"\n📆Ngày 20/7/2024, Chiến sĩ tình nguyện trường Cao đẳng Kỹ thuật Cao Thắng phối hợp cùng đoàn viên, thanh niên xã Tân Quý Tây tổ chức các hoạt động chung tay bảo vệ môi trường, xây dựng nông thôn mới.\n🍀Các chiến sĩ tình nguyện đã tổ chức dọn dẹp cảnh quan môi trường, xoá các biển quảng cáo trái phép trên cột điện, tổ chức trồng cây cải tạo cảnh quan tại các địa điểm dễ gây ô nhiễm môi trường,…\n🕊️Cùng ngày, Các chiến sĩ tình nguyện cũng đã trao 02 bộ bàn ghế học tập dành cho các em học sinh có hoàn cảnh khó khăn vươn lên trong học tập.',
+		ctaText: 'Đồng hành cùng chúng tôi',
+		startDate: '2025-07-04T17:00:00.000Z',
+		endDate: '2025-08-03T17:00:00.000Z',
+		location: 'Trường Cao Đẳng Kỹ Thuật Cao Thắng'
 	}
-	// {
-	// 	url: Banner_4, // Thêm banner thứ 4 nếu cần
-	// 	name: 'Ngày hội Kết nối yêu thương',
-	// 	link: '/events/charity-festival',
-	// 	icon: Handshake,
-	// 	badge: 'Sự kiện đặc biệt',
-	// 	title: 'Ngày hội Kết nối Yêu thương',
-	// 	subtitle: 'Sự kiện thường niên quy tụ toàn thể sinh viên, giảng viên và cộng đồng trong tinh thần chia sẻ và yêu thương.',
-	// 	ctaText: 'Đăng ký tham gia',
-	// 	stats: [
-	// 		{ number: '5,000+', label: 'Người tham gia' },
-	// 		{ number: '100+', label: 'Hoạt động' },
-	// 		{ number: '3 ngày', label: 'Sự kiện' }
-	// 	]
-	// }
 ]
 
 export const BANNER_THEME = {

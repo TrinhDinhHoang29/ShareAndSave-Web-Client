@@ -52,6 +52,7 @@ import { EDateRangeStatus, EPostSTatus, EPostType } from '@/models/enums'
 import { IDateRangeResult, IUserInterest } from '@/models/interfaces'
 import useAuthStore from '@/stores/authStore'
 
+import PostDetailSkeleton from './components/PostDetailSkeleton'
 import RelatedPosts from './components/RelatedPosts'
 import TransactionInterestDialog from './components/TransactionInterestDialog'
 
@@ -289,16 +290,7 @@ const PostDetail: React.FC = () => {
 			})
 		}
 	}
-	if (isLoading)
-		return (
-			<div className='flex items-center justify-center py-12'>
-				<Loading
-					size='lg'
-					color='primary'
-					text='Đang tải...'
-				/>
-			</div>
-		)
+	if (isLoading) return <PostDetailSkeleton />
 	if (isError) return <div>Lỗi: {error?.message}</div>
 	if (!post) return <div>Bài đăng không tồn tại hoặc ID không hợp lệ</div>
 

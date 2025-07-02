@@ -48,9 +48,6 @@ export const ChatNotificationProvider: React.FC<{
 	// Hàm kết nối WebSocket
 	const connectNoti = (token: string) => {
 		if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-			console.log(
-				'[ℹ️] Socket đã kết nối hoặc đang kết nối, bỏ qua kết nối lại'
-			)
 			return
 		}
 
@@ -64,16 +61,13 @@ export const ChatNotificationProvider: React.FC<{
 		const newSocket = new WebSocket(wsUrl, token || '')
 
 		newSocket.onopen = () => {
-			console.log(
-				'[✅] Đã kết nối đến server noti. ReadyState:',
-				newSocket.readyState
-			)
+			console.log('Đã kết nối chat noti')
 		}
 
 		newSocket.onmessage = event => {
-			console.log('[ℹ️] Tin nhắn thô nhận được:', event.data)
 			try {
 				const data = JSON.parse(event.data) as ChatNotificationResponse
+				console.log(data.data)
 				if (data.event === 'send_message_response') {
 					const type = data.data.type as ETypeNotification
 					if (type === ETypeNotification.FOLLOWING) {
@@ -87,13 +81,10 @@ export const ChatNotificationProvider: React.FC<{
 			}
 		}
 
-		newSocket.onclose = event => {
-			console.log('[❌] Kết nối đóng. Mã:', event.code, 'Lý do:', event.reason)
-			console.log('[ℹ️] Kết nối có được đóng sạch sẽ?', event.wasClean)
+		newSocket.onclose = () => {
 			socketRef.current = null
 			// Thử kết nối lại sau 3 giây
 			setTimeout(() => {
-				console.log('[ℹ️] Đang thử kết nối lại...')
 				connectNoti(token)
 			}, 3000)
 		}

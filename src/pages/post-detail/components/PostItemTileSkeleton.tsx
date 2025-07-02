@@ -18,7 +18,7 @@ const PostItemTileSkeleton: React.FC<PostItemTileSkeletonProps> = ({
 				>
 					<div className='flex'>
 						{/* Image Section Skeleton - Left Side */}
-						<div className='bg-muted h-24 w-24 flex-shrink-0 rounded-l-xl' />
+						<div className='bg-muted h-32 w-24 flex-shrink-0 rounded-l-xl' />
 
 						{/* Content Section Skeleton - Right Side */}
 						<div className='min-w-0 flex-1 p-3'>

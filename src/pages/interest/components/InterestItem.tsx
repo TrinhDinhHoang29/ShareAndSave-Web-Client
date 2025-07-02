@@ -1,6 +1,6 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import clsx from 'clsx'
-import { ChevronDown, Clock, User } from 'lucide-react'
+import { ChevronDown, Clock, Recycle, RotateCw, User } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 
 import Loading from '@/components/common/Loading'
@@ -303,6 +303,15 @@ export const InterestItem = ({
 									)}
 								</>
 							)}
+
+							<button
+								className={`text-secondary-foreground bg-secondary rounded-xl p-3 shadow-lg transition-all duration-200 hover:shadow-xl`}
+								onClick={() => refetch()}
+								aria-label='Tải lại giao dịch'
+								title='Tải lại giao dịch'
+							>
+								<RotateCw className='h-5 w-5' />
+							</button>
 
 							<ChatButton
 								interestID={userInterstStable.id}
