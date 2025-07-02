@@ -232,7 +232,11 @@ const PostDetail: React.FC = () => {
 
 	const getCampaignInfo = () => {
 		try {
-			if (!post?.info) return null
+			if (
+				!post?.info ||
+				(post.type.toString() as EPostType) !== EPostType.CAMPAIGN
+			)
+				return null
 
 			const parsed = JSON.parse(post.info)
 
@@ -246,7 +250,6 @@ const PostDetail: React.FC = () => {
 			) {
 				return null
 			}
-
 			return parsed
 		} catch (error) {
 			console.warn('Failed to parse campaign info:', error)

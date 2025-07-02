@@ -25,10 +25,16 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({
 			onResetPasswordSuccess?.()
 		},
 		onError: (message: string) => {
-			setError('rePassword', {
-				type: 'manual',
-				message: message
-			})
+			if (currentPassword) {
+				setError('currentPassword', {
+					type: 'manual',
+					message: message
+				})
+			} else
+				setError('rePassword', {
+					type: 'manual',
+					message: message
+				})
 		}
 	})
 

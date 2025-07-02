@@ -144,7 +144,7 @@ const ImageUpload = ({
 				</span>
 				<br />
 				<span className='text-muted-foreground text-sm'>
-					Hoặc kéo thả vào đây
+					Hình ảnh phải khác định dạng Webp
 				</span>
 			</label>
 		</>

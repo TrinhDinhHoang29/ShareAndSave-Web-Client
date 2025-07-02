@@ -139,6 +139,7 @@ const PostAction: React.FC = () => {
 
 	const handleBack = () => {
 		if (currentStep > 0) {
+			resetForm()
 			setIsTransitioning(true)
 			setTimeout(() => {
 				setCurrentStep(currentStep - 1)

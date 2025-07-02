@@ -23,7 +23,13 @@ export const postInfoSchema = z.object({
 	reward: z.string().optional(),
 	foundLocation: z.string().optional(),
 	foundDate: z.string().optional(),
-	title: z.string().min(2, 'Tiêu đề phải chứa ít nhất 2 ký tự'),
+	title: z
+		.string()
+		.min(2, 'Tiêu đề phải chứa ít nhất 2 ký tự')
+		.transform(val => val.trim()) // Loại bỏ khoảng trắng ở đầu và cuối
+		.refine(val => val.length >= 2, {
+			message: 'Tiêu đề phải chứa ít nhất 2 ký tự'
+		}),
 	newItems: z
 		.array(
 			z.object({

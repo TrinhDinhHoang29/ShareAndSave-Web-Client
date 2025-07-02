@@ -53,7 +53,7 @@ const PostFindItemForm: React.FC<PostFindItemFormProps> = ({
 				<ItemManager
 					newItemsFieldName='newItems'
 					oldItemsFieldName='oldItems'
-					label='Món đồ'
+					label='Món đồ *'
 					description='Bấm vào dấu "+" để thêm món đồ'
 					animationDelay={0.2}
 				/>
@@ -99,7 +99,7 @@ const PostFindItemForm: React.FC<PostFindItemFormProps> = ({
 						render={({ field }) => (
 							<ImageUpload
 								name='images'
-								label='Hình ảnh'
+								label='Hình ảnh *'
 								field={field}
 								error={
 									Array.isArray(errors.images)

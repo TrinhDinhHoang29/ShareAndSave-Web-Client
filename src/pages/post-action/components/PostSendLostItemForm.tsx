@@ -87,7 +87,7 @@ const PostSendLostItemForm: React.FC<PostSendLostItemFormProps> = ({
 						render={({ field }) => (
 							<ImageUpload
 								name='images'
-								label='Hình ảnh'
+								label='Hình ảnh *'
 								field={field}
 								error={
 									Array.isArray(errors.images)
@@ -99,9 +99,6 @@ const PostSendLostItemForm: React.FC<PostSendLostItemFormProps> = ({
 							/>
 						)}
 					/>
-					<p className='text-muted-foreground mt-1 text-sm'>
-						Tải lên hình ảnh của món đồ (nếu có)
-					</p>
 				</div>
 				<div>
 					<InputText

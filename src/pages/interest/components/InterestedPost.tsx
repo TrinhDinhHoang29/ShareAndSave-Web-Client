@@ -111,9 +111,11 @@ export const InterestedPost = ({
 					</div>
 				</div>
 
-				<p className='text-muted-foreground bg-muted/50 line-clamp-2 rounded-lg p-4 text-sm leading-relaxed'>
-					{post.description}
-				</p>
+				<div className='bg-muted/50 rounded-lg p-4'>
+					<p className='text-muted-foreground line-clamp-2 text-sm leading-relaxed'>
+						{post.description}
+					</p>
+				</div>
 			</div>
 		</div>
 	)

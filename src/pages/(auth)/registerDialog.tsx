@@ -180,6 +180,55 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({
 									{passwordStrength.text}
 								</span>
 							</div>
+
+							{/* Password Requirements */}
+							<div className='mt-3 space-y-1'>
+								<p className='text-muted-foreground mb-2 text-xs font-medium'>
+									Mật khẩu cần có:
+								</p>
+								<div className='grid grid-cols-1 gap-1 text-xs'>
+									<div
+										className={`flex items-center gap-2 ${password.length >= 8 ? 'text-green-600' : 'text-muted-foreground'}`}
+									>
+										<div
+											className={`h-1.5 w-1.5 rounded-full ${password.length >= 8 ? 'bg-green-600' : 'bg-muted-foreground'}`}
+										/>
+										Ít nhất 8 ký tự
+									</div>
+									<div
+										className={`flex items-center gap-2 ${/[a-z]/.test(password) ? 'text-green-600' : 'text-muted-foreground'}`}
+									>
+										<div
+											className={`h-1.5 w-1.5 rounded-full ${/[a-z]/.test(password) ? 'bg-green-600' : 'bg-muted-foreground'}`}
+										/>
+										Chữ thường (a-z)
+									</div>
+									<div
+										className={`flex items-center gap-2 ${/[A-Z]/.test(password) ? 'text-green-600' : 'text-muted-foreground'}`}
+									>
+										<div
+											className={`h-1.5 w-1.5 rounded-full ${/[A-Z]/.test(password) ? 'bg-green-600' : 'bg-muted-foreground'}`}
+										/>
+										Chữ hoa (A-Z)
+									</div>
+									<div
+										className={`flex items-center gap-2 ${/\d/.test(password) ? 'text-green-600' : 'text-muted-foreground'}`}
+									>
+										<div
+											className={`h-1.5 w-1.5 rounded-full ${/\d/.test(password) ? 'bg-green-600' : 'bg-muted-foreground'}`}
+										/>
+										Số (0-9)
+									</div>
+									<div
+										className={`flex items-center gap-2 ${/[!@#$%^&*(),.?":{}|<>]/.test(password) ? 'text-green-600' : 'text-muted-foreground'}`}
+									>
+										<div
+											className={`h-1.5 w-1.5 rounded-full ${/[!@#$%^&*(),.?":{}|<>]/.test(password) ? 'bg-green-600' : 'bg-muted-foreground'}`}
+										/>
+										Ký tự đặc biệt (!@#$%...)
+									</div>
+								</div>
+							</div>
 						</motion.div>
 					)}
 				</div>

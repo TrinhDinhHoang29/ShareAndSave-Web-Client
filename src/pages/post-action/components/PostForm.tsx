@@ -62,7 +62,7 @@ const PostForm: React.FC<PostFormProps> = ({ isTransitioning }) => {
 						render={({ field }) => (
 							<ImageUpload
 								name='images'
-								label='Hình ảnh'
+								label='Hình ảnh *'
 								field={field}
 								error={
 									Array.isArray(errors.images)

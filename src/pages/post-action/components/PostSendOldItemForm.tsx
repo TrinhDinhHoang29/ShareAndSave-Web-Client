@@ -58,7 +58,7 @@ const PostSendOldItemForm: React.FC<PostSendOldItemFormProps> = ({
 				<ItemManager
 					newItemsFieldName='newItems'
 					oldItemsFieldName='oldItems'
-					label='Món đồ'
+					label='Món đồ *'
 					description='Bấm vào dấu "+" để thêm món đồ'
 					animationDelay={0.2}
 				/>
@@ -70,7 +70,7 @@ const PostSendOldItemForm: React.FC<PostSendOldItemFormProps> = ({
 						render={({ field }) => (
 							<ImageUpload
 								name='images'
-								label='Hình ảnh'
+								label='Hình ảnh *'
 								field={field}
 								error={
 									Array.isArray(errors.images)

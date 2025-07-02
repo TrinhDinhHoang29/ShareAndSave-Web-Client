@@ -14,7 +14,13 @@ import useDebounce from '@/hooks/use-debounce'
 import { ICategory, IItemSuggestion } from '@/models/interfaces'
 
 const itemSchema = z.object({
-	name: z.string().min(1, 'Tên không được để trống'),
+	name: z
+		.string()
+		.min(1, 'Tên không được để trống')
+		.transform(val => val.trim()) // Loại bỏ khoảng trắng ở đầu và cuối
+		.refine(val => val.length >= 1, {
+			message: 'Tên không được để trống'
+		}),
 	categoryID: z.number().min(1, 'Vui lòng chọn danh mục'),
 	quantity: z.number().min(1, 'Số lượng phải lớn hơn 0'),
 	image: z
@@ -104,7 +110,7 @@ const ItemDialog: React.FC<ItemDialogProps> = ({
 			setSelectedItemId(suggestion.id)
 		} else {
 			setSelectedItemId(null)
-			setValue('categoryID', 0)
+			// setValue('categoryID', 0)
 		}
 	}
 
@@ -124,12 +130,26 @@ const ItemDialog: React.FC<ItemDialogProps> = ({
 			image: data.image
 		}
 
+		const normalizeString = (str: string): string => {
+			return str
+				.toLowerCase() // Chuyển về chữ thường
+				.normalize('NFKD') // Chuẩn hóa chuỗi, tách dấu ra khỏi ký tự
+				.replace(/[\u0300-\u036f]/g, '') // Loại bỏ các ký tự dấu
+		}
+
 		const existingItem = existingItems.find(
-			existing => existing.itemID === itemID
+			existing =>
+				existing.itemID === itemID ||
+				normalizeString(existing.name) === normalizeString(item.name)
 		)
+
 		if (existingItem) {
 			const newQuantity = existingItem.quantity + data.quantity
-			onAdd({ ...item, quantity: newQuantity })
+			onAdd({
+				...item,
+				quantity: newQuantity,
+				itemID: isOldItem ? itemID : existingItem.itemID
+			})
 		} else {
 			onAdd(item)
 		}
