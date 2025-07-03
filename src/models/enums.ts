@@ -121,5 +121,6 @@ export enum ENotiType {
 
 export enum ENotiTargetType {
 	INTEREST = 'interest',
-	APPOINTMENT = 'appointment'
+	APPOINTMENT = 'appointment',
+	POST = 'post'
 }

@@ -8,7 +8,7 @@ export const useListNotiQuery = (
 	params: { page?: number; limit?: number }
 ) => {
 	return useInfiniteQuery<INotiResponse, Error>({
-		queryKey: ['noti', params, token],
+		queryKey: ['noti', token],
 		queryFn: async ({ pageParam = 1 }) => {
 			const queryParams = { ...params, page: Number(pageParam) }
 			const res = await notiApi.list(queryParams)

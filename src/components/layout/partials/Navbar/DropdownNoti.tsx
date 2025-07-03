@@ -1,18 +1,95 @@
+import { useQueryClient } from '@tanstack/react-query'
 import clsx from 'clsx'
-import { Bell, Clock, Heart, Loader2 } from 'lucide-react'
-import React, { useEffect } from 'react'
+import { Bell, Check, CircleAlert } from 'lucide-react'
+import React, { useEffect, useState } from 'react'
 import { useInView } from 'react-intersection-observer'
+import { useNavigate } from 'react-router-dom'
 
+import NotiSound from '@/assets/sound_effect/noti_sound.wav'
 import Dropdown from '@/components/common/Dropdown'
 import Loading from '@/components/common/Loading'
+import { useNoti } from '@/context/notification-context'
+import {
+	useUpdateNotiAllMutation,
+	useUpdateNotiByIDMutation
+} from '@/hooks/mutations/use-noti.mutation'
 import { useListNotiQuery } from '@/hooks/queries/use-noti.query'
 import { getAccessToken } from '@/lib/token'
-import { formatNearlyDateTimeVN } from '@/lib/utils'
-import { ENotiTargetType, ENotiType } from '@/models/enums'
+import { ENotiTargetType } from '@/models/enums'
 import { INoti } from '@/models/interfaces'
 
+import FloatingNotification from './FloatingNotification'
+import NotificationItem from './NotificationItem'
+
 const DropdownNoti: React.FC = () => {
+	const queryClient = useQueryClient()
 	const token = getAccessToken()
+	const { noti } = useNoti()
+	const [newNotification, setNewNotification] = useState<INoti | null>(null)
+	const [isOpenFloatingNoti, setIsOpenFloatingNoti] = useState<boolean>(false)
+	const navigate = useNavigate()
+	const [isOpen, setIsOpen] = useState<boolean>(false)
+	const { mutate: updateNotiAll, isPending: isMarkingAllRead } =
+		useUpdateNotiAllMutation()
+
+	const { mutate: updateNotiByID } = useUpdateNotiByIDMutation()
+
+	const handleNavigate = (notification: INoti) => {
+		if (!notification.isRead) {
+			updateNotiByID(notification.id)
+		}
+		if (notification.targetType === ENotiTargetType.INTEREST) {
+			navigate('/chat/' + notification.targetID)
+			setIsOpen(false)
+		} else if (notification.targetType === ENotiTargetType.POST) {
+			navigate('/bai-dang')
+			setIsOpen(false)
+		} else if (notification.targetType === ENotiTargetType.APPOINTMENT) {
+			navigate('/lich-hen')
+			setIsOpen(false)
+		}
+	}
+
+	// Function to mark all notifications as read
+	const handleMarkAllRead = async () => {
+		if (unreadCount === 0) return
+		updateNotiAll()
+	}
+
+	useEffect(() => {
+		if (noti && noti !== newNotification) {
+			queryClient.setQueryData(['noti', token], (old: any) => {
+				if (!old?.pages?.[0]) {
+					console.log('old', old)
+					return old
+				}
+
+				const newPages = [...old.pages]
+				newPages[0] = {
+					...newPages[0],
+					notifications: [noti, ...newPages[0].notifications],
+					unreadCount: newPages[0].unreadCount + 1
+				}
+				console.log('newPages', newPages)
+
+				return {
+					...old,
+					pages: newPages
+				}
+			})
+
+			// Hiển thị floating notification
+			setNewNotification(noti)
+			setIsOpenFloatingNoti(true)
+
+			// Tùy chọn: Phát âm thanh thông báo
+			const audio = new Audio(NotiSound)
+			audio.volume = 0.3
+			audio.play().catch(() => {
+				console.log('Could not play notification sound')
+			})
+		}
+	}, [noti])
 
 	const {
 		data,
@@ -41,91 +118,6 @@ const DropdownNoti: React.FC = () => {
 	const unreadCount = data?.pages[0]?.unreadCount || 0
 
 	// Get notification icon based on type and target type
-	const getNotificationIcon = (
-		type: ENotiType,
-		targetType: ENotiTargetType
-	) => {
-		if (type === ENotiType.SYSTEM) {
-			return <Bell className='text-warning h-5 w-5' />
-		}
-
-		// For NORMAL notifications, differentiate by targetType
-		switch (targetType) {
-			case ENotiTargetType.INTEREST:
-				return <Heart className='text-primary h-5 w-5' />
-			case ENotiTargetType.APPOINTMENT:
-				return <Clock className='text-accent h-5 w-5' />
-			default:
-				return <Bell className='text-muted-foreground h-5 w-5' />
-		}
-	}
-
-	const NotificationItem: React.FC<{ notification: INoti }> = ({
-		notification
-	}) => (
-		<div
-			className={clsx(
-				'group border-border/30 flex items-start gap-4 border-b p-4 last:border-b-0',
-				'hover:from-accent/5 hover:to-primary/5 transition-all duration-200 hover:bg-gradient-to-r',
-				'relative cursor-pointer overflow-hidden',
-				!notification.isRead && 'from-primary/5 to-accent/5 bg-gradient-to-r'
-			)}
-		>
-			{/* Icon with background */}
-			<div className='relative flex-shrink-0'>
-				<div
-					className={clsx(
-						'flex h-10 w-10 items-center justify-center rounded-full',
-						'bg-gradient-to-br shadow-sm',
-						notification.type === ENotiType.SYSTEM
-							? 'from-warning/20 to-warning/10'
-							: notification.targetType === ENotiTargetType.INTEREST
-								? 'from-primary/20 to-primary/10'
-								: 'from-accent/20 to-accent/10'
-					)}
-				>
-					{getNotificationIcon(notification.type, notification.targetType)}
-				</div>
-				{!notification.isRead && (
-					<div className='bg-destructive border-card absolute -top-1 -right-1 h-3 w-3 rounded-full border-2' />
-				)}
-			</div>
-
-			<div className='min-w-0 flex-1'>
-				<div className='space-y-1'>
-					{/* Sender Name */}
-					<div className='flex items-center gap-2'>
-						<p className='text-foreground text-sm font-semibold'>
-							{notification.senderName || `Người dùng ${notification.senderID}`}
-						</p>
-						<span className='text-muted-foreground text-xs'>
-							{formatNearlyDateTimeVN(notification.createdAt)}
-						</span>
-					</div>
-
-					{/* Content */}
-					<p className='text-muted-foreground text-sm leading-relaxed'>
-						{notification.content || 'Thông báo mới'}
-					</p>
-				</div>
-			</div>
-
-			{/* Hover effect overlay */}
-			<div className='via-primary/2 absolute inset-0 bg-gradient-to-r from-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100' />
-		</div>
-	)
-
-	const LoadingState = () => (
-		<div className='flex items-center justify-center p-8'>
-			<div className='relative'>
-				<Loader2 className='text-primary h-6 w-6 animate-spin' />
-				<div className='bg-primary/20 absolute inset-0 animate-pulse rounded-full' />
-			</div>
-			<span className='text-muted-foreground ml-3 text-sm'>
-				Đang tải thông báo...
-			</span>
-		</div>
-	)
 
 	const EmptyState = () => (
 		<div className='flex flex-col items-center justify-center p-12 text-center'>
@@ -145,7 +137,7 @@ const DropdownNoti: React.FC = () => {
 	const ErrorState = () => (
 		<div className='flex flex-col items-center justify-center p-12 text-center'>
 			<div className='from-destructive/20 to-destructive/10 mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br'>
-				<span className='text-2xl'>⚠️</span>
+				<CircleAlert className='text-warning text-2xl' />
 			</div>
 			<h3 className='text-destructive mb-2 font-medium'>
 				Không thể tải thông báo
@@ -188,69 +180,96 @@ const DropdownNoti: React.FC = () => {
 	)
 
 	return (
-		<Dropdown
-			trigger={trigger}
-			position='right'
-		>
-			<div className='bg-card w-96 overflow-hidden rounded-md shadow-xl backdrop-blur-xl'>
-				{/* Header */}
-				<div className='from-primary/5 to-accent/5 border-border/30 border-b bg-gradient-to-r p-4'>
-					<div className='flex items-center justify-between'>
-						<div className='flex items-center gap-3'>
-							<div className='from-primary to-accent flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br'>
-								<Bell className='h-4 w-4 text-white' />
+		<>
+			<FloatingNotification
+				isOpen={isOpenFloatingNoti}
+				notification={newNotification}
+				onClose={() => setIsOpenFloatingNoti(false)}
+				autoHideDelay={5000}
+			/>
+			<Dropdown
+				isOpen={isOpen}
+				onOpenChange={setIsOpen}
+				trigger={trigger}
+				position='right'
+			>
+				<div className='bg-card w-96 overflow-hidden rounded-md shadow-xl backdrop-blur-xl'>
+					{/* Header */}
+					<div className='from-primary/5 to-accent/5 border-border/30 border-b bg-gradient-to-r p-4'>
+						<div className='flex items-center justify-between'>
+							<div className='flex items-center gap-3'>
+								<div className='from-primary to-accent flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br'>
+									<Bell className='h-4 w-4 text-white' />
+								</div>
+								<h3 className='text-foreground font-semibold'>Thông báo</h3>
 							</div>
-							<h3 className='text-foreground font-semibold'>Thông báo</h3>
-						</div>
-						<div className='flex items-center gap-3'>
 							{unreadCount > 0 && (
-								<span className='text-primary bg-primary/10 rounded-full px-2 py-1 text-xs font-medium'>
-									{unreadCount} mới
-								</span>
+								<button
+									onClick={handleMarkAllRead}
+									disabled={isMarkingAllRead}
+									className={clsx(
+										'flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium transition-all',
+										'hover:bg-primary/20 text-primary hover:text-primary/80',
+										'disabled:cursor-not-allowed disabled:opacity-50'
+									)}
+									title='Đánh dấu tất cả đã đọc'
+								>
+									{isMarkingAllRead ? (
+										<Loading size='sm' />
+									) : (
+										<Check className='h-3 w-3' />
+									)}
+									<span className='hidden sm:inline'>
+										{isMarkingAllRead ? 'Đang xử lý...' : 'Đánh dấu đã đọc'}
+									</span>
+								</button>
 							)}
 						</div>
 					</div>
+
+					{/* Content */}
+					<div className='custom-scrollbar max-h-[400px] overflow-y-auto'>
+						{isLoading ? (
+							<div className='py-4'>
+								<Loading text='Đang tải...' />
+							</div>
+						) : error ? (
+							<ErrorState />
+						) : allNotifications.length === 0 ? (
+							<EmptyState />
+						) : (
+							<>
+								{allNotifications.map(notification => (
+									<NotificationItem
+										key={notification.id}
+										notification={notification}
+										handleNavigate={handleNavigate}
+									/>
+								))}
+
+								{/* Infinite scroll trigger */}
+								{hasNextPage && (
+									<div
+										ref={ref}
+										className='h-4'
+									>
+										{isFetchingNextPage && <Loading size='sm' />}
+									</div>
+								)}
+
+								{!hasNextPage && allNotifications.length > 0 && (
+									<div className='py-4 text-center'>
+										<span className='text-muted-foreground text-sm'>
+											Đã hiển thị tất cả thông báo
+										</span>
+									</div>
+								)}
+							</>
+						)}
+					</div>
 				</div>
-
-				{/* Content */}
-				<div className='custom-scrollbar max-h-[400px] overflow-y-auto'>
-					{isLoading ? (
-						<LoadingState />
-					) : error ? (
-						<ErrorState />
-					) : allNotifications.length === 0 ? (
-						<EmptyState />
-					) : (
-						<>
-							{allNotifications.map(notification => (
-								<NotificationItem
-									key={notification.id}
-									notification={notification}
-								/>
-							))}
-
-							{/* Infinite scroll trigger */}
-							{hasNextPage && (
-								<div
-									ref={ref}
-									className='h-4'
-								>
-									{isFetchingNextPage && <Loading size='sm' />}
-								</div>
-							)}
-
-							{!hasNextPage && allNotifications.length > 0 && (
-								<div className='py-4 text-center'>
-									<span className='text-muted-foreground text-sm'>
-										Đã hiển thị tất cả thông báo
-									</span>
-								</div>
-							)}
-						</>
-					)}
-				</div>
-			</div>
-		</Dropdown>
+			</Dropdown>
+		</>
 	)
 }
 
