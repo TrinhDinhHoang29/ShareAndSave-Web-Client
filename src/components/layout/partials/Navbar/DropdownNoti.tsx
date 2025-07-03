@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react'
 import { useInView } from 'react-intersection-observer'
 import { useNavigate } from 'react-router-dom'
 
+import postApi from '@/apis/modules/post.api'
 import NotiSound from '@/assets/sound_effect/noti_sound.wav'
 import Dropdown from '@/components/common/Dropdown'
 import Loading from '@/components/common/Loading'
@@ -34,7 +35,7 @@ const DropdownNoti: React.FC = () => {
 
 	const { mutate: updateNotiByID } = useUpdateNotiByIDMutation()
 
-	const handleNavigate = (notification: INoti) => {
+	const handleNavigate = async (notification: INoti) => {
 		if (!notification.isRead) {
 			updateNotiByID(notification.id)
 		}
@@ -42,8 +43,11 @@ const DropdownNoti: React.FC = () => {
 			navigate('/chat/' + notification.targetID)
 			setIsOpen(false)
 		} else if (notification.targetType === ENotiTargetType.POST) {
-			navigate('/bai-dang')
-			setIsOpen(false)
+			const res = await postApi.detailByID(notification.targetID)
+			if (res && res.data.post) {
+				navigate('/bai-dang/' + res.data.post.slug)
+				setIsOpen(false)
+			}
 		} else if (notification.targetType === ENotiTargetType.APPOINTMENT) {
 			navigate('/lich-hen')
 			setIsOpen(false)

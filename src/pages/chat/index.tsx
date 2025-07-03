@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useInView } from 'react-intersection-observer'
 import { useNavigate, useParams } from 'react-router-dom'
 
@@ -11,7 +11,7 @@ import {
 } from '@/hooks/mutations/use-transaction.mutation'
 import { useDetailPostInterestQuery } from '@/hooks/queries/use-interest.query'
 import { useListTransactionQuery } from '@/hooks/queries/use-transaction.query'
-import { getAccessToken } from '@/lib/token'
+import { useWebSocketConnection } from '@/hooks/useWebSocketConnection'
 import { getConfirmContentTransactionStatus } from '@/models/constants'
 import {
 	EMethod,
@@ -51,22 +51,13 @@ const Chat = () => {
 		refetch: postDetailDataRefetch
 	} = useDetailPostInterestQuery(interestID)
 
-	const socketRef = useRef<WebSocket | null>(null)
-	const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-	const reconnectAttemptsRef = useRef(0)
-	const maxReconnectAttempts = 5
-	const reconnectDelayRef = useRef(1000) // Start with 1 second
-	const isReconnectingRef = useRef(false)
-	const shouldReconnectRef = useRef(true)
-
-	const token = getAccessToken()
-
 	const { user } = useAuthStore()
 	const senderID = user?.id
 	const isAuthor = useMemo(() => {
 		if (!postDetailInterestData || !senderID) return false
 		return senderID === postDetailInterestData.authorID
 	}, [postDetailInterestData?.authorID, senderID])
+
 	const receiver: IReceiver = isAuthor
 		? {
 				id: postDetailInterestData?.interests[0]?.userID || 0,
@@ -78,225 +69,11 @@ const Chat = () => {
 				name: postDetailInterestData?.authorName || '',
 				avatar: postDetailInterestData?.authorAvatar || ''
 			}
+
 	const [socketMessageResponse, setSocketMessageResponse] = useState<{
 		data?: ISocketMessageResponse
 		status: 'success' | 'error'
 	}>(Object)
-
-	const [connectionStatus, setConnectionStatus] = useState<
-		'connecting' | 'connected' | 'disconnected' | 'reconnecting'
-	>('disconnected')
-
-	// Join room function
-	const joinRoom = useCallback(() => {
-		if (socketRef.current?.readyState === WebSocket.OPEN && interestID) {
-			const msg = {
-				event: 'join_room',
-				data: {
-					interestID
-				}
-			}
-			socketRef.current.send(JSON.stringify(msg))
-		}
-	}, [interestID])
-
-	const sendTransaction = useCallback(() => {
-		if (
-			socketRef.current?.readyState === WebSocket.OPEN &&
-			interestID &&
-			receiver
-		) {
-			const msg = {
-				event: 'send_transaction',
-				data: {
-					interestID,
-					receiverID: receiver.id
-				}
-			}
-			console.log('đã send')
-			socketRef.current.send(JSON.stringify(msg))
-		}
-	}, [interestID])
-
-	// Leave room function
-	const leaveRoom = useCallback(() => {
-		if (socketRef.current?.readyState === WebSocket.OPEN && interestID) {
-			const msg = {
-				event: 'left_room',
-				data: {
-					interestID
-				}
-			}
-			socketRef.current.send(JSON.stringify(msg))
-		}
-	}, [interestID])
-
-	// WebSocket connection function
-	const connectWebSocket = useCallback(() => {
-		if (isReconnectingRef.current || !shouldReconnectRef.current) return
-
-		setConnectionStatus('connecting')
-
-		const wsUrl =
-			import.meta.env.VITE_SOCKET_CHAT || 'ws://34.142.168.171:8001/chat'
-
-		try {
-			socketRef.current = new WebSocket(wsUrl, [token ?? ''])
-
-			socketRef.current.onopen = () => {
-				console.log('✅ WebSocket connected')
-				setConnectionStatus('connected')
-				reconnectAttemptsRef.current = 0
-				reconnectDelayRef.current = 1000 // Reset delay
-				isReconnectingRef.current = false
-				joinRoom()
-			}
-
-			socketRef.current.onmessage = event => {
-				try {
-					const data = JSON.parse(event.data)
-					if (data.event === 'send_message_response' && data.data.message) {
-						const messageResponse: ISocketMessageResponse = data.data
-						setSocketMessageResponse({
-							data: messageResponse,
-							status: 'success'
-						})
-					} else if (
-						data.event === 'send_message_response' &&
-						data.status === 'error'
-					) {
-						setSocketMessageResponse({
-							status: 'error'
-						})
-					} else if (data.event === 'send_transaction_response') {
-						if (!isAuthor) {
-							setTransactionStatus(ETransactionStatus.DEFAULT)
-							setTransactionItems([])
-							postDetailDataRefetch()
-						}
-						transactionDataRefetch()
-					}
-				} catch (error) {
-					console.error('❌ Parse error:', error)
-				}
-			}
-
-			socketRef.current.onerror = error => {
-				console.error('❌ WebSocket error:', error)
-				setSocketMessageResponse({
-					status: 'error'
-				})
-			}
-
-			socketRef.current.onclose = event => {
-				console.warn(
-					`⚠️ WebSocket closed. Code: ${event.code}, Reason: ${event.reason}`
-				)
-				setConnectionStatus('disconnected')
-
-				// Only attempt reconnect if it wasn't a manual close and we should reconnect
-				if (shouldReconnectRef.current && event.code !== 1000) {
-					attemptReconnect()
-				}
-			}
-		} catch (error) {
-			console.error('❌ WebSocket connection error:', error)
-			setConnectionStatus('disconnected')
-			if (shouldReconnectRef.current) {
-				attemptReconnect()
-			}
-		}
-	}, [token, joinRoom])
-
-	// Reconnect function with exponential backoff
-	const attemptReconnect = useCallback(() => {
-		if (isReconnectingRef.current || !shouldReconnectRef.current) return
-
-		if (reconnectAttemptsRef.current >= maxReconnectAttempts) {
-			console.error('❌ Max reconnection attempts reached')
-			setConnectionStatus('disconnected')
-			showInfo({
-				infoTitle: 'Mất kết nối',
-				infoMessage:
-					'Không thể kết nối lại với server. Vui lòng tải lại trang.',
-				infoButtonText: 'Đã hiểu'
-			})
-			return
-		}
-
-		isReconnectingRef.current = true
-		setConnectionStatus('reconnecting')
-		reconnectAttemptsRef.current += 1
-
-		console.log(
-			`🔄 Attempting to reconnect... (${reconnectAttemptsRef.current}/${maxReconnectAttempts})`
-		)
-
-		reconnectTimeoutRef.current = setTimeout(() => {
-			connectWebSocket()
-			// Exponential backoff: double the delay each time, max 30 seconds
-			reconnectDelayRef.current = Math.min(reconnectDelayRef.current * 2, 30000)
-		}, reconnectDelayRef.current)
-	}, [connectWebSocket, showInfo])
-
-	// Manual reconnect function
-	const manualReconnect = useCallback(() => {
-		if (socketRef.current) {
-			socketRef.current.close()
-		}
-
-		// Clear any existing reconnect timeout
-		if (reconnectTimeoutRef.current) {
-			clearTimeout(reconnectTimeoutRef.current)
-			reconnectTimeoutRef.current = null
-		}
-
-		// Reset reconnect state
-		reconnectAttemptsRef.current = 0
-		reconnectDelayRef.current = 1000
-		isReconnectingRef.current = false
-		shouldReconnectRef.current = true
-
-		// Attempt to connect
-		connectWebSocket()
-	}, [connectWebSocket])
-
-	// Initialize WebSocket connection
-	useEffect(() => {
-		shouldReconnectRef.current = true
-		connectWebSocket()
-
-		return () => {
-			shouldReconnectRef.current = false
-			isReconnectingRef.current = false
-
-			if (reconnectTimeoutRef.current) {
-				clearTimeout(reconnectTimeoutRef.current)
-				reconnectTimeoutRef.current = null
-			}
-
-			if (socketRef.current?.readyState === WebSocket.OPEN) {
-				leaveRoom()
-				socketRef.current.close(1000, 'Component unmounting')
-			}
-		}
-	}, [connectWebSocket, leaveRoom])
-
-	// Cleanup on interestID change
-	useEffect(() => {
-		return () => {
-			if (socketRef.current?.readyState === WebSocket.OPEN) {
-				leaveRoom()
-			}
-		}
-	}, [interestID, leaveRoom])
-
-	useEffect(() => {
-		const handleRefetch = async () => {
-			await messageApi.update(interestID)
-		}
-		if (interestID) handleRefetch()
-	}, [interestID])
 
 	//Handle Transactions
 	const transactionParams: ITransactionParams = useMemo(
@@ -310,18 +87,7 @@ const Chat = () => {
 		}),
 		[interestID, postDetailInterestData]
 	)
-	const [selectedTransactionID, setSelectedTransactionID] = useState<number>(0)
-	const [selectedMethod, setSelectedMethod] = useState<EMethod>(
-		EMethod.IN_PERSON
-	)
-	const handleSendRequest = (method: EMethod) => {
-		if (selectedItems.length > 0) {
-			setSelectedMethod(method) // Store the selected method
-			setTransactionItems([...transactionItems, ...selectedItems])
-			setSelectedItems([])
-			setCurrentRequestIndex(0)
-		}
-	}
+
 	const {
 		data: transactionData,
 		fetchNextPage: transactionFetchNextPage,
@@ -333,6 +99,38 @@ const Chat = () => {
 	const transactions: ITransaction[] = useMemo(() => {
 		return transactionData?.pages.flatMap(page => page.transactions) || []
 	}, [transactionData])
+
+	// Memoize callback functions to prevent unnecessary re-renders
+	const handleMessageResponse = useCallback((data: any) => {
+		if (data.data.message) {
+			const messageResponse: ISocketMessageResponse = data.data
+			setSocketMessageResponse({
+				data: messageResponse,
+				status: 'success'
+			})
+		} else if (data.status === 'error') {
+			setSocketMessageResponse({
+				status: 'error'
+			})
+		}
+	}, [])
+
+	const handleTransactionResponse = useCallback(() => {
+		if (!isAuthor) {
+			setTransactionStatus(ETransactionStatus.DEFAULT)
+			setTransactionItems([])
+			postDetailDataRefetch()
+		}
+		transactionDataRefetch()
+	}, [isAuthor, postDetailDataRefetch, transactionDataRefetch])
+
+	// WebSocket connection hook
+	const { socket, connectionStatus, manualReconnect, sendTransaction } =
+		useWebSocketConnection({
+			interestID,
+			onMessage: handleMessageResponse,
+			onTransactionResponse: handleTransactionResponse
+		})
 
 	const { ref: transactionRef, inView: transactionInView } = useInView({
 		threshold: 0.5,
@@ -357,6 +155,19 @@ const Chat = () => {
 	const [isRequestsVisible, setIsRequestsVisible] = useState(true)
 	const [transactionStatus, setTransactionStatus] =
 		useState<ETransactionStatus>(ETransactionStatus.DEFAULT)
+	const [selectedTransactionID, setSelectedTransactionID] = useState<number>(0)
+	const [selectedMethod, setSelectedMethod] = useState<EMethod>(
+		EMethod.IN_PERSON
+	)
+
+	const handleSendRequest = (method: EMethod) => {
+		if (selectedItems.length > 0) {
+			setSelectedMethod(method)
+			setTransactionItems([...transactionItems, ...selectedItems])
+			setSelectedItems([])
+			setCurrentRequestIndex(0)
+		}
+	}
 
 	const isPendingTransaction = useMemo(() => {
 		if (transactions && transactions.length > 0) {
@@ -382,7 +193,7 @@ const Chat = () => {
 			setTransactionStatus(ETransactionStatus.PENDING)
 			setSelectedItems([])
 			transactionDataRefetch()
-			sendTransaction()
+			sendTransaction(receiver.id)
 		}
 	})
 
@@ -396,7 +207,7 @@ const Chat = () => {
 			) {
 				postDetailDataRefetch()
 			}
-			sendTransaction()
+			sendTransaction(receiver.id)
 		}
 	})
 
@@ -417,7 +228,7 @@ const Chat = () => {
 					postItemID: item.postItemID,
 					quantity: item.quantity
 				})),
-				method: selectedMethod // Add method here
+				method: selectedMethod
 			}
 			updateTransactionMutation({
 				transactionID: selectedTransactionID,
@@ -436,9 +247,8 @@ const Chat = () => {
 							postItemID: item.postItemID,
 							quantity: item.quantity
 						})),
-						method: selectedMethod // Add method here
+						method: selectedMethod
 					}
-					// console.log(transactionRequest)
 					createTransactionMutation({ data: transactionRequest })
 				},
 				cancelButtonText: 'Hủy'
@@ -492,6 +302,13 @@ const Chat = () => {
 		setSelectedItems([])
 		setCurrentRequestIndex(0)
 	}
+
+	useEffect(() => {
+		const handleRefetch = async () => {
+			await messageApi.update(interestID)
+		}
+		if (interestID) handleRefetch()
+	}, [interestID])
 
 	useEffect(() => {
 		if (
@@ -587,7 +404,7 @@ const Chat = () => {
 							/>
 							<ChatMessagesPanel
 								socketMessageResponse={socketMessageResponse}
-								socket={socketRef.current}
+								socket={socket}
 								socketInfo={{
 									isOwner: isAuthor,
 									interestID,
@@ -653,7 +470,7 @@ const Chat = () => {
 									prev.filter(item => item.itemID !== itemId)
 								)
 							}}
-							handleSendRequest={handleSendRequest} // Updated to accept method parameter
+							handleSendRequest={handleSendRequest}
 							setSelectedItems={setSelectedItems}
 						/>
 					</div>
