@@ -1,6 +1,6 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import clsx from 'clsx'
-import { ChevronDown, Clock, Recycle, RotateCw, User } from 'lucide-react'
+import { ChevronDown, Clock, RotateCw, User } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 
 import Loading from '@/components/common/Loading'
