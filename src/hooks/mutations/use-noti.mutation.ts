@@ -71,7 +71,7 @@ export const useUpdateNotiByIDMutation = ({
 		},
 
 		// Rollback nếu có lỗi
-		onError: async (error: any, notiId, context) => {
+		onError: async (error: any, _notiId, context) => {
 			// Khôi phục data trước đó
 			if (context?.previousData) {
 				queryClient.setQueryData(['noti'], context.previousData)
@@ -150,7 +150,7 @@ export const useUpdateNotiAllMutation = ({
 			}
 		},
 
-		onError: async (error: any, variables, context) => {
+		onError: async (error: any, _variables, context) => {
 			if (context?.previousData) {
 				queryClient.setQueryData(['noti'], context.previousData)
 			}
