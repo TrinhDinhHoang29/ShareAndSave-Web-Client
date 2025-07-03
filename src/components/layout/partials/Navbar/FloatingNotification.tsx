@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Bell, Clock, Heart, X } from 'lucide-react'
-import React from 'react'
+import { ArrowRightLeft, Bell, Clipboard, Clock, X } from 'lucide-react'
+import React, { useMemo } from 'react'
 
 import { formatNearlyDateTimeVN } from '@/lib/utils'
 import { ENotiTargetType, ENotiType } from '@/models/enums'
@@ -12,6 +12,36 @@ interface FloatingNotificationProps {
 	notification: INoti | null
 	onClose: () => void
 	autoHideDelay?: number
+}
+
+const getNotificationType = (type: ENotiType, targetType: ENotiTargetType) => {
+	// Determine background gradient based on notification type and target type
+	const getBgGradient = () => {
+		if (type === ENotiType.SYSTEM) {
+			return 'from-warning/20 to-warning/10 text-warning '
+		} else {
+			return 'from-primary/20 to-primary/10 text-primary'
+		}
+	}
+
+	// Determine icon based on target type
+	const getIcon = () => {
+		switch (targetType) {
+			case ENotiTargetType.INTEREST:
+				return <ArrowRightLeft className='h-5 w-5' />
+			case ENotiTargetType.APPOINTMENT:
+				return <Clock className='h-5 w-5' />
+			case ENotiTargetType.POST:
+				return <Clipboard className='h-5 w-5' />
+			default:
+				return <Bell className='h-5 w-5' />
+		}
+	}
+
+	return {
+		bgGradient: getBgGradient(),
+		icon: getIcon()
+	}
 }
 
 const FloatingNotification: React.FC<FloatingNotificationProps> = ({
@@ -31,26 +61,12 @@ const FloatingNotification: React.FC<FloatingNotificationProps> = ({
 		}
 	}, [notification, autoHideDelay, onClose])
 
-	// Get notification icon based on type and target type
-	const getNotificationIcon = (
-		type: ENotiType,
-		targetType: ENotiTargetType
-	) => {
-		if (type === ENotiType.SYSTEM) {
-			return <Bell className='text-warning h-4 w-4' />
+	const notificationType = useMemo(() => {
+		if (notification) {
+			return getNotificationType(notification.type, notification.targetType)
 		}
-
-		// For NORMAL notifications, differentiate by targetType
-		switch (targetType) {
-			case ENotiTargetType.INTEREST:
-				return <Heart className='text-primary h-4 w-4' />
-			case ENotiTargetType.APPOINTMENT:
-				return <Clock className='text-accent h-4 w-4' />
-			default:
-				return <Bell className='text-muted-foreground h-4 w-4' />
-		}
-	}
-
+		return null
+	}, [notification])
 	return (
 		<div className='pointer-events-none fixed top-4 right-4 z-50'>
 			<AnimatePresence>
@@ -112,17 +128,10 @@ const FloatingNotification: React.FC<FloatingNotificationProps> = ({
 										className={clsx(
 											'flex h-8 w-8 items-center justify-center rounded-full',
 											'bg-gradient-to-br shadow-sm',
-											notification.type === ENotiType.SYSTEM
-												? 'from-warning/20 to-warning/10'
-												: notification.targetType === ENotiTargetType.INTEREST
-													? 'from-primary/20 to-primary/10'
-													: 'from-accent/20 to-accent/10'
+											notificationType?.bgGradient
 										)}
 									>
-										{getNotificationIcon(
-											notification.type,
-											notification.targetType
-										)}
+										{notificationType?.icon}
 									</motion.div>
 									{!notification.isRead && (
 										<motion.div

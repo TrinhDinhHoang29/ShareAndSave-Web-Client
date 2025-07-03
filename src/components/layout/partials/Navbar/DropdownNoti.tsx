@@ -49,7 +49,7 @@ const DropdownNoti: React.FC = () => {
 				setIsOpen(false)
 			}
 		} else if (notification.targetType === ENotiTargetType.APPOINTMENT) {
-			navigate('/lich-hen')
+			navigate('/ho-so/lich-hen')
 			setIsOpen(false)
 		}
 	}

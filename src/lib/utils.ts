@@ -23,7 +23,6 @@ import { IGoodDeed, IMessage } from '@/models/interfaces'
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs))
 }
-
 export const formatNearlyDateTimeVN = (dateString: string): string => {
 	try {
 		const now = new Date()
@@ -33,12 +32,12 @@ export const formatNearlyDateTimeVN = (dateString: string): string => {
 			return dateString
 		}
 
-		const diffSeconds = differenceInSeconds(now, date)
-		const diffMinutes = differenceInMinutes(now, date)
-		const diffHours = differenceInHours(now, date)
-		const diffDays = differenceInDays(now, date)
-		const diffWeeks = differenceInWeeks(now, date)
-		const diffMonths = differenceInMonths(now, date)
+		const diffSeconds = Math.abs(differenceInSeconds(now, date))
+		const diffMinutes = Math.abs(differenceInMinutes(now, date))
+		const diffHours = Math.abs(differenceInHours(now, date))
+		const diffDays = Math.abs(differenceInDays(now, date))
+		const diffWeeks = Math.abs(differenceInWeeks(now, date))
+		const diffMonths = Math.abs(differenceInMonths(now, date))
 
 		if (diffSeconds < 60) {
 			return `${diffSeconds} giây trước`

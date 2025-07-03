@@ -1,10 +1,10 @@
 import {
 	Calendar,
+	Calendar1,
 	CheckCircle,
 	Clock,
 	PackageCheck,
 	PackageX,
-	User,
 	X
 } from 'lucide-react'
 import React from 'react'
@@ -57,15 +57,12 @@ const AppointmentItem: React.FC<AppointmentItemProps> = ({
 
 	return (
 		<div className='bg-card border-border glass space-y-4 rounded-xl border p-6 shadow-sm transition-all duration-300 hover:shadow-lg'>
-			<div className='flex items-start justify-between'>
-				<div className='flex items-center space-x-3'>
+			<div className='flex items-center justify-between gap-4'>
+				<div className='flex flex-1 items-center space-x-3'>
 					<div className='bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full'>
-						<User className='text-primary h-6 w-6' />
+						<Calendar1 className='text-primary h-6 w-6' />
 					</div>
-					<div>
-						<h3 className='text-foreground text-lg font-semibold'>
-							{appointment.userName}
-						</h3>
+					<div className='min-w-0 flex-1'>
 						<p className='text-muted-foreground text-sm'>
 							Số: #{appointment.id}
 						</p>
