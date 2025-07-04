@@ -10,7 +10,7 @@ interface ItemData {
 	categoryName: string
 	quantity: number
 	image?: string
-	althernativeImage?: string
+	alternativeImage?: string
 	isOldItem: boolean
 }
 
@@ -37,7 +37,7 @@ export const useItemManager = ({
 				categoryName,
 				quantity,
 				image,
-				althernativeImage,
+				alternativeImage,
 				isOldItem
 			} = data
 
@@ -48,7 +48,7 @@ export const useItemManager = ({
 				categoryName,
 				quantity,
 				image,
-				althernativeImage
+				alternativeImage
 			}
 
 			if (isOldItem) {
@@ -114,7 +114,7 @@ export const useItemManager = ({
 			categoryName: item.categoryName,
 			quantity: item.quantity,
 			image: item.image,
-			althernativeImage: item.althernativeImage,
+			alternativeImage: item.alternativeImage,
 			categoryID: item.categoryID
 		})),
 		...oldItems.map(item => ({
@@ -123,7 +123,7 @@ export const useItemManager = ({
 			categoryName: item.categoryName,
 			quantity: item.quantity,
 			image: item.image,
-			althernativeImage: item.althernativeImage,
+			alternativeImage: item.alternativeImage,
 			categoryID: item.categoryID
 		}))
 	]

@@ -11,7 +11,7 @@ interface ItemTableProps {
 		categoryName: string
 		quantity: number
 		image?: string
-		althernativeImage?: string
+		alternativeImage?: string
 	}[]
 	onDelete: (itemID: number) => void
 }
@@ -50,7 +50,7 @@ const ItemTable: React.FC<ItemTableProps> = ({ allItems, onDelete }) => {
 							>
 								<td className='border-border border-b px-4 py-2'>
 									<img
-										src={item.image || item.althernativeImage || defaultImage}
+										src={item.image || item.alternativeImage || defaultImage}
 										alt={item.name}
 										className='h-12 w-12 rounded-md object-cover'
 										onError={e => {

@@ -35,7 +35,8 @@ const itemSchema = z.object({
 			{
 				message: 'Không chấp nhận ảnh định dạng .webp'
 			}
-		)
+		),
+	alternativeImage: z.string().optional()
 })
 
 interface ItemDialogProps {
@@ -49,6 +50,7 @@ interface ItemDialogProps {
 		quantity: number
 		isOldItem: boolean
 		image?: string
+		alternativeImage?: string
 	}) => void
 	existingItems: {
 		itemID: number
@@ -57,6 +59,7 @@ interface ItemDialogProps {
 		categoryName: string
 		quantity: number
 		image?: string
+		alternativeImage?: string
 	}[]
 }
 
@@ -65,6 +68,7 @@ interface FormData {
 	categoryID: number
 	quantity: number
 	image?: string
+	alternativeImage?: string
 }
 
 const ItemDialog: React.FC<ItemDialogProps> = ({
@@ -107,10 +111,10 @@ const ItemDialog: React.FC<ItemDialogProps> = ({
 		if (suggestion) {
 			setValue('name', suggestion.name)
 			setValue('categoryID', suggestion.categoryID)
+			setValue('alternativeImage', suggestion.image)
 			setSelectedItemId(suggestion.id)
 		} else {
 			setSelectedItemId(null)
-			// setValue('categoryID', 0)
 		}
 	}
 
@@ -127,7 +131,8 @@ const ItemDialog: React.FC<ItemDialogProps> = ({
 			categoryName,
 			quantity: data.quantity,
 			isOldItem,
-			image: data.image
+			image: data.image,
+			alternativeImage: data.alternativeImage
 		}
 
 		const normalizeString = (str: string): string => {

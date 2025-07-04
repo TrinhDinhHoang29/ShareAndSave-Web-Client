@@ -458,7 +458,7 @@ export interface IItemRequest {
 	categoryName: string
 	quantity: number
 	image?: string
-	althernativeImage?: string
+	alternativeImage?: string
 }
 
 export interface IAppointmentItem {
