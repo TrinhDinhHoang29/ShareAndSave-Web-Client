@@ -840,7 +840,10 @@ const PostDetail: React.FC = () => {
 											)}
 										>
 											{isCreateInterestPending || isDeleteInterestPending ? (
-												<Loading color='secondary' />
+												<Loading
+													color='secondary'
+													size='sm'
+												/>
 											) : (
 												<>
 													<Heart
