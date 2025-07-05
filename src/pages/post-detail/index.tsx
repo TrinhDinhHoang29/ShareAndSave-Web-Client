@@ -830,13 +830,17 @@ const PostDetail: React.FC = () => {
 												`relative flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 font-medium transition-all`,
 												interestID
 													? 'bg-primary text-primary-foreground hover:bg-primary/90'
-													: !statusTimeCampaign?.isInRange
-														? 'bg-accent/20 text-accent-foreground hover:bg-accent/30 cursor-not-allowed'
-														: 'bg-accent text-accent-foreground hover:bg-accent/80'
+													: (
+																statusTimeCampaign
+																	? statusTimeCampaign.isInRange
+																	: true
+														  )
+														? 'bg-accent text-accent-foreground hover:bg-accent/80'
+														: 'bg-accent/20 text-accent-foreground hover:bg-accent/30 cursor-not-allowed'
 											)}
 										>
 											{isCreateInterestPending || isDeleteInterestPending ? (
-												<Loading />
+												<Loading color='secondary' />
 											) : (
 												<>
 													<Heart
