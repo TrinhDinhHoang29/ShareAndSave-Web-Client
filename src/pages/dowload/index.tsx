@@ -54,7 +54,7 @@ const Download = () => {
 										<div className='mb-4 text-center'>
 											<div className='from-primary to-secondary mb-2 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br shadow-md'>
 												<img
-													src='https://caothang.edu.vn/tuyensinh/templates/images/logo.png'
+													src='https://shareandsave.io.vn/logo.png'
 													alt='logo_caothang'
 													className='h-8 w-8 object-contain'
 												/>
