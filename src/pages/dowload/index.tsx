@@ -203,7 +203,7 @@ const Download = () => {
 									href='https://drive.google.com/drive/folders/1GX5qudF8Eggl1bydvZrQBU7WgylfsKgX'
 									className='bg-card hover:bg-accent/50 border-border hover:border-primary/50 group flex w-full items-center justify-center gap-4 rounded-xl border-2 p-4 transition-all duration-200'
 								>
-									<FileText className='text-foreground group-hover:text-primary h-8 w-8 transition-colors' />
+									<DownloadIcon className='text-foreground group-hover:text-primary h-8 w-8 transition-colors' />
 									<div className='text-left'>
 										<div className='text-muted-foreground text-xs'>
 											GET IT ON
