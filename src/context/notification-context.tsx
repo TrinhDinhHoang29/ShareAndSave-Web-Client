@@ -18,6 +18,7 @@ interface ChatNotificationResponse {
 // Định nghĩa kiểu dữ liệu cho Context
 interface NotiContextType {
 	noti: INoti | null
+	setNoti: React.Dispatch<React.SetStateAction<INoti | null>>
 	isConnected: boolean
 	reconnect: () => void
 }
@@ -223,6 +224,7 @@ export const NotiProvider: React.FC<{
 	// Cung cấp giá trị cho context
 	const contextValue: NotiContextType = {
 		noti,
+		setNoti,
 		isConnected,
 		reconnect
 	}

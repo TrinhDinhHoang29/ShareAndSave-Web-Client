@@ -25,9 +25,7 @@ import NotificationItem from './NotificationItem'
 const DropdownNoti: React.FC = () => {
 	const queryClient = useQueryClient()
 	const token = getAccessToken()
-	const { noti } = useNoti()
-	const [newNotification, setNewNotification] = useState<INoti | null>(null)
-	const [isOpenFloatingNoti, setIsOpenFloatingNoti] = useState<boolean>(false)
+	const { noti, setNoti } = useNoti()
 	const navigate = useNavigate()
 	const [isOpen, setIsOpen] = useState<boolean>(false)
 	const { mutate: updateNotiAll, isPending: isMarkingAllRead } =
@@ -61,7 +59,7 @@ const DropdownNoti: React.FC = () => {
 	}
 
 	useEffect(() => {
-		if (noti && noti !== newNotification) {
+		if (noti) {
 			queryClient.setQueryData(['noti', token], (old: any) => {
 				if (!old?.pages?.[0]) {
 					console.log('old', old)
@@ -81,10 +79,6 @@ const DropdownNoti: React.FC = () => {
 					pages: newPages
 				}
 			})
-
-			// Hiển thị floating notification
-			setNewNotification(noti)
-			setIsOpenFloatingNoti(true)
 
 			// Tùy chọn: Phát âm thanh thông báo
 			const audio = new Audio(NotiSound)
@@ -186,9 +180,9 @@ const DropdownNoti: React.FC = () => {
 	return (
 		<>
 			<FloatingNotification
-				isOpen={isOpenFloatingNoti}
-				notification={newNotification}
-				onClose={() => setIsOpenFloatingNoti(false)}
+				isOpen={!!noti}
+				notification={noti}
+				onClose={() => setNoti(null)}
 				autoHideDelay={5000}
 			/>
 			<Dropdown
@@ -277,4 +271,4 @@ const DropdownNoti: React.FC = () => {
 	)
 }
 
-export default DropdownNoti
+export default React.memo(DropdownNoti)

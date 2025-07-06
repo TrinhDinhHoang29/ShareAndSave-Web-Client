@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import notiApi from '@/apis/modules/noti.api'
 import { useAlertModalContext } from '@/context/alert-modal-context'
+import { getAccessToken } from '@/lib/token'
 import { IApiErrorResponse, INoti } from '@/models/interfaces'
 
 interface useUpdateMutationOptions {
@@ -13,16 +14,16 @@ export const useUpdateNotiByIDMutation = ({
 }: useUpdateMutationOptions = {}) => {
 	const { showError } = useAlertModalContext()
 	const queryClient = useQueryClient()
-
+	const token = getAccessToken()
 	return useMutation({
 		mutationFn: notiApi.updateByID,
 		// Optimistic update - cập nhật ngay lập tức trước khi API trả về
 		onMutate: async (notiId: number) => {
 			// Hủy bỏ các queries đang pending để tránh conflict
-			await queryClient.cancelQueries({ queryKey: ['noti'] })
+			await queryClient.cancelQueries({ queryKey: ['noti', token] })
 
 			// Lấy snapshot của data hiện tại để rollback nếu cần
-			const previousData = queryClient.getQueryData(['noti'])
+			const previousData = queryClient.getQueryData(['noti', token])
 
 			// Optimistically update - đánh dấu notification đã đọc
 			queryClient.setQueryData(['noti'], (old: any) => {
@@ -53,11 +54,6 @@ export const useUpdateNotiByIDMutation = ({
 
 		onSuccess: async res => {
 			if (res.code === 200 || res.code === 201) {
-				// Invalidate để đảm bảo data sync với server (nhẹ hơn refetch)
-				queryClient.invalidateQueries({
-					queryKey: ['noti'],
-					exact: false
-				})
 				onSuccess?.()
 			} else {
 				const errorMessage = res.message.split(':')[0].trim()
@@ -74,7 +70,7 @@ export const useUpdateNotiByIDMutation = ({
 		onError: async (error: any, _notiId, context) => {
 			// Khôi phục data trước đó
 			if (context?.previousData) {
-				queryClient.setQueryData(['noti'], context.previousData)
+				queryClient.setQueryData(['noti', token], context.previousData)
 			}
 
 			const errorMessage = (error as IApiErrorResponse).message
@@ -86,14 +82,6 @@ export const useUpdateNotiByIDMutation = ({
 				errorTitle: 'Lỗi thông báo',
 				onConfirm: close
 			})
-		},
-
-		// Luôn invalidate sau khi settled để đảm bảo consistency
-		onSettled: () => {
-			queryClient.invalidateQueries({
-				queryKey: ['noti'],
-				exact: false
-			})
 		}
 	})
 }
@@ -103,17 +91,18 @@ export const useUpdateNotiAllMutation = ({
 }: useUpdateMutationOptions = {}) => {
 	const { showError } = useAlertModalContext()
 	const queryClient = useQueryClient()
+	const token = getAccessToken()
 
 	return useMutation({
 		mutationFn: notiApi.updateAll,
 
 		onMutate: async () => {
-			await queryClient.cancelQueries({ queryKey: ['noti'] })
+			await queryClient.cancelQueries({ queryKey: ['noti', token] })
 
-			const previousData = queryClient.getQueryData(['noti'])
+			const previousData = queryClient.getQueryData(['noti', token])
 
 			// Đánh dấu tất cả notification đã đọc
-			queryClient.setQueryData(['noti'], (old: any) => {
+			queryClient.setQueryData(['noti', token], (old: any) => {
 				if (!old) return old
 
 				return {
@@ -134,10 +123,6 @@ export const useUpdateNotiAllMutation = ({
 
 		onSuccess: async res => {
 			if (res.code === 200 || res.code === 201) {
-				queryClient.invalidateQueries({
-					queryKey: ['noti'],
-					exact: false
-				})
 				onSuccess?.()
 			} else {
 				const errorMessage = res.message.split(':')[0].trim()
@@ -152,7 +137,7 @@ export const useUpdateNotiAllMutation = ({
 
 		onError: async (error: any, _variables, context) => {
 			if (context?.previousData) {
-				queryClient.setQueryData(['noti'], context.previousData)
+				queryClient.setQueryData(['noti', token], context.previousData)
 			}
 
 			const errorMessage = (error as IApiErrorResponse).message
@@ -163,13 +148,6 @@ export const useUpdateNotiAllMutation = ({
 				errorMessage: errorMessage,
 				errorTitle: 'Lỗi thông báo',
 				onConfirm: close
-			})
-		},
-
-		onSettled: () => {
-			queryClient.invalidateQueries({
-				queryKey: ['noti'],
-				exact: false
 			})
 		}
 	})
