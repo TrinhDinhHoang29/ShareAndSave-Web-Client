@@ -53,7 +53,7 @@ const Footer = () => {
 							<img
 								src='https://shareandsave.io.vn/logo.png'
 								alt='logo_caothang'
-								className='h-8 w-8 object-contain'
+								className='h-12 w-12 object-contain'
 							/>
 							<span className='from-primary to-accent bg-gradient-to-r bg-clip-text text-transparent'>
 								Share&Save

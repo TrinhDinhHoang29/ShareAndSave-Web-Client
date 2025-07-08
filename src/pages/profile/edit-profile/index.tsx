@@ -47,7 +47,23 @@ const EditProfile = () => {
 		{ id: 18, name: 'Kỹ thuật sửa chữa, lắp ráp máy tính' }
 	]
 
-	const { user } = useAuthStore()
+	const { user, isAuthenticated, fetchUserProfile } = useAuthStore()
+
+	useEffect(() => {
+		const handleLoadProfile = async () => {
+			if (!isAuthenticated) return
+
+			try {
+				// Nếu chưa có user data, fetch từ API
+				if (!user) {
+					await fetchUserProfile()
+				}
+			} catch (err) {
+				console.error(err)
+			}
+		}
+		handleLoadProfile()
+	}, [])
 
 	// React Hook Form setup with Zod resolver
 	const {

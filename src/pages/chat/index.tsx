@@ -51,7 +51,22 @@ const Chat = () => {
 		refetch: postDetailDataRefetch
 	} = useDetailPostInterestQuery(interestID)
 
-	const { user } = useAuthStore()
+	const { user, isAuthenticated, fetchUserProfile } = useAuthStore()
+	useEffect(() => {
+		const handleLoadProfile = async () => {
+			if (!isAuthenticated) return
+
+			try {
+				// Nếu chưa có user data, fetch từ API
+				if (!user) {
+					await fetchUserProfile()
+				}
+			} catch (err) {
+				console.error(err)
+			}
+		}
+		handleLoadProfile()
+	}, [])
 	const senderID = user?.id
 	const isAuthor = useMemo(() => {
 		if (!postDetailInterestData || !senderID) return false
@@ -334,8 +349,8 @@ const Chat = () => {
 				</div>
 			) : (
 				<div className='container mx-auto py-12'>
-					<div className='flex w-full overflow-hidden rounded-2xl shadow-md'>
-						<div className='flex w-full flex-1 flex-col'>
+					<div className='grid grid-cols-4 overflow-hidden rounded-2xl shadow-md'>
+						<div className='col-span-3 flex w-full flex-1 flex-col'>
 							<ChatHeaderWithRequests
 								onRefetch={handleTransactionDataRefetch}
 								setSelectedMethod={(method: EMethod) =>

@@ -29,12 +29,6 @@ const METHOD_OPTIONS: IOption[] = [
 	{ value: EMethod.SHIP, label: EMethod.SHIP }
 ]
 
-const SORT_OPTIONS: IOption[] = [
-	{ value: 'default', label: 'Mặc định' },
-	{ value: 'date_asc', label: 'Cũ nhất' },
-	{ value: 'date_desc', label: 'Mới nhất' }
-]
-
 const InterestListDialog = ({
 	isOpen,
 	onClose,
@@ -45,7 +39,6 @@ const InterestListDialog = ({
 	const [searchQuery, setSearchQuery] = useState('')
 	const [selectedFilter, setSelectedFilter] = useState<string>('all')
 	const [selectedMethod, setSelectedMethod] = useState<string | number>('all')
-	const [selectedSort, setSelectedSort] = useState<string | number>('default')
 	const [interests, setInterests] = useState<IUserInterest[]>(defaultInterests)
 
 	useEffect(() => {
@@ -98,34 +91,13 @@ const InterestListDialog = ({
 			)
 		}
 
-		// Apply sorting
-		if (selectedSort !== 'default') {
-			filtered.sort((a, b) => {
-				switch (selectedSort) {
-					case 'date_asc':
-						return (
-							new Date(a.updatedAt || 0).getTime() -
-							new Date(b.updatedAt || 0).getTime()
-						)
-					case 'date_desc':
-						return (
-							new Date(b.updatedAt || 0).getTime() -
-							new Date(a.updatedAt || 0).getTime()
-						)
-					default:
-						return 0
-				}
-			})
-		}
-
 		return filtered
-	}, [interests, searchQuery, selectedFilter, selectedMethod, selectedSort])
+	}, [interests, searchQuery, selectedFilter, selectedMethod])
 	useEffect(() => {
 		if (!isOpen) {
 			setSearchQuery('')
 			setSelectedFilter('all')
 			setSelectedMethod('all')
-			setSelectedSort('default')
 		}
 	}, [isOpen])
 
@@ -133,14 +105,10 @@ const InterestListDialog = ({
 		setSearchQuery('')
 		setSelectedFilter('all')
 		setSelectedMethod('all')
-		setSelectedSort('default')
 	}
 
 	const hasActiveFilters =
-		searchQuery ||
-		selectedFilter !== 'all' ||
-		selectedMethod !== 'all' ||
-		selectedSort !== 'default'
+		searchQuery || selectedFilter !== 'all' || selectedMethod !== 'all'
 
 	return (
 		<Dialog
@@ -207,16 +175,6 @@ const InterestListDialog = ({
 											value={selectedMethod}
 											onChange={setSelectedMethod}
 											options={METHOD_OPTIONS}
-											className='w-full'
-										/>
-									</div>
-
-									{/* Sort Options */}
-									<div className='flex-1'>
-										<CustomSelect
-											value={selectedSort}
-											onChange={setSelectedSort}
-											options={SORT_OPTIONS}
 											className='w-full'
 										/>
 									</div>

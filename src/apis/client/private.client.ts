@@ -1,4 +1,3 @@
-// axiosPrivate.ts
 import axios from 'axios'
 
 import {
@@ -42,15 +41,19 @@ axiosPrivate.interceptors.response.use(
 	response => response.data,
 	async error => {
 		const originalRequest = error.config
-		const { setAuthLoading, logout } = useAuthStore.getState()
-		console.log(error.response?.data)
+
+		// Chỉ handle 401 error
 		if (error.response?.status === 401 && !originalRequest._retry) {
-			const isDuplicate =
-				error.response.data.message ===
-				'Có ai đó đã đăng nhập trên cùng loại thiết bị, hoặc đổi mật khẩu'
+			const errorMessage = error.response.data?.message || ''
+
+			// Check duplicate login
+			const isDuplicate = errorMessage.includes(
+				'Có ai đó đã đăng nhập trên cùng loại thiết bị'
+			)
 			if (isDuplicate) {
 				clearAccessToken()
 				clearRefreshToken()
+				useAuthStore.setState({ user: null, isAuthenticated: false })
 				window.location.href = '/phien-dang-nhap'
 				return Promise.reject(error)
 			}
@@ -58,25 +61,30 @@ axiosPrivate.interceptors.response.use(
 			originalRequest._retry = true
 
 			try {
-				setAuthLoading(true)
 				const refreshToken = getRefreshToken()
 				if (!refreshToken) {
 					throw new Error('No refresh token available')
 				}
 
+				// Refresh token
 				const response = await authApi.refreshToken({ refreshToken })
 				const jwt = response.data.jwt
 				setAccessToken(jwt)
 
+				// Retry original request
 				originalRequest.headers.Authorization = `Bearer ${jwt}`
 				return axiosPrivate(originalRequest)
 			} catch (refreshError) {
-				logout() // Cập nhật trạng thái auth khi refresh thất bại
+				// Refresh failed - clear auth state
+				console.error('Token refresh failed:', refreshError)
+				clearAccessToken()
+				clearRefreshToken()
+				useAuthStore.setState({ user: null, isAuthenticated: false })
+
 				return Promise.reject(refreshError)
-			} finally {
-				setAuthLoading(false)
 			}
 		}
+
 		return Promise.reject(error.response?.data || error)
 	}
 )

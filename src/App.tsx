@@ -1,70 +1,38 @@
 import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 
 import AppRouter from '@/routes/index.route'
 
-import authApi from './apis/modules/auth.api'
-import { useScreenSize } from './hooks/useScreenSize' // Import hook
-import {
-	clearAccessToken,
-	clearRefreshToken,
-	getAccessToken,
-	getRefreshToken,
-	setAccessToken
-} from './lib/token'
+import { useScreenSize } from './hooks/useScreenSize'
+import { getAccessToken, getRefreshToken } from './lib/token'
 import Dowload from './pages/dowload'
 import useAuthStore from './stores/authStore'
 import { useSettingsStore } from './stores/settingStore'
 
 function App() {
-	const { login, setAuthLoading, syncAuthState } = useAuthStore()
-	const navigate = useNavigate()
 	const { fetchSettings } = useSettingsStore()
-	const { isDesktop } = useScreenSize() // Sử dụng hook
+	const { isDesktop } = useScreenSize()
 
 	useEffect(() => {
 		fetchSettings()
 	}, [fetchSettings])
 
+	// Chỉ check nếu có token trong localStorage để restore UI state
 	useEffect(() => {
-		let isMounted = true
+		const accessToken = getAccessToken()
+		const refreshToken = getRefreshToken()
 
-		const initializeAuth = async () => {
-			setAuthLoading(true)
-			try {
-				const accessToken = getAccessToken()
-				const refreshToken = getRefreshToken()
-				if (accessToken) {
-					await syncAuthState()
-				} else if (refreshToken) {
-					const response = await authApi.refreshToken({ refreshToken })
-					const jwt = response.data.jwt
-					setAccessToken(jwt)
-					await syncAuthState()
-				} else {
-					useAuthStore.setState({ user: null, isAuthenticated: false })
-				}
-			} catch (error) {
-				console.error('Auth initialization failed:', error)
-				useAuthStore.setState({ user: null, isAuthenticated: false })
-				clearAccessToken()
-				clearRefreshToken()
-				navigate('/')
-			} finally {
-				if (isMounted) {
-					setAuthLoading(false)
-				}
-			}
+		if (accessToken || refreshToken) {
+			useAuthStore.setState({
+				isAuthenticated: true
+			})
+		} else {
+			useAuthStore.setState({
+				user: null,
+				isAuthenticated: false
+			})
 		}
+	}, [])
 
-		initializeAuth()
-
-		return () => {
-			isMounted = false
-		}
-	}, [login, setAuthLoading, syncAuthState])
-
-	// 🎯 Điều kiện hiển thị
 	if (!isDesktop) {
 		return <Dowload />
 	}

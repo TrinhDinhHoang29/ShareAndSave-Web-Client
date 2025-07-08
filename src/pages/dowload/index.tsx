@@ -21,7 +21,7 @@ const Download = () => {
 						<img
 							src='https://shareandsave.io.vn/logo.png'
 							alt='logo'
-							className='h-8 w-8 object-contain'
+							className='h-12 w-12 object-contain'
 						/>
 					</div>
 					<h1 className='text-foreground mb-3 text-2xl font-bold md:text-3xl lg:text-4xl'>

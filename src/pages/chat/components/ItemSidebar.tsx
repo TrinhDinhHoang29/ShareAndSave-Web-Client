@@ -40,7 +40,7 @@ const ItemSidebar = ({
 	transactionStatus = transactionStatus.toString() as ETransactionStatus
 
 	return (
-		<div className='border-border/50 bg-muted/30 flex w-80 flex-col border-l'>
+		<div className='border-border/50 bg-muted/30 col-span-1 flex w-full flex-col border-l'>
 			{transactionStatus === ETransactionStatus.DEFAULT && !isAuthor && (
 				<div className='border-border from-primary/5 to-success/5 border-b bg-gradient-to-r p-4'>
 					<h3 className='text-foreground mb-1 flex items-center gap-2 font-semibold'>

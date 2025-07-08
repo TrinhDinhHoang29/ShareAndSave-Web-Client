@@ -1,4 +1,3 @@
-// stores/authStore.ts
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
@@ -7,7 +6,6 @@ import {
 	clearAccessToken,
 	clearRefreshToken,
 	getAccessToken,
-	getRefreshToken,
 	setAccessToken,
 	setRefreshToken
 } from '@/lib/token'
@@ -16,19 +14,18 @@ import { ILoginResponse, IUser } from '@/models/interfaces'
 interface AuthState {
 	user: IUser | null
 	isAuthenticated: boolean
-	isAuthLoading: boolean
 	login: (data: ILoginResponse) => void
 	logout: () => void
-	setAuthLoading: (loading: boolean) => void
-	syncAuthState: () => Promise<void> // Thêm phương thức đồng bộ trạng thái
+	// Chỉ call khi cần thiết (ví dụ sau khi login thành công)
+	fetchUserProfile: () => Promise<void>
 }
 
 const useAuthStore = create<AuthState>()(
 	persist(
-		(set, get) => ({
+		set => ({
 			user: null,
 			isAuthenticated: false,
-			isAuthLoading: true,
+
 			login: data => {
 				setAccessToken(data.jwt)
 				setRefreshToken(data.refreshToken)
@@ -37,8 +34,13 @@ const useAuthStore = create<AuthState>()(
 					isAuthenticated: true
 				})
 			},
+
 			logout: async () => {
-				await authApi.logout()
+				try {
+					await authApi.logout()
+				} catch (error) {
+					console.error('Logout API failed:', error)
+				}
 				clearAccessToken()
 				clearRefreshToken()
 				set({
@@ -46,29 +48,27 @@ const useAuthStore = create<AuthState>()(
 					isAuthenticated: false
 				})
 			},
-			setAuthLoading: loading => set({ isAuthLoading: loading }),
-			syncAuthState: async () => {
+
+			// Chỉ call khi cần thiết
+			fetchUserProfile: async () => {
 				const accessToken = getAccessToken()
-				const refreshToken = getRefreshToken()
-				if (!accessToken && !refreshToken) {
+				if (!accessToken) {
 					set({ user: null, isAuthenticated: false })
 					return
 				}
-				// Chỉ gọi getMe nếu chưa có user hoặc token đã thay đổi
-				const currentUser = get().user
-				if (!currentUser) {
-					try {
-						const response = await authApi.getMe()
-						set({
-							user: response.data.user,
-							isAuthenticated: true
-						})
-					} catch (error) {
-						console.error('Sync auth failed:', error)
-						clearAccessToken()
-						clearRefreshToken()
-						set({ user: null, isAuthenticated: false })
-					}
+
+				try {
+					const response = await authApi.getMe()
+					set({
+						user: response.data.user,
+						isAuthenticated: true
+					})
+				} catch (error) {
+					console.error('Fetch user profile failed:', error)
+					clearAccessToken()
+					clearRefreshToken()
+					set({ user: null, isAuthenticated: false })
+					throw error
 				}
 			}
 		}),

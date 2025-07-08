@@ -114,7 +114,7 @@ const Navbar = () => {
 					<div className='container mx-auto space-y-2 py-2'>
 						<div className='flex h-16 items-center justify-between'>
 							{/* Logo */}
-							<Link
+							{/* <Link
 								to='/'
 								className='from-primary to-accent flex items-center gap-3 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent transition-transform hover:scale-105'
 							>
@@ -124,6 +124,17 @@ const Navbar = () => {
 									className='h-8 w-8 object-contain'
 								/>
 								Share&Save
+							</Link> */}
+
+							<Link
+								to='/'
+								className='transition-transform hover:scale-105'
+							>
+								<img
+									src='https://shareandsave.io.vn/logo.png'
+									alt='logo_caothang'
+									className='h-28 w-28 object-contain'
+								/>
 							</Link>
 
 							{/* Search Bar */}
