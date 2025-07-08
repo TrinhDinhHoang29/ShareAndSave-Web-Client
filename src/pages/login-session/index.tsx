@@ -1,18 +1,12 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { RefreshCw, Shield } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import { useAuthDialog } from '@/context/auth-dialog-context'
-import useAuthStore from '@/stores/authStore'
 
 const LoginSession = () => {
 	const [isVisible] = useState(true)
-	const { syncAuthState } = useAuthStore()
 	const { openDialog } = useAuthDialog()
-
-	useEffect(() => {
-		syncAuthState()
-	}, [])
 
 	const containerVariants = {
 		hidden: {
