@@ -1,12 +1,5 @@
 import axios from 'axios'
 
-import {
-	clearAccessToken,
-	clearRefreshToken,
-	getAccessToken,
-	getRefreshToken,
-	setAccessToken
-} from '@/lib/token'
 import useAuthStore from '@/stores/authStore'
 
 import authApi from '../modules/auth.api'
@@ -24,7 +17,7 @@ const axiosPrivate = axios.create({
 // Request Interceptor
 axiosPrivate.interceptors.request.use(
 	config => {
-		const token = getAccessToken()
+		const token = useAuthStore.getState().accessToken
 		if (token) {
 			config.headers.Authorization = `Bearer ${token}`
 		}
@@ -50,10 +43,9 @@ axiosPrivate.interceptors.response.use(
 			const isDuplicate = errorMessage.includes(
 				'Có ai đó đã đăng nhập trên cùng loại thiết bị'
 			)
+
 			if (isDuplicate) {
-				clearAccessToken()
-				clearRefreshToken()
-				useAuthStore.setState({ user: null, isAuthenticated: false })
+				useAuthStore.getState().clearTokens()
 				window.location.href = '/phien-dang-nhap'
 				return Promise.reject(error)
 			}
@@ -61,7 +53,7 @@ axiosPrivate.interceptors.response.use(
 			originalRequest._retry = true
 
 			try {
-				const refreshToken = getRefreshToken()
+				const refreshToken = useAuthStore.getState().refreshToken
 				if (!refreshToken) {
 					throw new Error('No refresh token available')
 				}
@@ -69,7 +61,9 @@ axiosPrivate.interceptors.response.use(
 				// Refresh token
 				const response = await authApi.refreshToken({ refreshToken })
 				const jwt = response.data.jwt
-				setAccessToken(jwt)
+
+				// Update tokens in store
+				useAuthStore.getState().setTokens(jwt)
 
 				// Retry original request
 				originalRequest.headers.Authorization = `Bearer ${jwt}`
@@ -77,10 +71,7 @@ axiosPrivate.interceptors.response.use(
 			} catch (refreshError) {
 				// Refresh failed - clear auth state
 				console.error('Token refresh failed:', refreshError)
-				clearAccessToken()
-				clearRefreshToken()
-				useAuthStore.setState({ user: null, isAuthenticated: false })
-
+				useAuthStore.getState().clearTokens()
 				return Promise.reject(refreshError)
 			}
 		}

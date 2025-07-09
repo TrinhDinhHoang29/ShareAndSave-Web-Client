@@ -37,16 +37,16 @@ export const useUserRanksQuery = (params: {
 	})
 }
 
-export const useMyGoodDeedsQuery = (token: string) => {
+export const useMyGoodDeedsQuery = (userId: number) => {
 	return useQuery<IDetailGoodDeed[], Error>({
-		queryKey: ['my-good-deeds', token], // Bao gồm params trong queryKey
+		queryKey: ['my-good-deeds', userId], // Bao gồm params trong queryKey
 		queryFn: async () => {
 			const response = await goodDeedApi.myGoodDeeds()
 			// Nếu không có dữ liệu hoặc items không tồn tại, trả về mảng rỗng
 			return response?.data?.goodDeeds || []
 		},
 		staleTime: 5 * 60 * 1000, // Dữ liệu được coi là "mới" trong 5 phút
-		retry: 1 // Thử lại 1 lần nếu thất bại
+		enabled: !!userId
 	})
 }
 

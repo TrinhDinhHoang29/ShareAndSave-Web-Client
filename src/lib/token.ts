@@ -1,5 +1,7 @@
 import Cookies from 'js-cookie'
 
+import authApi from '@/apis/modules/auth.api'
+
 export const getAccessToken = () => Cookies.get('access_token')
 export const setAccessToken = (token: string) =>
 	Cookies.set('access_token', token, {
@@ -19,3 +21,29 @@ export const setRefreshToken = (token: string) =>
 		sameSite: 'strict' // Bảo vệ khỏi CSRF
 	})
 export const clearRefreshToken = () => Cookies.remove('refresh_token')
+
+export const getValidToken = async (): Promise<string | null> => {
+	const accessToken = getAccessToken()
+
+	// Nếu có access token, return luôn
+	if (accessToken) {
+		return accessToken
+	}
+
+	// Nếu không có access token, thử refresh
+	const refreshToken = getRefreshToken()
+	if (!refreshToken) {
+		return null
+	}
+
+	try {
+		console.log('WebSocket: Refreshing token...')
+		const response = await authApi.refreshToken({ refreshToken })
+		const newToken = response.data.jwt
+		setAccessToken(newToken)
+		return newToken
+	} catch (error) {
+		console.error('WebSocket: Failed to refresh token:', error)
+		return null
+	}
+}

@@ -2,8 +2,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import notiApi from '@/apis/modules/noti.api'
 import { useAlertModalContext } from '@/context/alert-modal-context'
-import { getAccessToken } from '@/lib/token'
 import { IApiErrorResponse, INoti } from '@/models/interfaces'
+import useAuthStore from '@/stores/authStore'
 
 interface useUpdateMutationOptions {
 	onSuccess?: () => void
@@ -14,16 +14,16 @@ export const useUpdateNotiByIDMutation = ({
 }: useUpdateMutationOptions = {}) => {
 	const { showError } = useAlertModalContext()
 	const queryClient = useQueryClient()
-	const token = getAccessToken()
+	const userId = useAuthStore.getState().user?.id
 	return useMutation({
 		mutationFn: notiApi.updateByID,
 		// Optimistic update - cập nhật ngay lập tức trước khi API trả về
 		onMutate: async (notiId: number) => {
 			// Hủy bỏ các queries đang pending để tránh conflict
-			await queryClient.cancelQueries({ queryKey: ['noti', token] })
+			await queryClient.cancelQueries({ queryKey: ['noti', userId] })
 
 			// Lấy snapshot của data hiện tại để rollback nếu cần
-			const previousData = queryClient.getQueryData(['noti', token])
+			const previousData = queryClient.getQueryData(['noti', userId])
 
 			// Optimistically update - đánh dấu notification đã đọc
 			queryClient.setQueryData(['noti'], (old: any) => {
@@ -70,7 +70,7 @@ export const useUpdateNotiByIDMutation = ({
 		onError: async (error: any, _notiId, context) => {
 			// Khôi phục data trước đó
 			if (context?.previousData) {
-				queryClient.setQueryData(['noti', token], context.previousData)
+				queryClient.setQueryData(['noti', userId], context.previousData)
 			}
 
 			const errorMessage = (error as IApiErrorResponse).message
@@ -91,18 +91,18 @@ export const useUpdateNotiAllMutation = ({
 }: useUpdateMutationOptions = {}) => {
 	const { showError } = useAlertModalContext()
 	const queryClient = useQueryClient()
-	const token = getAccessToken()
+	const userId = useAuthStore.getState().user?.id
 
 	return useMutation({
 		mutationFn: notiApi.updateAll,
 
 		onMutate: async () => {
-			await queryClient.cancelQueries({ queryKey: ['noti', token] })
+			await queryClient.cancelQueries({ queryKey: ['noti', userId] })
 
-			const previousData = queryClient.getQueryData(['noti', token])
+			const previousData = queryClient.getQueryData(['noti', userId])
 
 			// Đánh dấu tất cả notification đã đọc
-			queryClient.setQueryData(['noti', token], (old: any) => {
+			queryClient.setQueryData(['noti', userId], (old: any) => {
 				if (!old) return old
 
 				return {
@@ -137,7 +137,7 @@ export const useUpdateNotiAllMutation = ({
 
 		onError: async (error: any, _variables, context) => {
 			if (context?.previousData) {
-				queryClient.setQueryData(['noti', token], context.previousData)
+				queryClient.setQueryData(['noti', userId], context.previousData)
 			}
 
 			const errorMessage = (error as IApiErrorResponse).message

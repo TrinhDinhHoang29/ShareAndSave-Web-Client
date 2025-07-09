@@ -3,16 +3,16 @@ import { useQuery } from '@tanstack/react-query'
 import appointmentApi from '@/apis/modules/appointment.api'
 import { IAppointmentResponse } from '@/models/interfaces'
 
-export const useListAppointmentQuery = (token: string, params: {}) => {
+export const useListAppointmentQuery = (userId: number, params: {}) => {
 	return useQuery<IAppointmentResponse>({
-		queryKey: ['appointments', params, token], // Key để cache, dựa trên params
+		queryKey: ['appointments', params, userId], // Key để cache, dựa trên params
 		queryFn: async () => {
 			const res = await appointmentApi.list(params)
 			return res.data
 		},
 		// keepPreviousData: true, // Giữ dữ liệu cũ khi thay đổi page/limit (option not available in current react-query version)
 		staleTime: 5 * 60 * 1000, // Dữ liệu tươi trong 5 phút
-		enabled: !!token
+		enabled: !!userId
 	})
 }
 

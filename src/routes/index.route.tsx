@@ -4,6 +4,8 @@ import { useRoutes } from 'react-router-dom'
 import Loading from '@/components/common/Loading'
 import PageTitle from '@/components/common/PageTitle'
 import LayoutDefault from '@/components/layout'
+import { ChatNotificationProvider } from '@/context/chat-noti-context'
+import { NotiProvider } from '@/context/notification-context'
 import Chat from '@/pages/chat'
 import Home from '@/pages/home'
 
@@ -46,7 +48,13 @@ function AppRouter() {
 	const routes = [
 		{
 			path: '/',
-			element: <LayoutDefault />,
+			element: (
+				<NotiProvider>
+					<ChatNotificationProvider>
+						<LayoutDefault />
+					</ChatNotificationProvider>
+				</NotiProvider>
+			),
 			children: [
 				{
 					index: true,

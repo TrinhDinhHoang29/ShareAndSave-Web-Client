@@ -4,9 +4,9 @@ import React, { useState } from 'react'
 
 import Loading from '@/components/common/Loading'
 import { useMyGoodDeedsQuery } from '@/hooks/queries/use-good-deed.query'
-import { getAccessToken } from '@/lib/token'
 import { EGoodDeedType } from '@/models/enums'
 import { IDetailGoodDeed } from '@/models/interfaces'
+import useAuthStore from '@/stores/authStore'
 
 interface GoodDeedItemProps {
 	deed: IDetailGoodDeed // Replace with your actual good deed type
@@ -173,8 +173,8 @@ const GoodDeedItem = ({ deed }: GoodDeedItemProps) => {
 }
 
 const MyHistory: React.FC = () => {
-	const token = getAccessToken()
-	const { data, isPending } = useMyGoodDeedsQuery(token || '')
+	const userId = useAuthStore.getState().user?.id
+	const { data, isPending } = useMyGoodDeedsQuery(userId || 0)
 
 	if (isPending) {
 		return <Loading text='Đang tải...' />

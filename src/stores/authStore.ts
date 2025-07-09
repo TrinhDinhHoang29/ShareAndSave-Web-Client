@@ -2,36 +2,38 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 import authApi from '@/apis/modules/auth.api'
-import {
-	clearAccessToken,
-	clearRefreshToken,
-	getAccessToken,
-	setAccessToken,
-	setRefreshToken
-} from '@/lib/token'
 import { ILoginResponse, IUser } from '@/models/interfaces'
 
 interface AuthState {
 	user: IUser | null
 	isAuthenticated: boolean
+	accessToken: string | null
+	refreshToken: string | null
+
+	// Actions
 	login: (data: ILoginResponse) => void
 	logout: () => void
-	// Chỉ call khi cần thiết (ví dụ sau khi login thành công)
+	setTokens: (accessToken: string, refreshToken?: string) => void
+	clearTokens: () => void
 	fetchUserProfile: () => Promise<void>
+	initializeAuth: () => Promise<void>
+	getValidToken: () => Promise<string | null>
 }
 
 const useAuthStore = create<AuthState>()(
 	persist(
-		set => ({
+		(set, get) => ({
 			user: null,
 			isAuthenticated: false,
+			accessToken: null,
+			refreshToken: null,
 
 			login: data => {
-				setAccessToken(data.jwt)
-				setRefreshToken(data.refreshToken)
 				set({
 					user: data.user,
-					isAuthenticated: true
+					isAuthenticated: true,
+					accessToken: data.jwt,
+					refreshToken: data.refreshToken
 				})
 			},
 
@@ -41,17 +43,33 @@ const useAuthStore = create<AuthState>()(
 				} catch (error) {
 					console.error('Logout API failed:', error)
 				}
-				clearAccessToken()
-				clearRefreshToken()
+
 				set({
 					user: null,
-					isAuthenticated: false
+					isAuthenticated: false,
+					accessToken: null,
+					refreshToken: null
 				})
 			},
 
-			// Chỉ call khi cần thiết
+			setTokens: (accessToken, refreshToken) => {
+				set(state => ({
+					accessToken,
+					refreshToken: refreshToken || state.refreshToken
+				}))
+			},
+
+			clearTokens: () => {
+				set({
+					user: null,
+					isAuthenticated: false,
+					accessToken: null,
+					refreshToken: null
+				})
+			},
+
 			fetchUserProfile: async () => {
-				const accessToken = getAccessToken()
+				const { accessToken } = get()
 				if (!accessToken) {
 					set({ user: null, isAuthenticated: false })
 					return
@@ -65,10 +83,79 @@ const useAuthStore = create<AuthState>()(
 					})
 				} catch (error) {
 					console.error('Fetch user profile failed:', error)
-					clearAccessToken()
-					clearRefreshToken()
-					set({ user: null, isAuthenticated: false })
+					set({
+						user: null,
+						isAuthenticated: false,
+						accessToken: null,
+						refreshToken: null
+					})
 					throw error
+				}
+			},
+
+			// Initialize auth state on app start
+			initializeAuth: async () => {
+				const validToken = await get().getValidToken()
+
+				if (validToken) {
+					set({ isAuthenticated: true })
+					// Optionally fetch user profile
+					try {
+						await get().fetchUserProfile()
+					} catch (error) {
+						console.error(
+							'Failed to fetch user profile during initialization:',
+							error
+						)
+					}
+				} else {
+					set({
+						user: null,
+						isAuthenticated: false,
+						accessToken: null,
+						refreshToken: null
+					})
+				}
+			},
+
+			// Get valid token with auto refresh
+			getValidToken: async () => {
+				const { accessToken, refreshToken } = get()
+
+				// Nếu có access token, return luôn
+				if (accessToken) {
+					return accessToken
+				}
+
+				// Nếu không có access token, thử refresh
+				if (!refreshToken) {
+					return null
+				}
+
+				try {
+					console.log('Auth: Refreshing token...')
+					const response = await authApi.refreshToken({ refreshToken })
+					const newToken = response.data.jwt
+
+					// Update access token in store
+					set(state => ({
+						accessToken: newToken,
+						refreshToken: state.refreshToken
+					}))
+
+					return newToken
+				} catch (error) {
+					console.error('Auth: Failed to refresh token:', error)
+
+					// Clear tokens on refresh failure
+					set({
+						user: null,
+						isAuthenticated: false,
+						accessToken: null,
+						refreshToken: null
+					})
+
+					return null
 				}
 			}
 		}),
@@ -76,7 +163,9 @@ const useAuthStore = create<AuthState>()(
 			name: 'auth-store',
 			partialize: state => ({
 				user: state.user,
-				isAuthenticated: state.isAuthenticated
+				isAuthenticated: state.isAuthenticated,
+				accessToken: state.accessToken,
+				refreshToken: state.refreshToken
 			})
 		}
 	)

@@ -15,16 +15,16 @@ import {
 	useUpdateNotiByIDMutation
 } from '@/hooks/mutations/use-noti.mutation'
 import { useListNotiQuery } from '@/hooks/queries/use-noti.query'
-import { getAccessToken } from '@/lib/token'
 import { ENotiTargetType } from '@/models/enums'
 import { INoti } from '@/models/interfaces'
+import useAuthStore from '@/stores/authStore'
 
 import FloatingNotification from './FloatingNotification'
 import NotificationItem from './NotificationItem'
 
 const DropdownNoti: React.FC = () => {
 	const queryClient = useQueryClient()
-	const token = getAccessToken()
+	const userId = useAuthStore.getState().user?.id
 	const { noti, setNoti } = useNoti()
 	const navigate = useNavigate()
 	const [isOpen, setIsOpen] = useState<boolean>(false)
@@ -60,7 +60,7 @@ const DropdownNoti: React.FC = () => {
 
 	useEffect(() => {
 		if (noti) {
-			queryClient.setQueryData(['noti', token], (old: any) => {
+			queryClient.setQueryData(['noti', userId], (old: any) => {
 				if (!old?.pages?.[0]) {
 					console.log('old', old)
 					return old
@@ -97,7 +97,7 @@ const DropdownNoti: React.FC = () => {
 		isLoading,
 		error,
 		refetch
-	} = useListNotiQuery(token || '', { limit: 10 })
+	} = useListNotiQuery(userId || 0, { limit: 10 })
 
 	const { ref, inView } = useInView({
 		threshold: 0,

@@ -6,8 +6,8 @@ import React, {
 	useState
 } from 'react'
 
-import { getAccessToken } from '@/lib/token'
 import { INoti } from '@/models/interfaces'
+import useAuthStore from '@/stores/authStore'
 
 // Định nghĩa kiểu dữ liệu cho WebSocket response
 interface ChatNotificationResponse {
@@ -32,9 +32,10 @@ export const NotiProvider: React.FC<{
 }> = ({ children }) => {
 	const socketRef = useRef<WebSocket | null>(null)
 	const pingIntervalRef = useRef<NodeJS.Timeout | null>(null)
+	const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 	const [noti, setNoti] = useState<INoti | null>(null)
 	const [isConnected, setIsConnected] = useState(false)
-	const token = getAccessToken()
+	const token = useAuthStore.getState().accessToken
 
 	// Hàm gửi ping lên server
 	const sendPingToServer = () => {
@@ -72,6 +73,33 @@ export const NotiProvider: React.FC<{
 		}
 	}
 
+	// Hàm dừng reconnect timeout
+	const stopReconnectTimeout = () => {
+		if (reconnectTimeoutRef.current) {
+			clearTimeout(reconnectTimeoutRef.current)
+			reconnectTimeoutRef.current = null
+			console.log('[NOTI] Dừng reconnect timeout')
+		}
+	}
+
+	// Hàm disconnect WebSocket
+	const disconnectSocket = () => {
+		console.log('[NOTI] Disconnecting WebSocket...')
+
+		// Dừng tất cả timers
+		stopPingInterval()
+		stopReconnectTimeout()
+
+		// Đóng socket
+		if (socketRef.current) {
+			socketRef.current.close()
+			socketRef.current = null
+		}
+
+		setIsConnected(false)
+		setNoti(null) // Reset notification khi disconnect
+	}
+
 	// Hàm xử lý keep_alive response từ server
 	const handleKeepAliveFromServer = () => {
 		console.log('[NOTI] Nhận được keep_alive từ server - kết nối vẫn ổn định')
@@ -82,14 +110,12 @@ export const NotiProvider: React.FC<{
 	const connectNoti = (token: string) => {
 		// Chỉ kết nối khi có token
 		if (!token) {
-			// console.log('[ℹ️] Không có token, bỏ qua kết nối socket')
+			console.log('[NOTI] Không có token, bỏ qua kết nối socket')
 			return
 		}
 
 		if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-			// console.log(
-			// 	'[ℹ️] Socket đã kết nối hoặc đang kết nối, bỏ qua kết nối lại'
-			// )
+			console.log('[NOTI] Socket đã kết nối, bỏ qua kết nối lại')
 			return
 		}
 
@@ -102,10 +128,10 @@ export const NotiProvider: React.FC<{
 		const newSocket = new WebSocket(wsUrl, token)
 
 		newSocket.onopen = () => {
-			// console.log(
-			// 	'[✅] Đã kết nối đến server notification. ReadyState:',
-			// 	newSocket.readyState
-			// )
+			console.log(
+				'[NOTI] Đã kết nối đến server notification. ReadyState:',
+				newSocket.readyState
+			)
 			setIsConnected(true)
 			// Bắt đầu ping interval khi kết nối thành công
 			startPingInterval()
@@ -114,13 +140,13 @@ export const NotiProvider: React.FC<{
 		newSocket.onmessage = event => {
 			try {
 				const data = JSON.parse(event.data) as ChatNotificationResponse
-				// console.log('Thông báo nhận được:', data)
+				console.log('[NOTI] Thông báo nhận được:', data)
 
 				// Xử lý các event khác nhau
 				switch (data.event) {
 					case 'receive_noti_response':
 						if (data.data) {
-							// console.log('Notification data:', data.data)
+							console.log('[NOTI] Notification data:', data.data)
 							// Cập nhật notification vào state để truyền ra context
 							setNoti(data.data)
 						}
@@ -134,30 +160,46 @@ export const NotiProvider: React.FC<{
 						console.log('[NOTI] Nhận được event không xác định:', data.event)
 				}
 			} catch (error) {
-				// console.log('[⚠️] Lỗi phân tích tin nhắn: ', error)
+				console.log('[NOTI] Lỗi phân tích tin nhắn: ', error)
 			}
 		}
 
 		newSocket.onclose = event => {
-			// console.log('[❌] Kết nối đóng. Mã:', event.code, 'Lý do:', event.reason)
-			// console.log('[ℹ️] Kết nối có được đóng sạch sẽ?', event.wasClean)
+			console.log(
+				'[NOTI] Kết nối đóng. Mã:',
+				event.code,
+				'Lý do:',
+				event.reason
+			)
+			console.log('[NOTI] Kết nối có được đóng sạch sẽ?', event.wasClean)
 			setIsConnected(false)
 			socketRef.current = null
 
 			// Dừng ping interval khi kết nối đóng
 			stopPingInterval()
 
-			// Chỉ thử kết nối lại nếu vẫn có token và không phải đóng có chủ ý
-			if (token && event.code !== 1000) {
-				setTimeout(() => {
-					// console.log('[ℹ️] Đang thử kết nối lại...')
-					connectNoti(token)
+			// Chỉ thử kết nối lại nếu vẫn có token
+			const currentToken = useAuthStore.getState().accessToken
+			if (currentToken && event.code !== 1000) {
+				console.log('[NOTI] Attempting to reconnect in 3 seconds...')
+				reconnectTimeoutRef.current = setTimeout(() => {
+					// Kiểm tra lại token trước khi reconnect
+					const tokenAtReconnect = useAuthStore.getState().accessToken
+					if (tokenAtReconnect) {
+						connectNoti(tokenAtReconnect)
+					} else {
+						console.log('[NOTI] No token available at reconnect time')
+					}
 				}, 3000)
+			} else {
+				console.log(
+					'[NOTI] No token available or manual close, not reconnecting'
+				)
 			}
 		}
 
 		newSocket.onerror = err => {
-			console.error('[⚠️] Lỗi WebSocket:', err)
+			console.error('[NOTI] Lỗi WebSocket:', err)
 			setIsConnected(false)
 		}
 
@@ -166,16 +208,19 @@ export const NotiProvider: React.FC<{
 
 	// Hàm kết nối lại thủ công
 	const reconnect = () => {
-		const currentToken = getAccessToken()
+		const currentToken = useAuthStore.getState().accessToken
 		if (currentToken) {
+			console.log('[NOTI] Manual reconnection...')
 			connectNoti(currentToken)
+		} else {
+			console.log('[NOTI] No token available for manual reconnection')
 		}
 	}
 
-	// Tự động kết nối khi token thay đổi
+	// Effect để xử lý thay đổi token
 	useEffect(() => {
 		if (token) {
-			// Chỉ kết nối nếu chưa có kết nối hoặc kết nối đã đóng
+			// Có token -> kết nối
 			if (
 				!socketRef.current ||
 				socketRef.current.readyState === WebSocket.CLOSED
@@ -183,43 +228,16 @@ export const NotiProvider: React.FC<{
 				connectNoti(token)
 			}
 		} else {
-			// Nếu không có token, đóng kết nối nếu đang mở
-			if (
-				socketRef.current &&
-				socketRef.current.readyState === WebSocket.OPEN
-			) {
-				socketRef.current.close()
-			}
-			setIsConnected(false)
-			setNoti(null) // Reset notification khi không có token
+			// Token null -> disconnect
+			console.log('[NOTI] Token is null, disconnecting WebSocket')
+			disconnectSocket()
 		}
 
-		// Cleanup function
 		return () => {
-			// Dừng ping interval khi component unmount
-			stopPingInterval()
-
-			if (
-				socketRef.current &&
-				(socketRef.current.readyState === WebSocket.OPEN ||
-					socketRef.current.readyState === WebSocket.CONNECTING)
-			) {
-				socketRef.current.close()
-			}
+			// Cleanup khi component unmount
+			disconnectSocket()
 		}
 	}, [token])
-
-	// Cleanup khi component unmount
-	useEffect(() => {
-		return () => {
-			// Dừng ping interval khi component unmount
-			stopPingInterval()
-
-			if (socketRef.current) {
-				socketRef.current.close()
-			}
-		}
-	}, [])
 
 	// Cung cấp giá trị cho context
 	const contextValue: NotiContextType = {

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { useAlertModalContext } from '@/context/alert-modal-context'
-import { getAccessToken } from '@/lib/token'
+import useAuthStore from '@/stores/authStore'
 
 interface UseWebSocketConnectionProps {
 	interestID: number
@@ -45,7 +45,7 @@ export const useWebSocketConnection = ({
 		'connecting' | 'connected' | 'disconnected' | 'reconnecting'
 	>('disconnected')
 
-	const token = getAccessToken()
+	const token = useAuthStore.getState().accessToken
 
 	// Clear all timeouts
 	const clearAllTimeouts = useCallback(() => {

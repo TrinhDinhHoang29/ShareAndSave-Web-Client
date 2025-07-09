@@ -12,8 +12,6 @@ import { ThemeProvider } from '@/context/theme-context'
 import ScrollToTop from './components/common/ScrollToTop'
 import { AlertModalProvider } from './context/alert-modal-context'
 import { AuthDialogProvider } from './context/auth-dialog-context'
-import { ChatNotificationProvider } from './context/chat-noti-context'
-import { NotiProvider } from './context/notification-context'
 
 const queryClient = new QueryClient({
 	defaultOptions: {
@@ -33,14 +31,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 			<FontProvider>
 				<AlertModalProvider>
 					<AuthDialogProvider>
-						<NotiProvider>
-							<ChatNotificationProvider>
-								<BrowserRouter>
-									<ScrollToTop />
-									<App />
-								</BrowserRouter>
-							</ChatNotificationProvider>
-						</NotiProvider>
+						<BrowserRouter>
+							<ScrollToTop />
+							<App />
+						</BrowserRouter>
 					</AuthDialogProvider>
 				</AlertModalProvider>
 			</FontProvider>

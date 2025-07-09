@@ -4,11 +4,11 @@ import notiApi from '@/apis/modules/noti.api'
 import { INotiResponse } from '@/models/interfaces'
 
 export const useListNotiQuery = (
-	token: string,
+	userId: number,
 	params: { page?: number; limit?: number }
 ) => {
 	return useInfiniteQuery<INotiResponse, Error>({
-		queryKey: ['noti', token],
+		queryKey: ['noti', userId],
 		queryFn: async ({ pageParam = 1 }) => {
 			const queryParams = { ...params, page: Number(pageParam) }
 			const res = await notiApi.list(queryParams)
@@ -30,7 +30,7 @@ export const useListNotiQuery = (
 			return undefined
 		},
 		initialPageParam: 1,
-		enabled: !!token,
+		enabled: !!userId,
 		staleTime: 5 * 60 * 1000 // Dữ liệu tươi trong 5 phút
 	})
 }
