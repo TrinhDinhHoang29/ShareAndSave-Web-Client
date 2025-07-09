@@ -1,4 +1,5 @@
 // components/DropdownProfileMenu.tsx
+import clsx from 'clsx'
 import { User } from 'lucide-react'
 import React from 'react'
 
@@ -13,7 +14,7 @@ interface DropdownProfileMenuProps {
 }
 
 const DropdownProfileMenu: React.FC<DropdownProfileMenuProps> = ({
-	className
+	className = 'hover:bg-muted rounded-full p-2 transition-colors'
 }) => {
 	const { isAuthenticated, user, logout } = useAuthStore()
 	const { openDialog } = useAuthDialog() // Sửa từ openAuthDialog thành openDialog
@@ -30,9 +31,11 @@ const DropdownProfileMenu: React.FC<DropdownProfileMenuProps> = ({
 				onOpenChange={setIsOpen}
 				trigger={
 					<button
-						className={
-							className || 'hover:bg-muted rounded-full p-2 transition-colors'
-						}
+						className={clsx(
+							className,
+							isAuthenticated &&
+								'bg-primary text-primary-foreground hover:bg-primary'
+						)}
 						title='Hồ sơ'
 						onClick={isAuthenticated ? undefined : handleOpenDialog}
 					>
