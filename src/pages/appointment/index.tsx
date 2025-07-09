@@ -1,16 +1,13 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { Frown } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
-import CustomSelect from '@/components/common/CustomSelect'
 import Pagination from '@/components/common/Pagination'
 import { useAlertModalContext } from '@/context/alert-modal-context'
 import { useUpdateAppointmentMutation } from '@/hooks/mutations/use-appointment.mutation'
 import { useListAppointmentQuery } from '@/hooks/queries/use-appointment.query'
-import useDebounce from '@/hooks/use-debounce'
-import { EAppointmentStatus, ESortOrder } from '@/models/enums'
+import { EAppointmentStatus } from '@/models/enums'
 import { IAppointment } from '@/models/interfaces'
-import { sortOptions } from '@/models/options'
 
 import Heading from '../home/components/Heading'
 import { AppointmentDialog } from './components/AppointmentDialog'
@@ -21,19 +18,19 @@ import AppointmentItemSkeleton from './components/AppointmentItemSkeleton'
 const limit = 9
 
 const Appointment = () => {
-	const [search, setSearch] = useState('')
 	const [currentPage, setCurrentPage] = useState(1)
-	const [order, setOrder] = useState<ESortOrder>(ESortOrder.DESC) // Mặc định là mới nhất
 	const [selectedAppointment, setSelectedAppointment] =
 		useState<IAppointment | null>(null)
 	const [isDialogOpen, setIsDialogOpen] = useState(false)
 	const { showConfirm } = useAlertModalContext()
+	// const [search, setSearch] = useState('')
+	// const [order, setOrder] = useState<ESortOrder>(ESortOrder.DESC) // Mặc định là mới nhất
 
-	const debouncedSearch = useDebounce(search, 500)
+	// const debouncedSearch = useDebounce(search, 500)
 
-	useEffect(() => {
-		setCurrentPage(1)
-	}, [debouncedSearch])
+	// useEffect(() => {
+	// 	setCurrentPage(1)
+	// }, [debouncedSearch])
 
 	// const params: IListTypeParams<EPostType> = useMemo(
 	// 	() => ({
@@ -89,7 +86,7 @@ const Appointment = () => {
 	return (
 		<div className='container mx-auto space-y-6 py-12'>
 			<Heading title='Lịch hẹn' />
-			<div className='flex items-center justify-between gap-2'>
+			{/* <div className='flex items-center justify-between gap-2'>
 				<div className='w-2/3'>
 					<label
 						htmlFor='searchInput'
@@ -117,7 +114,7 @@ const Appointment = () => {
 						className='flex-1'
 					/>
 				</div>
-			</div>
+			</div> */}
 
 			<div className='relative space-y-6'>
 				<AnimatePresence mode='wait'>
