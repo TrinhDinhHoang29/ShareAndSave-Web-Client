@@ -6,6 +6,7 @@ import Pagination from '@/components/common/Pagination'
 import { useAlertModalContext } from '@/context/alert-modal-context'
 import { useUpdateAppointmentMutation } from '@/hooks/mutations/use-appointment.mutation'
 import { useListAppointmentQuery } from '@/hooks/queries/use-appointment.query'
+import { getAccessToken } from '@/lib/token'
 import { EAppointmentStatus } from '@/models/enums'
 import { IAppointment } from '@/models/interfaces'
 
@@ -42,10 +43,13 @@ const Appointment = () => {
 	// 	}),
 	// 	[selectedType, currentPage, order, debouncedSearch]
 	// )
-
+	const token = getAccessToken()
 	const params = {}
 
-	const { data, isPending, refetch } = useListAppointmentQuery(params)
+	const { data, isPending, refetch } = useListAppointmentQuery(
+		token || '',
+		params
+	)
 	const { mutate } = useUpdateAppointmentMutation({
 		onSuccess: () => {
 			refetch()

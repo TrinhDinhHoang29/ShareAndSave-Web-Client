@@ -1,12 +1,24 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { RefreshCw, Shield } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import { useAuthDialog } from '@/context/auth-dialog-context'
+import useAuthStore from '@/stores/authStore'
 
 const LoginSession = () => {
 	const [isVisible] = useState(true)
 	const { openDialog } = useAuthDialog()
+	const { isAuthenticated } = useAuthStore()
+	const navigate = useNavigate()
+
+	useEffect(() => {
+		if (isAuthenticated) {
+			navigate('/')
+		}
+	}, [isAuthenticated])
+
+	if (!isVisible && isAuthenticated) return null
 
 	const containerVariants = {
 		hidden: {
@@ -42,12 +54,10 @@ const LoginSession = () => {
 		}
 	}
 
-	if (!isVisible) return null
-
 	return (
 		<div className='bg-background'>
 			<AnimatePresence>
-				{isVisible && (
+				{isVisible && !isAuthenticated && (
 					<motion.div
 						variants={containerVariants}
 						initial='hidden'
