@@ -199,7 +199,7 @@ export const AppointmentDialog: React.FC<AppointmentDialogProps> = ({
 														<div className='mt-2 flex items-center space-x-4'>
 															<div className='bg-primary/10 flex items-center space-x-1 rounded-md px-2 py-1'>
 																<span className='text-muted-foreground text-xs'>
-																	Thực tế:
+																	Thực tế nhận:
 																</span>
 																<span className='text-primary text-sm font-medium'>
 																	{item.actualQuantity}
@@ -208,7 +208,7 @@ export const AppointmentDialog: React.FC<AppointmentDialogProps> = ({
 															{item.missingQuantity > 0 && (
 																<div className='bg-warning/10 flex items-center space-x-1 rounded-md px-2 py-1'>
 																	<span className='text-muted-foreground text-xs'>
-																		Thiếu:
+																		Còn thiếu:
 																	</span>
 																	<span className='text-warning text-sm font-medium'>
 																		{item.missingQuantity}

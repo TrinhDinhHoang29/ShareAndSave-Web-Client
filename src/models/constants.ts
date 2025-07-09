@@ -192,7 +192,7 @@ export const getStatusAppointment = (status: number) => {
 			icon: CheckCircle
 		},
 		2: {
-			label: 'Đã hủy',
+			label: 'Đã từ chối',
 			color: 'bg-error/10 text-error border-error/20',
 			icon: X
 		}
