@@ -26,7 +26,7 @@ export const useUpdateNotiByIDMutation = ({
 			const previousData = queryClient.getQueryData(['noti', userId])
 
 			// Optimistically update - đánh dấu notification đã đọc
-			queryClient.setQueryData(['noti'], (old: any) => {
+			queryClient.setQueryData(['noti', userId], (old: any) => {
 				if (!old) return old
 
 				return {
