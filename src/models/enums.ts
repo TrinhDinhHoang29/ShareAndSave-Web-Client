@@ -68,6 +68,7 @@ export enum EMethod {
 }
 
 export enum EAppointmentStatus {
+	ALL = '',
 	APPROVED = 1,
 	REJECTED = 2
 }

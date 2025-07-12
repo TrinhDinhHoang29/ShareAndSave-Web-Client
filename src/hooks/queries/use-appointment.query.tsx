@@ -1,9 +1,16 @@
 import { useQuery } from '@tanstack/react-query'
 
 import appointmentApi from '@/apis/modules/appointment.api'
+import { EAppointmentStatus } from '@/models/enums'
 import { IAppointmentResponse } from '@/models/interfaces'
 
-export const useListAppointmentQuery = (userId: number, params: {}) => {
+export const useListAppointmentQuery = (
+	userId: number,
+	params: {
+		searchBy: 'status'
+		searchValue: EAppointmentStatus
+	}
+) => {
 	return useQuery<IAppointmentResponse>({
 		queryKey: ['appointments', params, userId], // Key để cache, dựa trên params
 		queryFn: async () => {

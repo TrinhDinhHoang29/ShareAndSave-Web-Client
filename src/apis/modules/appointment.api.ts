@@ -1,3 +1,4 @@
+import { EAppointmentStatus } from '@/models/enums'
 import {
 	IApiResponse,
 	IAppointmentRequest,
@@ -30,7 +31,10 @@ const appointmentApi = {
 			throw error
 		}
 	},
-	async list(params: {}): Promise<IApiResponse<IAppointmentResponse>> {
+	async list(params: {
+		searchBy: 'status'
+		searchValue: EAppointmentStatus
+	}): Promise<IApiResponse<IAppointmentResponse>> {
 		return axiosPrivate.get(appointmentEndpoints.list, {
 			params
 		})
