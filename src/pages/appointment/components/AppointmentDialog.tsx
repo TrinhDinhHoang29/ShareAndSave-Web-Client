@@ -140,10 +140,10 @@ export const AppointmentDialog: React.FC<AppointmentDialogProps> = ({
 												<PackageCheck className='text-primary h-5 w-5' />
 												<div>
 													<p className='text-muted-foreground text-sm'>
-														Tổng số items
+														Tổng số món đồ
 													</p>
 													<p className='text-foreground font-medium'>
-														{totalItems} items
+														{totalItems} món đồ
 													</p>
 												</div>
 											</div>
@@ -153,7 +153,7 @@ export const AppointmentDialog: React.FC<AppointmentDialogProps> = ({
 													<PackageX className='text-warning h-5 w-5' />
 													<div>
 														<p className='text-muted-foreground text-sm'>
-															Items thiếu
+															Món đồ còn thiếu
 														</p>
 														<p className='text-warning font-medium'>
 															{missingItems} items
@@ -167,7 +167,7 @@ export const AppointmentDialog: React.FC<AppointmentDialogProps> = ({
 									{/* Appointment Items */}
 									<div>
 										<h3 className='text-foreground mb-4 text-lg font-semibold'>
-											Danh sách items ({appointment.appointmentItems.length})
+											Danh sách món đồ ({appointment.appointmentItems.length})
 										</h3>
 
 										<div className='no-scrollbar grid max-h-96 grid-cols-2 gap-4 space-y-3 overflow-y-auto pr-2'>
