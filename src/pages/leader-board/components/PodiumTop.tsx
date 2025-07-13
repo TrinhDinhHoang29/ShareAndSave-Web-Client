@@ -114,7 +114,7 @@ const PodiumTop = ({ users }: { users: IUserRank[] }) => {
 				className={`flex flex-col items-center ${position === 'center' ? 'relative' : ''}`}
 			>
 				{/* Crown for first place */}
-				{style.showCrown && (
+				{style.showCrown && position === 'center' && (
 					<motion.div
 						animate={{ rotate: [0, 5, -5, 0] }}
 						transition={{ duration: 3, repeat: Infinity }}
