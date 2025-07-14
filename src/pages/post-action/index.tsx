@@ -63,7 +63,7 @@ const PostAction: React.FC = () => {
 	const [formData, setFormData] = useState<IPostActionInfoFormData>(Object)
 	const [isCompleted, setIsCompleted] = useState<boolean>(false)
 	const [completedEmail, setCompletedEmail] = useState<string>('')
-	const { showError } = useAlertModalContext()
+	const { showError, showInfo } = useAlertModalContext()
 	const { isAuthenticated } = useAuthStore()
 	const [currentStep, setCurrentStep] = useState<number>(() =>
 		isAuthenticated ? 1 : 0
@@ -166,10 +166,10 @@ const PostAction: React.FC = () => {
 			postInfoForm.getValues().newItems?.length === 0 &&
 			postInfoForm.getValues().oldItems?.length === 0
 		) {
-			showError({
-				errorButtonText: 'Đóng',
-				errorMessage: 'Vui lòng chọn ít nhất một món đồ',
-				errorTitle: 'Thông tin không hợp lệ'
+			showInfo({
+				infoButtonText: 'Đã rõ',
+				infoMessage: 'Vui lòng chọn ít nhất một món đồ',
+				infoTitle: 'Thông tin không hợp lệ'
 			})
 			return
 		}
