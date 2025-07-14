@@ -18,6 +18,7 @@ const axiosPrivate = axios.create({
 axiosPrivate.interceptors.request.use(
 	config => {
 		const token = useAuthStore.getState().accessToken
+		console.log(token)
 		if (token) {
 			config.headers.Authorization = `Bearer ${token}`
 		}
@@ -44,9 +45,18 @@ axiosPrivate.interceptors.response.use(
 				'Có ai đó đã đăng nhập trên cùng loại thiết bị'
 			)
 
+			const isRedisNull = errorMessage.includes(
+				'Có lỗi khi kiểm tra version JWT: redis: nil'
+			)
+
 			if (isDuplicate) {
 				useAuthStore.getState().clearTokens()
 				window.location.href = '/phien-dang-nhap'
+				return Promise.reject(error)
+			}
+
+			if (isRedisNull) {
+				useAuthStore.getState().clearTokens()
 				return Promise.reject(error)
 			}
 

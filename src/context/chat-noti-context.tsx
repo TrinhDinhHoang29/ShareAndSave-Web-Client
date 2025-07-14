@@ -184,7 +184,7 @@ export const ChatNotificationProvider: React.FC<{
 			// Chỉ thử kết nối lại nếu vẫn còn token
 			const currentToken = useAuthStore.getState().accessToken
 			if (currentToken) {
-				console.log('[CHAT-NOTI] Attempting to reconnect in 3 seconds...')
+				// console.log('[CHAT-NOTI] Attempting to reconnect in 3 seconds...')
 				reconnectTimeoutRef.current = setTimeout(() => {
 					// Kiểm tra lại token trước khi reconnect
 					const tokenAtReconnect = useAuthStore.getState().accessToken

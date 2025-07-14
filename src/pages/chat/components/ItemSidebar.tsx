@@ -191,21 +191,16 @@ const ItemSidebar = ({
 										{availableQuantity}
 									</div>
 								</div>
-								<div className='min-w-0 flex-1'>
-									<h4 className='text-foreground mb-1 truncate text-sm font-semibold'>
+								<div className='min-w-0 flex-1 space-y-2'>
+									<h4 className='text-foreground mb-2 truncate text-sm font-semibold'>
 										{item.name}
 									</h4>
-									<p className='text-muted-foreground mb-2 line-clamp-2 text-xs'>
-										{item.description}
-									</p>
-									<div className='flex flex-wrap items-center gap-2'>
-										{item.categoryName && (
-											<span className='bg-muted text-muted-foreground inline-block rounded-md px-2 py-1 text-xs font-medium'>
-												{item.categoryName}
-											</span>
-										)}
+									<div className='flex items-center gap-2'>
+										<span className='bg-muted text-muted-foreground inline-block w-full truncate rounded-md px-2 py-1 text-center text-xs font-medium'>
+											{item.categoryName}
+										</span>
 										<span
-											className={`inline-block rounded-md px-2 py-1 text-xs font-medium ${
+											className={`inline-block w-full rounded-md px-2 py-1 text-center text-xs font-medium ${
 												availableQuantity > 0
 													? 'bg-green-100 text-green-700'
 													: 'bg-red-100 text-red-700'

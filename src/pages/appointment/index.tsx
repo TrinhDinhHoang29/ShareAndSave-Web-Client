@@ -1,13 +1,14 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { Frown } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import CustomSelect from '@/components/common/CustomSelect'
 import Pagination from '@/components/common/Pagination'
 import { useAlertModalContext } from '@/context/alert-modal-context'
+import { useNoti } from '@/context/notification-context'
 import { useUpdateAppointmentMutation } from '@/hooks/mutations/use-appointment.mutation'
 import { useListAppointmentQuery } from '@/hooks/queries/use-appointment.query'
-import { EAppointmentStatus } from '@/models/enums'
+import { EAppointmentStatus, ENotiTargetType } from '@/models/enums'
 import { IAppointment } from '@/models/interfaces'
 import { appointmentStatusOptions } from '@/models/options'
 import useAuthStore from '@/stores/authStore'
@@ -40,6 +41,12 @@ const Appointment = () => {
 		}),
 		[appointmentStatus, currentPage]
 	)
+	const { noti } = useNoti()
+	useEffect(() => {
+		if (noti && noti.targetType === ENotiTargetType.APPOINTMENT) {
+			refetch()
+		}
+	}, [noti])
 	const userId = useAuthStore.getState().user?.id
 
 	const { data, isPending, refetch } = useListAppointmentQuery(
