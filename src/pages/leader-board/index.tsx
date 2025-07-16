@@ -5,6 +5,7 @@ import { useInView } from 'react-intersection-observer'
 
 import Loading from '@/components/common/Loading'
 import { useUserRanksQuery } from '@/hooks/queries/use-good-deed.query'
+import useAuthStore from '@/stores/authStore'
 
 import MyHistory from './components/MyHistory'
 import PodiumTop from './components/PodiumTop'
@@ -16,13 +17,14 @@ import UserRanksOutTop from './components/UserRanksOutTop'
 
 const Leaderboard: React.FC = () => {
 	const [activeTab, setActiveTab] = useState<'rankings' | 'history'>('rankings')
+	const userId = useAuthStore.getState().user?.id
 
 	const {
 		data: userRankData,
 		fetchNextPage,
 		hasNextPage,
 		isFetchingNextPage
-	} = useUserRanksQuery({
+	} = useUserRanksQuery(userId || 0, {
 		limit: 10,
 		page: 1
 	})

@@ -6,12 +6,15 @@ import goodDeedApi from '@/apis/modules/good-deed.api'
 import { EGoodDeedType, EGoodPOINTTYPE } from '@/models/enums'
 import { IDetailGoodDeed, IUserRankResponse } from '@/models/interfaces'
 
-export const useUserRanksQuery = (params: {
-	limit?: number
-	page?: number
-}) => {
+export const useUserRanksQuery = (
+	userId: number,
+	params: {
+		limit?: number
+		page?: number
+	}
+) => {
 	return useInfiniteQuery<IUserRankResponse, Error>({
-		queryKey: ['transactions', params],
+		queryKey: ['ranks', params, userId],
 		queryFn: async ({ pageParam = 1 }) => {
 			const queryParams = { ...params, page: Number(pageParam) }
 			const res = await goodDeedApi.ranks(queryParams)
@@ -32,6 +35,7 @@ export const useUserRanksQuery = (params: {
 			// No more pages
 			return undefined
 		},
+		enabled: !!userId,
 		initialPageParam: 1,
 		staleTime: 5 * 60 * 1000 // Dữ liệu tươi trong 5 phút
 	})
