@@ -51,7 +51,7 @@ const Footer = () => {
 							className='group mb-4 flex items-center gap-3 text-xl font-bold'
 						>
 							<img
-								src='https://shareandsave.io.vn/logo.png'
+								src='/logo.png'
 								alt='logo_caothang'
 								className='h-12 w-12 object-contain'
 							/>
