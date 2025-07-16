@@ -205,6 +205,5 @@ export const userProfileSchema = z.object({
 				message: 'Không chấp nhận ảnh định dạng .webp'
 			}
 		),
-	status: z.number(),
-	goodPoint: z.number()
+	status: z.number()
 })

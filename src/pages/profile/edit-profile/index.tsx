@@ -81,7 +81,6 @@ const EditProfile = () => {
 			phoneNumber: user?.phoneNumber || '',
 			address: user?.address || '',
 			avatar: user?.avatar || '',
-			goodPoint: user?.goodPoint,
 			status: user?.status
 		}
 	})
