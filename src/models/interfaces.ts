@@ -125,7 +125,7 @@ export interface IUser {
 	goodPoint?: number
 	id?: number
 	major?: string
-	phoneNumber: string
+	phoneNumber?: string
 	roleID?: number // Consider defining an enum for roleID values
 	roleName?: string
 	status?: number // Consider defining an enum for status values

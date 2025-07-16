@@ -47,23 +47,7 @@ const EditProfile = () => {
 		{ id: 18, name: 'Kỹ thuật sửa chữa, lắp ráp máy tính' }
 	]
 
-	const { user, isAuthenticated, fetchUserProfile } = useAuthStore()
-
-	useEffect(() => {
-		const handleLoadProfile = async () => {
-			if (!isAuthenticated) return
-
-			try {
-				// Nếu chưa có user data, fetch từ API
-				if (!user) {
-					await fetchUserProfile()
-				}
-			} catch (err) {
-				console.error(err)
-			}
-		}
-		handleLoadProfile()
-	}, [])
+	const { user } = useAuthStore()
 
 	// React Hook Form setup with Zod resolver
 	const {
@@ -78,7 +62,6 @@ const EditProfile = () => {
 			majorID: majors.some(i => i.name === user?.major)
 				? majors.find(i => i.name === user?.major)?.id
 				: undefined,
-			phoneNumber: user?.phoneNumber || '',
 			address: user?.address || '',
 			avatar: user?.avatar || '',
 			status: user?.status
@@ -89,7 +72,9 @@ const EditProfile = () => {
 		onSuccess: (userData: IUser) => {
 			userData = {
 				...userData,
-				email: user?.email
+				email: user?.email,
+				goodPoint: user?.goodPoint,
+				phoneNumber: user?.phoneNumber || ''
 			}
 			useAuthStore.setState({ user: userData })
 		}

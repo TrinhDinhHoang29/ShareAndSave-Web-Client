@@ -183,10 +183,6 @@ export const userProfileSchema = z.object({
 		.min(2, 'Họ và tên phải có ít nhất 2 ký tự')
 		.max(50, 'Họ và tên không được quá 50 ký tự'),
 	majorID: z.number().min(1, 'Vui lòng chọn chuyên ngành'), // Đảm bảo majorID phải >= 1
-	phoneNumber: z
-		.string()
-		.min(1, 'Số điện thoại không được để trống')
-		.regex(/^[0-9]{10,11}$/, 'Số điện thoại phải có 10-11 chữ số'),
 	address: z
 		.string()
 		.min(1, 'Địa chỉ không được để trống')
