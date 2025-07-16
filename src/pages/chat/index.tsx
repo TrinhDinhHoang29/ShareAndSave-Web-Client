@@ -51,22 +51,7 @@ const Chat = () => {
 		refetch: postDetailDataRefetch
 	} = useDetailPostInterestQuery(interestID)
 
-	const { user, isAuthenticated, fetchUserProfile } = useAuthStore()
-	useEffect(() => {
-		const handleLoadProfile = async () => {
-			if (!isAuthenticated) return
-
-			try {
-				// Nếu chưa có user data, fetch từ API
-				if (!user) {
-					await fetchUserProfile()
-				}
-			} catch (err) {
-				console.error(err)
-			}
-		}
-		handleLoadProfile()
-	}, [])
+	const { user } = useAuthStore()
 	const senderID = user?.id
 	const isAuthor = useMemo(() => {
 		if (!postDetailInterestData || !senderID) return false
