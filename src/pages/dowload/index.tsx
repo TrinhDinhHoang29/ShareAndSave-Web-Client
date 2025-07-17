@@ -1,10 +1,12 @@
 import {
+	ArrowLeftRight,
 	BarChart3,
 	Bell,
 	DownloadIcon,
 	FileText,
 	Gift,
 	Heart,
+	MessageCircle,
 	Search,
 	Smartphone,
 	User,
@@ -28,8 +30,8 @@ const Download = () => {
 						Tải ứng dụng ShareAndSave
 					</h1>
 					<p className='text-muted-foreground mx-auto max-w-2xl text-sm md:text-base'>
-						Kết nối sinh viên Cao Thắng - Chia sẻ, tìm kiếm và nhận đồ dùng miễn
-						phí
+						Kết nối sinh viên Cao Thắng - Hỗ trợ trao đổi đồ đạc và tổ chức
+						chiến dịch
 					</p>
 				</div>
 
@@ -63,7 +65,7 @@ const Download = () => {
 												ShareAndSave
 											</h3>
 											<p className='text-muted-foreground text-xs'>
-												Cao Thắng Community
+												Kết nối - Tìm lại - Trao đi
 											</p>
 										</div>
 
@@ -222,36 +224,45 @@ const Download = () => {
 									Tính năng nổi bật
 								</h3>
 							</div>
-
 							<div className='grid gap-3'>
 								{[
 									{
 										icon: Gift,
-										text: 'Đăng bài cho tặng đồ cũ không dùng đến',
-										color: 'text-primary'
+										text: 'Đăng bài tìm/trả đồ thất lạc, cho/tặng đồ cũ',
+										color: 'text-primary',
+										bgColor: 'bg-primary/20'
 									},
 									{
 										icon: Bell,
-										text: 'Báo cáo đồ nhặt được để trả lại chủ nhân',
-										color: 'text-warning'
+										text: 'Thông báo bài đăng, lịch hẹn, giao dịch',
+										color: 'text-warning',
+										bgColor: 'bg-warning/20'
 									},
 									{
-										icon: Search,
-										text: 'Tìm kiếm đồ thất lạc trong trường',
-										color: 'text-success'
+										icon: ArrowLeftRight,
+										text: 'Tạo giao dịch nhanh chóng và hiệu quả',
+										color: 'text-success',
+										bgColor: 'bg-success/20'
 									},
 									{
 										icon: Heart,
-										text: 'Kết nối cộng đồng sinh viên Cao Thắng',
-										color: 'text-secondary'
+										text: 'Quản lý các bài đăng đã và đang quan tâm',
+										color: 'text-error',
+										bgColor: 'bg-error/20'
+									},
+									{
+										icon: MessageCircle,
+										text: 'Hỗ trợ nhắn tin trao đổi thông tin',
+										color: 'text-secondary',
+										bgColor: 'bg-secondary/20'
 									}
 								].map((feature, index) => (
 									<div
 										key={index}
-										className='bg-card/50 border-border/30 flex items-start gap-3 rounded-lg border p-3'
+										className='bg-card/50 border-border/30 flex items-center gap-3 rounded-lg border p-3'
 									>
 										<div
-											className={`flex h-8 w-8 items-center justify-center rounded-lg bg-${feature.color.replace('text-', '')}/20 flex-shrink-0`}
+											className={`flex h-8 w-8 items-center justify-center rounded-lg ${feature.bgColor} flex-shrink-0`}
 										>
 											<feature.icon className={`h-4 w-4 ${feature.color}`} />
 										</div>
@@ -260,22 +271,6 @@ const Download = () => {
 										</span>
 									</div>
 								))}
-							</div>
-						</div>
-
-						{/* Community Info */}
-						<div className='glass from-primary/5 to-secondary/5 rounded-2xl bg-gradient-to-br p-6'>
-							<div className='text-center'>
-								<div className='text-primary mb-1 text-2xl font-bold'>
-									1,200+
-								</div>
-								<div className='text-muted-foreground mb-3 text-sm'>
-									Sinh viên đang sử dụng
-								</div>
-								<div className='text-muted-foreground flex items-center justify-center gap-2 text-xs'>
-									<div className='bg-success h-2 w-2 animate-pulse rounded-full'></div>
-									<span>Hoạt động 24/7</span>
-								</div>
 							</div>
 						</div>
 					</div>
