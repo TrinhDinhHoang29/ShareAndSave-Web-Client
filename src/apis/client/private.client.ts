@@ -65,6 +65,7 @@ axiosPrivate.interceptors.response.use(
 			try {
 				const refreshToken = useAuthStore.getState().refreshToken
 				if (!refreshToken) {
+					useAuthStore.getState().clearTokens()
 					throw new Error('No refresh token available')
 				}
 

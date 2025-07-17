@@ -17,7 +17,6 @@ interface AuthState {
 	clearTokens: () => void
 	fetchUserProfile: () => Promise<void>
 	initializeAuth: () => Promise<void>
-	getValidToken: () => Promise<string | null>
 }
 
 const useAuthStore = create<AuthState>()(
@@ -95,9 +94,9 @@ const useAuthStore = create<AuthState>()(
 
 			// Initialize auth state on app start
 			initializeAuth: async () => {
-				const validToken = await get().getValidToken()
+				const accessToken = get().accessToken
 
-				if (validToken) {
+				if (accessToken) {
 					set({ isAuthenticated: true })
 					// Optionally fetch user profile
 					try {
@@ -115,47 +114,6 @@ const useAuthStore = create<AuthState>()(
 						accessToken: null,
 						refreshToken: null
 					})
-				}
-			},
-
-			// Get valid token with auto refresh
-			getValidToken: async () => {
-				const { accessToken, refreshToken } = get()
-
-				// Nếu có access token, return luôn
-				if (accessToken) {
-					return accessToken
-				}
-
-				// Nếu không có access token, thử refresh
-				if (!refreshToken) {
-					return null
-				}
-
-				try {
-					console.log('Auth: Refreshing token...')
-					const response = await authApi.refreshToken({ refreshToken })
-					const newToken = response.data.jwt
-
-					// Update access token in store
-					set(state => ({
-						accessToken: newToken,
-						refreshToken: state.refreshToken
-					}))
-
-					return newToken
-				} catch (error) {
-					console.error('Auth: Failed to refresh token:', error)
-
-					// Clear tokens on refresh failure
-					set({
-						user: null,
-						isAuthenticated: false,
-						accessToken: null,
-						refreshToken: null
-					})
-
-					return null
 				}
 			}
 		}),
