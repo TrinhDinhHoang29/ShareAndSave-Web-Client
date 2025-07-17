@@ -359,23 +359,6 @@ const ItemWarehouse = () => {
 					</div>
 				</div>
 
-				{/* My Warehouse Sidebar */}
-				<MyWarehouseSidebar
-					selectedItems={registeredItems}
-					claimRequests={submittedRequests}
-					isOpen={showMyWarehouse}
-					onClose={() => setShowMyWarehouse(false)}
-					isCreateLoading={isCreateItemWarehousePending}
-					onUpdateQuantity={handleUpdateRegisteredQuantity}
-					onRemoveItem={handleRemoveRegisteredItem}
-					onConfirmReceive={handleConfirmReceiveItems}
-					onUpdateClaimQuantity={handleUpdateClaimQuantity}
-					onRemoveClaimItem={handleRemoveClaimItem}
-					onUpdateClaimItem={handleUpdateClaimItem}
-					isItemUpdating={isItemUpdating} // 🆕 Thêm prop này
-					isItemDeleting={isItemDeleting}
-				/>
-
 				{/* Filters */}
 				<div className='mb-6 flex items-center justify-between gap-2'>
 					<div className='w-2/3'>
@@ -474,6 +457,22 @@ const ItemWarehouse = () => {
 					isLoading={isLoading}
 				/>
 			</div>
+			{/* My Warehouse Sidebar */}
+			<MyWarehouseSidebar
+				selectedItems={registeredItems}
+				claimRequests={submittedRequests}
+				isOpen={showMyWarehouse}
+				onClose={() => setShowMyWarehouse(false)}
+				isCreateLoading={isCreateItemWarehousePending}
+				onUpdateQuantity={handleUpdateRegisteredQuantity}
+				onRemoveItem={handleRemoveRegisteredItem}
+				onConfirmReceive={handleConfirmReceiveItems}
+				onUpdateClaimQuantity={handleUpdateClaimQuantity}
+				onRemoveClaimItem={handleRemoveClaimItem}
+				onUpdateClaimItem={handleUpdateClaimItem}
+				isItemUpdating={isItemUpdating} // 🆕 Thêm prop này
+				isItemDeleting={isItemDeleting}
+			/>
 			<NoticeDialog
 				isOpen={isOpenDialog}
 				onClose={() => setIsOpenDialog(false)}
