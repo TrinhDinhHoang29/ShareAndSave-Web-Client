@@ -15,7 +15,6 @@ import { EPostType } from '@/models/enums'
 import {
 	IPostActionInfoFormData,
 	IPostActionRequest,
-	IPostActionResponse,
 	IStep
 } from '@/models/interfaces'
 import {
@@ -79,8 +78,7 @@ const PostAction: React.FC = () => {
 	}, [isAuthenticated, isRegisterByPost])
 
 	const mutation = useCreatePostMutation({
-		onSuccess: (data: IPostActionResponse) => {
-			console.log(data)
+		onSuccess: () => {
 			setCompletedEmail(formData.personalInfo?.email || '')
 			setIsCompleted(true)
 		}

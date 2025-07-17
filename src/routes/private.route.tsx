@@ -10,7 +10,6 @@ const PrivateRoute = ({ children }: { children: ReactNode }) => {
 
 	useEffect(() => {
 		if (!isAuthenticated && !hasOpenedDialog.current) {
-			console.log('Opening dialog for authentication')
 			openDialog({}) // Mở dialog chỉ khi chưa mở trước đó
 			hasOpenedDialog.current = true // Đánh dấu đã mở
 		}

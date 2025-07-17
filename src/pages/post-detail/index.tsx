@@ -267,8 +267,6 @@ const PostDetail: React.FC = () => {
 		return null
 	}, [campaignInfo])
 
-	console.log(statusTimeCampaign)
-
 	const { color: statusColor, label: statusLabel } = getStatusPostTypeConfig(
 		post?.type.toString() as EPostType,
 		sumCurrentQuantityItems,

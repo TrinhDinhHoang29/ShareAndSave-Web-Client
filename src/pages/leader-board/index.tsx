@@ -35,12 +35,10 @@ const Leaderboard: React.FC = () => {
 	}, [userRankData])
 
 	const myRank = useMemo(() => {
-		console.log('Chay vao myRank')
 		return userRankData?.pages[0].yourRank
 	}, [userRankData?.pages[0]])
 
 	const myInfo = useMemo(() => {
-		console.log('Chay vao myInfo')
 		return userRankData?.pages[0].yourInfo
 	}, [userRankData?.pages[0]])
 	// Intersection Observer for infinite scroll

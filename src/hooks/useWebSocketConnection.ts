@@ -163,7 +163,6 @@ export const useWebSocketConnection = ({
 			socketRef.current = new WebSocket(wsUrl, [token ?? ''])
 
 			socketRef.current.onopen = () => {
-				console.log('✅ WebSocket connected')
 				setConnectionStatus('connected')
 				resetReconnectState()
 				joinRoom()
@@ -274,11 +273,6 @@ export const useWebSocketConnection = ({
 
 		isReconnectingRef.current = true
 		setConnectionStatus('reconnecting')
-		reconnectAttemptsRef.current += 1
-
-		console.log(
-			`🔄 Attempting to reconnect... (${reconnectAttemptsRef.current}/${maxReconnectAttempts})`
-		)
 
 		reconnectTimeoutRef.current = setTimeout(() => {
 			isReconnectingRef.current = false
@@ -290,8 +284,6 @@ export const useWebSocketConnection = ({
 
 	// Manual reconnect function
 	const manualReconnect = useCallback(() => {
-		console.log('🔄 Manual reconnect initiated')
-
 		// Set manual close flag
 		isManualCloseRef.current = true
 
@@ -326,7 +318,6 @@ export const useWebSocketConnection = ({
 						socketRef.current?.readyState !== WebSocket.OPEN &&
 						shouldReconnectRef.current
 					) {
-						console.log('🔄 Page visible, checking connection...')
 						manualReconnect()
 					}
 				}

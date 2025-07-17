@@ -77,7 +77,6 @@ const Interest = () => {
 		return () => setIsFollowingPing(false)
 	}, [followingNotification])
 
-	console.log(followedByNotification, followingNotification)
 	// Mutation để hủy quan tâm
 	const { mutate: deleteInterestMutation, isPending: isDeleteInterestPending } =
 		useDeleteInterestMutation({

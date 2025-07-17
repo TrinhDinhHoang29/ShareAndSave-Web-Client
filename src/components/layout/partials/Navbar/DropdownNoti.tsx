@@ -62,7 +62,6 @@ const DropdownNoti: React.FC = () => {
 		if (noti) {
 			queryClient.setQueryData(['noti', userId], (old: any) => {
 				if (!old?.pages?.[0]) {
-					console.log('old', old)
 					return old
 				}
 
@@ -72,7 +71,6 @@ const DropdownNoti: React.FC = () => {
 					notifications: [noti, ...newPages[0].notifications],
 					unreadCount: newPages[0].unreadCount + 1
 				}
-				console.log('newPages', newPages)
 
 				return {
 					...old,

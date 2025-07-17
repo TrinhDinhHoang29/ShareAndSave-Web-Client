@@ -16,7 +16,6 @@ const Pagination: React.FC<PaginationProps> = ({
 
 	const handlePageChange = (page: number) => {
 		if (page >= 1 && page <= totalPages) {
-			console.log('Page changed:', { page })
 			setCurrentPage(page)
 			window.scrollTo({ top: 0, behavior: 'smooth' })
 		}

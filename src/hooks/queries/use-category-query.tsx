@@ -15,11 +15,5 @@ export const useCategoriesQuery = () => {
 		staleTime: 5 * 60 * 1000, // Dữ liệu được coi là "mới" trong 5 phút
 		gcTime: 10 * 60 * 1000, // Giữ cache trong 10 phút
 		retry: 1 // Thử lại 1 lần nếu thất bại
-		// onSuccess: (data) => {
-		//   console.log('Danh sách danh mục:', data.data.categories);
-		// },
-		// onError: (error) => {
-		//   console.error('Lỗi khi lấy danh mục:', error);
-		// },
 	})
 }

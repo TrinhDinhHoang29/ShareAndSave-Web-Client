@@ -63,7 +63,6 @@ const ImageUpload = ({
 			reader.onloadend = () => {
 				const result = reader.result as string
 				field.onChange(result)
-				console.log('Uploaded single image:', result.substring(0, 50) + '...')
 			}
 			reader.onerror = () => console.error('Error reading file')
 			reader.readAsDataURL(validFiles[0])
@@ -83,7 +82,6 @@ const ImageUpload = ({
 						? (field.value as string[])
 						: []
 					field.onChange([...currentImages, ...imageUrls].slice(0, maxImages))
-					console.log('Uploaded multiple images:', imageUrls.length)
 				})
 				.catch(err => console.error('Error processing images:', err))
 		}
@@ -183,7 +181,6 @@ const ImageUpload = ({
 									onClick={() => {
 										field.onChange(undefined)
 										setSelectedImage(null)
-										console.log('Image removed')
 									}}
 									className='bg-destructive hover:bg-destructive/80 absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100'
 								>
@@ -219,7 +216,6 @@ const ImageUpload = ({
 											)
 											field.onChange(newImages.length ? newImages : undefined)
 											if (selectedImage === image) setSelectedImage(null)
-											console.log('Removed image at index:', index)
 										}}
 										className='bg-destructive hover:bg-destructive/80 absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100'
 									>

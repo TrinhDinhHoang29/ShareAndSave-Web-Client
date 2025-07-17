@@ -194,7 +194,6 @@ export const AuthDialogProvider: React.FC<{ children: ReactNode }> = ({
 		purpose: EPurposeOTP,
 		email: string
 	) => {
-		console.log(purpose)
 		if (userData && purpose === EPurposeOTP.ACTIVE_ACCOUNT) {
 			const fullUserData = {
 				...userData,
