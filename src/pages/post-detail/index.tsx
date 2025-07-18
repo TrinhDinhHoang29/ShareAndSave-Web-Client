@@ -944,46 +944,6 @@ const PostDetail: React.FC = () => {
 									</motion.div>
 								)}
 
-								{/* Author Info */}
-								<motion.div
-									initial={{ opacity: 0, x: 20 }}
-									animate={{ opacity: 1, x: 0 }}
-									transition={{ delay: 0.5 }}
-									className='glass space-y-4 rounded-xl p-6'
-								>
-									<h3 className='text-foreground font-semibold'>
-										Thông tin người đăng
-									</h3>
-									<div className='space-y-3'>
-										<div className='flex items-center gap-3'>
-											<div className='flex h-12 w-12 items-center justify-center rounded-full bg-gray-200'>
-												{user?.avatar ? (
-													<img
-														src={user.avatar}
-														alt={`${user?.fullName} avatar`}
-														className='h-full w-full rounded-full object-cover'
-													/>
-												) : (
-													<User className='text-secondary h-5 w-5' /> // Placeholder nếu không có avatar
-												)}
-											</div>
-											<div>
-												<p className='text-foreground font-medium'>
-													{post.authorName}
-												</p>
-												<p className='text-muted-foreground text-sm'>
-													Thành viên
-												</p>
-											</div>
-										</div>
-
-										<div className='text-muted-foreground flex items-center gap-2 text-sm'>
-											<Clock className='h-4 w-4' />
-											<span>Tham gia từ 2023</span>
-										</div>
-									</div>
-								</motion.div>
-
 								{/* Stats */}
 								<motion.div
 									initial={{ opacity: 0, x: 20 }}
